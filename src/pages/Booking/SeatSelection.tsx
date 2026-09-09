@@ -43,28 +43,34 @@ export const SeatSelection: React.FC = () => {
   const [currentShowtimeId, setCurrentShowtimeId] = useState(showtimeId || 'st-11:30');
   const [currentShowtimeTime, setCurrentShowtimeTime] = useState('11:30');
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
-  const [timeLeft, setTimeLeft] = useState(585); // 9 mins 45 secs hold timer
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes hold timer (600s)
 
   // Scroll to top when page mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentShowtimeId]);
 
-  // ── 10-Minute Hold Timer Countdown ────────────────────────────────
+  // ── 10-Minute Hold Timer Countdown (Activates only when seats are selected) ──
   useEffect(() => {
+    if (selectedSeatIds.length === 0) {
+      setTimeLeft(600); // Reset to 10:00 when no seats selected
+      return;
+    }
+
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          toast.error('Hết thời gian giữ ghế! Vui lòng chọn lại.');
+          toast.error('Hết thời gian giữ ghế! Hệ thống đã giải phóng vị trí ghế.');
           setSelectedSeatIds([]);
           return 600;
         }
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedSeatIds.length]);
 
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -301,10 +307,17 @@ export const SeatSelection: React.FC = () => {
                   <h2 className="font-bold text-base text-[#1b1c1c] uppercase tracking-wide">
                     Thông tin đặt vé
                   </h2>
-                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-[#d71920] font-extrabold text-xs border border-red-200">
-                    <Timer className="w-4 h-4" />
-                    <span>{formatTimer(timeLeft)}</span>
-                  </div>
+                  {selectedSeatIds.length > 0 ? (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-[#d71920] font-extrabold text-xs border border-red-200 animate-pulse">
+                      <Timer className="w-4 h-4" />
+                      <span>{formatTimer(timeLeft)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-gray-400 font-bold text-xs border border-gray-200" title="Thời gian giữ ghế 10 phút sẽ đếm ngược khi chọn ghế">
+                      <Timer className="w-4 h-4 text-gray-400" />
+                      <span>10:00</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Movie Brief Card */}
