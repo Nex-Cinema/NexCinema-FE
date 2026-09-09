@@ -10,7 +10,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f3f3] text-[#1b1c1c] antialiased">
       <Header />
-      <main className="flex-1 w-full">{children}</main>
+      <main className="flex-1 w-full pt-20">{children}</main>
       <Footer />
     </div>
   );
