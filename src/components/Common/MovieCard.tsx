@@ -29,18 +29,20 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
     <div className="group bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col border border-gray-100">
       {/* POSTER & OVERLAY BADGES */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
-        <img 
-          src={movie.poster} 
-          alt={movie.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500';
-          }}
-        />
+        <Link to={`/movie/${movie.id}`}>
+          <img 
+            src={movie.poster} 
+            alt={movie.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500';
+            }}
+          />
+        </Link>
 
         {/* TOP LEFT TAG */}
         {movie.tag && (
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 pointer-events-none">
             <span className={`px-2 py-0.5 rounded font-bold text-[11px] shadow-xs uppercase tracking-wider ${
               movie.tag === 'HOT' ? 'bg-[#d71920] text-white' : 'bg-blue-700 text-white'
             }`}>
@@ -50,7 +52,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
         )}
 
         {/* TOP RIGHT BADGES */}
-        <div className="absolute top-2.5 right-2.5 flex flex-col items-end gap-1">
+        <div className="absolute top-2.5 right-2.5 flex flex-col items-end gap-1 pointer-events-none">
           {getAgeRatingBadge(movie.ageRating)}
           {movie.formats.length > 0 && (
             <span className="px-2 py-0.5 rounded bg-gray-900/80 backdrop-blur-xs text-white text-[11px] font-semibold">
@@ -70,10 +72,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
             </button>
           ) : (
             <Link 
-              to={`/booking/${movie.id}`}
+              to={`/movie/${movie.id}`}
               className="px-4 py-2.5 rounded-lg bg-[#d71920] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
             >
-              <Ticket className="w-4 h-4" /> Đặt vé
+              <Ticket className="w-4 h-4" /> Xem chi tiết
             </Link>
           )}
         </div>
@@ -88,7 +90,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
               <Star className="w-3.5 h-3.5 fill-amber-400 stroke-none" /> {movie.rating}
             </span>
           </div>
-          <Link to={`/movies/${movie.id}`}>
+          <Link to={`/movie/${movie.id}`}>
             <h3 className="font-bold text-sm text-gray-900 line-clamp-1 group-hover:text-[#d71920] transition-colors">
               {movie.title}
             </h3>

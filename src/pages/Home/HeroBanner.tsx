@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Ticket, Play, Clock, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Ticket, Play, Clock, Star, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 
 interface FeaturedMovie {
   id: string;
@@ -24,7 +25,7 @@ const FEATURED_MOVIES: FeaturedMovie[] = [
     duration: '166 phút',
     genre: 'Khoa học viễn tưởng, Phiêu lưu',
     releaseDate: '01/03/2024',
-    synopsis: 'Paul Atreides hợp lực cùng Chani và tộc người Fremen khi anh tìm kiếm sự trả thù chống lại những kẻ đã hủy hoại gia đình mình, đồng thời đối mặt với số phận nghiệt ngã của vũ trụ.',
+    synopsis: 'Paul Atreides hợp lực cùng Chani và tộc người Fremen khi anh tìm kiếm sự trả thù chống lại những kẻ đã hủy hoại gia đình mình, đồng thời đối mặt với số phận nghiệt ngã của vũ vũ trụ.',
     bgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk_Q_fVvtjXnMffPose-winhFedj2Thnqbu_3aFRB_52LVqlcRfNsDIiWFNL5U6KsYXiNTwwnMAiRjswSFgsnOJJYJoIFXm7Xf0qPSmfkGRe1ylYjS9Uenmy-KalrrFYSrW6c1i-Av5hRrY6yr798Gil6fdCsAFWyMdx02-VWeK5wEgLw3Dvw8nYeQVtOZchraQUFAbvI0lPzctXaiQrGXA5osmWKyohBhw4_gQKSf-TeYDotIljUh8Q'
   },
   {
@@ -52,7 +53,7 @@ const FEATURED_MOVIES: FeaturedMovie[] = [
     bgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBQApIsluMZkKbasRzODxDYeMICC7Hn32qSpVKicnUVan2QN8PYUi4widx9PygF4tNg5DKjHPabXGQWY8C1RMD02AcJda1m2OkLKHxCILUpwPQhkN6zsQjkZ0BLFKlo_jaSFvxiXouCMS2l1TXQESY0sBsR3DDi2X-vfORjYed0gusqndXQmA3c0y8ARV01bFLdTbYlUrptKsEYRrY7cfd78QFxzysFbVrDHB_Hfunsa-byhGCIu3BTtw'
   },
   {
-    id: 'kungfu4',
+    id: 'kungfupanda',
     title: 'Kung Fu Panda 4',
     badges: ['2D Lồng tiếng', 'P'],
     rating: '8.5',
@@ -66,6 +67,7 @@ const FEATURED_MOVIES: FeaturedMovie[] = [
 ];
 
 const HeroBanner: React.FC = () => {
+  const navigate = useNavigate();
   const [activeIdx, setActiveIdx] = useState(0);
   const currentMovie = FEATURED_MOVIES[activeIdx];
 
@@ -77,9 +79,8 @@ const HeroBanner: React.FC = () => {
     setActiveIdx((prev) => (prev === FEATURED_MOVIES.length - 1 ? 0 : prev + 1));
   };
 
-  const scrollToQuickBooking = () => {
-    const el = document.getElementById('quick-booking');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const handleGoToDetails = () => {
+    navigate(`/movie/${currentMovie.id}`);
   };
 
   return (
@@ -87,13 +88,14 @@ const HeroBanner: React.FC = () => {
       <div className="relative w-full min-h-[580px] lg:min-h-[660px] flex items-end">
         {/* HERO BACKGROUND IMAGE */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-700 hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700 hover:scale-105 cursor-pointer"
           style={{ backgroundImage: `url('${currentMovie.bgUrl}')` }}
+          onClick={handleGoToDetails}
         />
 
         {/* GRADIENT SCRIMS */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c] via-[#1b1c1c]/70 to-[#1b1c1c]/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1b1c1c]/95 via-[#1b1c1c]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c] via-[#1b1c1c]/70 to-[#1b1c1c]/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1b1c1c]/95 via-[#1b1c1c]/60 to-transparent pointer-events-none" />
 
         {/* CONTENT CONTAINER */}
         <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-24">
@@ -112,7 +114,10 @@ const HeroBanner: React.FC = () => {
             </div>
 
             {/* MAIN TITLE */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight leading-tight drop-shadow-md">
+            <h1 
+              onClick={handleGoToDetails}
+              className="text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight leading-tight drop-shadow-md cursor-pointer hover:text-red-400 transition-colors"
+            >
               {currentMovie.title}
             </h1>
 
@@ -140,7 +145,7 @@ const HeroBanner: React.FC = () => {
             {/* ACTION BUTTONS */}
             <div className="flex items-center gap-4 pt-2">
               <button 
-                onClick={scrollToQuickBooking}
+                onClick={handleGoToDetails}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#d71920] hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <Ticket className="w-4 h-4" />
@@ -149,10 +154,11 @@ const HeroBanner: React.FC = () => {
 
               <button 
                 type="button"
+                onClick={handleGoToDetails}
                 className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg bg-white/15 hover:bg-white/25 backdrop-blur-md text-white font-bold text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white" />
-                <span>Xem trailer</span>
+                <Info className="w-4 h-4" />
+                <span>Chi tiết phim</span>
               </button>
             </div>
 
