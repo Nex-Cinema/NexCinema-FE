@@ -78,18 +78,23 @@ export const SeatSelection: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ── Generate Seat Map (Rows A-J, Cols 1-12) ───────────────────────
-  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+  // ── Generate Seat Map (Rows A-I: single, Row K: couple) ───────────────────────
+  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K'];
   const generateSeats = (): Record<string, Seat[]> => {
     const map: Record<string, Seat[]> = {};
-    // Sold seats mock list
-    const soldSeats = ['C4', 'C5', 'E8', 'F2', 'F3'];
+    // Sold seats mock list (including couple seat K7-K8)
+    const soldSeats = ['C4', 'C5', 'E8', 'F2', 'F3', 'K7', 'K8'];
 
     rows.forEach((row) => {
       map[row] = [];
-      const isVipRow = ['G', 'H', 'I', 'J'].includes(row);
-      const price = isVipRow ? 110000 : 50000;
-      const type = isVipRow ? 'VIP' : 'STANDARD';
+      const isCoupleRow = row === 'K';
+      const isVipRow = ['G', 'H', 'I'].includes(row);
+      const price = isCoupleRow || isVipRow ? 110000 : 50000;
+      const type: 'STANDARD' | 'VIP' | 'COUPLE' = isCoupleRow
+        ? 'COUPLE'
+        : isVipRow
+        ? 'VIP'
+        : 'STANDARD';
 
       for (let col = 1; col <= 12; col++) {
         const id = `${row}${col}`;
@@ -115,14 +120,37 @@ export const SeatSelection: React.FC = () => {
   const handleToggleSeat = (seat: Seat) => {
     if (seat.status === 'SOLD') return;
 
-    if (selectedSeatIds.includes(seat.id)) {
-      setSelectedSeatIds((prev) => prev.filter((id) => id !== seat.id));
-    } else {
-      if (selectedSeatIds.length >= 8) {
-        toast.error('Tối đa chỉ được chọn 8 ghế trong một lần đặt vé!');
-        return;
+    if (seat.type === 'COUPLE') {
+      const colNum = seat.col;
+      // Pair cols 1-2, 3-4, 5-6, 7-8, 9-10, 11-12
+      const partnerCol = colNum % 2 === 1 ? colNum + 1 : colNum - 1;
+      const id1 = `${seat.row}${Math.min(colNum, partnerCol)}`;
+      const id2 = `${seat.row}${Math.max(colNum, partnerCol)}`;
+
+      const isPairSelected = selectedSeatIds.includes(id1) && selectedSeatIds.includes(id2);
+
+      if (isPairSelected) {
+        // Unselect couple pair
+        setSelectedSeatIds((prev) => prev.filter((id) => id !== id1 && id !== id2));
+      } else {
+        // Select couple pair (checks 8-seat limit)
+        if (selectedSeatIds.length + 2 > 8) {
+          toast.error('Tối đa chỉ được chọn 8 ghế trong một lần đặt vé!');
+          return;
+        }
+        setSelectedSeatIds((prev) => Array.from(new Set([...prev, id1, id2])));
       }
-      setSelectedSeatIds((prev) => [...prev, seat.id]);
+    } else {
+      // Standard or VIP single seat
+      if (selectedSeatIds.includes(seat.id)) {
+        setSelectedSeatIds((prev) => prev.filter((id) => id !== seat.id));
+      } else {
+        if (selectedSeatIds.length >= 8) {
+          toast.error('Tối đa chỉ được chọn 8 ghế trong một lần đặt vé!');
+          return;
+        }
+        setSelectedSeatIds((prev) => [...prev, seat.id]);
+      }
     }
   };
 
@@ -138,8 +166,8 @@ export const SeatSelection: React.FC = () => {
   // Total price calculation
   const totalAmount = selectedSeatIds.reduce((sum, seatId) => {
     const row = seatId.charAt(0);
-    const isVip = ['G', 'H', 'I', 'J'].includes(row);
-    return sum + (isVip ? 110000 : 50000);
+    const isVipOrCouple = ['G', 'H', 'I', 'K'].includes(row);
+    return sum + (isVipOrCouple ? 110000 : 50000);
   }, 0);
 
   const handleContinueToPayment = () => {
@@ -228,32 +256,68 @@ export const SeatSelection: React.FC = () => {
 
                       {/* Seats in Row */}
                       <div className="flex items-center gap-1.5">
-                        {seatMap[row].map((seat) => {
-                          const isAisleBefore = [3, 11].includes(seat.col);
-                          return (
-                            <React.Fragment key={seat.id}>
-                              {isAisleBefore && <div className="w-4" />}
-                              <button
-                                onClick={() => handleToggleSeat(seat)}
-                                disabled={seat.status === 'SOLD'}
-                                className={`w-8 h-8 rounded-t-lg flex items-center justify-center text-[11px] font-bold transition-all shadow-2xs ${
-                                  seat.status === 'SOLD'
-                                    ? 'bg-[#e4e2e2] text-[#926f6b] cursor-not-allowed border border-[#e6bdb8]'
-                                    : seat.status === 'SELECTED'
-                                    ? 'bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40'
-                                    : seat.type === 'VIP'
-                                    ? 'bg-[#efeded] hover:bg-[#e2dfde] text-[#1b1c1c] border border-[#c8c6c5]'
-                                    : 'bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c] border border-[#e4e2e2]'
-                                }`}
-                                title={`${seat.id} (${
-                                  seat.type === 'VIP' ? 'Ghế VIP' : 'Ghế tiêu chuẩn'
-                                }) - ${seat.price.toLocaleString('vi-VN')} đ`}
-                              >
-                                {seat.status === 'SOLD' ? '✕' : seat.col}
-                              </button>
-                            </React.Fragment>
-                          );
-                        })}
+                        {row === 'K' ? (
+                          /* ── COUPLE ROW (Row K: 6 double seats) ────────── */
+                          [1, 3, 5, 7, 9, 11].map((c1) => {
+                            const c2 = c1 + 1;
+                            const isAisleBefore = [3, 11].includes(c1);
+                            const seat1 = seatMap['K'].find((s) => s.col === c1);
+                            const seat2 = seatMap['K'].find((s) => s.col === c2);
+                            const isSold = seat1?.status === 'SOLD' || seat2?.status === 'SOLD';
+                            const isSelected =
+                              seat1?.status === 'SELECTED' || seat2?.status === 'SELECTED';
+
+                            return (
+                              <React.Fragment key={`K${c1}-${c2}`}>
+                                {isAisleBefore && <div className="w-4" />}
+                                <button
+                                  type="button"
+                                  onClick={() => seat1 && handleToggleSeat(seat1)}
+                                  disabled={isSold}
+                                  className={`w-[4.6rem] h-8 rounded-t-lg flex items-center justify-center text-[11px] font-bold transition-all shadow-2xs ${
+                                    isSold
+                                      ? 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed border border-slate-300'
+                                      : isSelected
+                                      ? 'bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40'
+                                      : 'bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-400 font-bold'
+                                  }`}
+                                  title={`Ghế đôi K${c1}-K${c2} - 220.000 đ/cặp`}
+                                >
+                                  {isSold ? '✕' : `K${c1}-${c2}`}
+                                </button>
+                              </React.Fragment>
+                            );
+                          })
+                        ) : (
+                          /* ── STANDARD & VIP ROWS (A-I) ─────────────────── */
+                          seatMap[row].map((seat) => {
+                            const isAisleBefore = [3, 11].includes(seat.col);
+                            return (
+                              <React.Fragment key={seat.id}>
+                                {isAisleBefore && <div className="w-4" />}
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSeat(seat)}
+                                  disabled={seat.status === 'SOLD'}
+                                  className={`w-8 h-8 rounded-t-lg flex items-center justify-center text-[11px] font-bold transition-all shadow-2xs ${
+                                    seat.status === 'SOLD'
+                                      ? 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed border border-slate-300'
+                                      : seat.status === 'SELECTED'
+                                      ? 'bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40'
+                                      : seat.type === 'VIP'
+                                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-400 font-bold'
+                                      : 'bg-[#f1f5f9] hover:bg-[#e2e8f0] text-slate-700 border border-slate-300'
+                                  }`}
+                                  title={`${seat.id} (${
+                                    seat.type === 'VIP' ? 'Ghế VIP' : 'Ghế tiêu chuẩn'
+                                  }) - ${seat.price.toLocaleString('vi-VN')} đ`}
+                                >
+                                  {seat.status === 'SOLD' ? '✕' : seat.col}
+                                </button>
+                              </React.Fragment>
+                            );
+                          })
+                        )}
                       </div>
 
                       {/* Row Label Right */}
@@ -266,21 +330,27 @@ export const SeatSelection: React.FC = () => {
               </div>
 
               {/* Seat Legend */}
-              <div className="mt-6 pt-4 border-t border-[#e4e2e2] w-full flex flex-wrap items-center justify-center gap-6 text-xs text-[#5f5e5e]">
+              <div className="mt-6 pt-4 border-t border-[#e4e2e2] w-full flex flex-wrap items-center justify-center gap-5 text-xs text-[#5f5e5e]">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#f5f3f3] border border-[#e4e2e2]" />
+                  <div className="w-5 h-5 rounded-t bg-[#f1f5f9] border border-slate-300" />
                   <span>Ghế tiêu chuẩn (50.000đ)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#efeded] border border-[#c8c6c5]" />
-                  <span>Ghế VIP (110.000đ)</span>
+                  <div className="w-5 h-5 rounded-t bg-amber-50 border border-amber-400" />
+                  <span className="font-semibold text-amber-900">Ghế VIP (110.000đ)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-5 rounded-t bg-pink-50 border border-pink-400 flex items-center justify-center text-[9px] font-bold text-pink-800">
+                    K1-2
+                  </div>
+                  <span className="font-semibold text-pink-900">Ghế Đôi (220.000đ/cặp)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-t bg-[#d71920]" />
                   <span className="font-bold text-[#1b1c1c]">Đang chọn</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#e4e2e2] text-[#926f6b] flex items-center justify-center text-[10px]">
+                  <div className="w-5 h-5 rounded-t bg-[#e2e8f0] text-slate-400 flex items-center justify-center text-[10px]">
                     ✕
                   </div>
                   <span>Đã bán</span>
