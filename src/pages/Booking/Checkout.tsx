@@ -14,6 +14,7 @@ import {
   QrCode,
   CreditCard,
   Film,
+  Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -60,6 +61,9 @@ const MOVIES_LIST: MovieOption[] = [
 
 const SHOWTIME_TIMES = ['10:45', '11:30', '13:00', '14:45', '18:15', '21:00'];
 
+// BR#21: Payment status type
+type PaymentStatus = 'IDLE' | 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED';
+
 export const Checkout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -75,7 +79,8 @@ export const Checkout: React.FC = () => {
 
   // ── Step 3 States (Payment Method) ─────────────────────────────────
   const [paymentMethod, setPaymentMethod] = useState<'PAYOS' | 'VNPAY'>('VNPAY');
-  const [holdTimeLeft, setHoldTimeLeft] = useState(437); // 7 mins 17 secs hold countdown
+  const [holdTimeLeft, setHoldTimeLeft] = useState(600);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('IDLE');
 
   // Retrieve draft from Step 2
   const bookingDraft = React.useMemo(() => {
@@ -91,14 +96,34 @@ export const Checkout: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location.pathname]);
 
-  // Hold Timer for Step 3
+  // BR#22: Restore hold timer from Step 2
+  useEffect(() => {
+    if (!isPaymentStep || !bookingDraft) return;
+
+    // Calculate remaining hold time from booking_draft
+    if (bookingDraft.holdTimeLeft && bookingDraft.holdStartedAt) {
+      const elapsed = Math.floor((Date.now() - bookingDraft.holdStartedAt) / 1000);
+      const remaining = Math.max(0, bookingDraft.holdTimeLeft - elapsed);
+      setHoldTimeLeft(remaining > 0 ? remaining : 600);
+    }
+  }, [isPaymentStep, bookingDraft]);
+
+  // Hold Timer countdown for Step 3
   useEffect(() => {
     if (!isPaymentStep) return;
     const interval = setInterval(() => {
-      setHoldTimeLeft((prev) => (prev <= 1 ? 600 : prev - 1));
+      setHoldTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          toast.error('Hết thời gian giữ ghế! Vui lòng chọn ghế lại.');
+          navigate('/checkout');
+          return 600;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaymentStep]);
+  }, [isPaymentStep, navigate]);
 
   const formatTimer = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -110,7 +135,7 @@ export const Checkout: React.FC = () => {
   const handleSelectMovie = (movie: MovieOption) => {
     setSelectedMovie(movie);
     setIsMovieDropdownOpen(false);
-    setIsShowtimeDropdownOpen(true); // Auto expand showtime dropdown
+    setIsShowtimeDropdownOpen(true);
   };
 
   const handleSelectTime = (time: string) => {
@@ -126,13 +151,73 @@ export const Checkout: React.FC = () => {
     navigate('/booking/st-11:30');
   };
 
+  // BR#14 & BR#15: Payment processing with mock flow
   const handleProcessPayment = () => {
-    toast.loading('Đang khởi tạo cổng thanh toán...');
+    if (paymentStatus === 'PROCESSING') return;
+
+    setPaymentStatus('PENDING');
+    toast.loading('Đang khởi tạo cổng thanh toán...', { id: 'payment' });
+
     setTimeout(() => {
-      toast.dismiss();
-      toast.success('Thanh toán đơn hàng thành công!');
-      navigate('/booking/confirmation');
-    }, 1200);
+      setPaymentStatus('PROCESSING');
+
+      if (paymentMethod === 'VNPAY') {
+        // BR#14: VNPay — mock redirect flow
+        toast.loading('Đang chuyển hướng tới VNPay...', { id: 'payment' });
+        setTimeout(() => {
+          toast.dismiss('payment');
+          setPaymentStatus('SUCCESS');
+          // Save confirmation data
+          const confirmData = {
+            orderCode: `NEX-${Math.floor(100000 + Math.random() * 900000)}`,
+            movieTitle: bookingDraft?.movieTitle || 'Dune: Hành Tinh Cát - Phần 2',
+            formatText: bookingDraft?.formatText || '2D IMAX Laser',
+            cinemaName: 'NexCinema Complex Lê Duẩn',
+            roomName: bookingDraft?.roomName || 'Phòng chiếu IMAX Laser (Tầng 4)',
+            showtime: `${bookingDraft?.showtimeTime || '11:30'} - ${bookingDraft?.showtimeDate || 'Thứ Ba, 29/10/2024'}`,
+            seats: bookingDraft?.seats || ['J4', 'J5'],
+            paymentMethod: 'VNPAY (Cổng VNPAY-QR)',
+            paymentStatus: 'ĐÃ THANH TOÁN',
+            totalAmount: bookingDraft?.totalAmount || 220000,
+            createdDate: new Date().toLocaleDateString('vi-VN'),
+          };
+          sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
+          toast.success('Thanh toán VNPay thành công!');
+          navigate('/booking/confirmation');
+        }, 2000);
+      } else {
+        // BR#15: PayOS — mock QR + polling flow
+        toast.loading('Đang tạo mã QR thanh toán PayOS...', { id: 'payment' });
+        setTimeout(() => {
+          toast.dismiss('payment');
+          toast.success('Quét QR thành công! Đang xác nhận giao dịch...');
+          setPaymentStatus('SUCCESS');
+          const confirmData = {
+            orderCode: `NEX-${Math.floor(100000 + Math.random() * 900000)}`,
+            movieTitle: bookingDraft?.movieTitle || 'Dune: Hành Tinh Cát - Phần 2',
+            formatText: bookingDraft?.formatText || '2D IMAX Laser',
+            cinemaName: 'NexCinema Complex Lê Duẩn',
+            roomName: bookingDraft?.roomName || 'Phòng chiếu IMAX Laser (Tầng 4)',
+            showtime: `${bookingDraft?.showtimeTime || '11:30'} - ${bookingDraft?.showtimeDate || 'Thứ Ba, 29/10/2024'}`,
+            seats: bookingDraft?.seats || ['J4', 'J5'],
+            paymentMethod: 'PayOS (Quét mã QR Ngân hàng)',
+            paymentStatus: 'ĐÃ THANH TOÁN',
+            totalAmount: bookingDraft?.totalAmount || 220000,
+            createdDate: new Date().toLocaleDateString('vi-VN'),
+          };
+          sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
+          navigate('/booking/confirmation');
+        }, 3000);
+      }
+    }, 800);
+  };
+
+  // BR#22: Back from payment → release held seats (mock)
+  const handleBackFromPayment = () => {
+    // In production: call cancelHeldSeats()
+    toast.success('Đã hủy giữ ghế. Quay lại chọn ghế.');
+    sessionStorage.removeItem('booking_draft');
+    navigate('/checkout');
   };
 
   // ── RENDER STEP 3 (THANH TOÁN) ────────────────────────────────────
@@ -160,12 +245,12 @@ export const Checkout: React.FC = () => {
 
                 {/* Option 1: PayOS */}
                 <div
-                  onClick={() => setPaymentMethod('PAYOS')}
+                  onClick={() => paymentStatus === 'IDLE' && setPaymentMethod('PAYOS')}
                   className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-4 ${
                     paymentMethod === 'PAYOS'
                       ? 'border-[#d71920] bg-red-50/20 ring-1 ring-[#d71920]'
                       : 'border-[#e4e2e2] bg-[#f5f3f3] hover:bg-[#e4e2e2]'
-                  }`}
+                  } ${paymentStatus !== 'IDLE' ? 'opacity-60 pointer-events-none' : ''}`}
                 >
                   <div className="w-4 h-4 rounded-full border-2 border-[#d71920] flex items-center justify-center">
                     {paymentMethod === 'PAYOS' && (
@@ -187,12 +272,12 @@ export const Checkout: React.FC = () => {
 
                 {/* Option 2: VNPay */}
                 <div
-                  onClick={() => setPaymentMethod('VNPAY')}
+                  onClick={() => paymentStatus === 'IDLE' && setPaymentMethod('VNPAY')}
                   className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-4 ${
                     paymentMethod === 'VNPAY'
                       ? 'border-[#d71920] bg-red-50/20 ring-1 ring-[#d71920]'
                       : 'border-[#e4e2e2] bg-[#f5f3f3] hover:bg-[#e4e2e2]'
-                  }`}
+                  } ${paymentStatus !== 'IDLE' ? 'opacity-60 pointer-events-none' : ''}`}
                 >
                   <div className="w-4 h-4 rounded-full border-2 border-[#d71920] flex items-center justify-center">
                     {paymentMethod === 'VNPAY' && (
@@ -211,6 +296,43 @@ export const Checkout: React.FC = () => {
                     </p>
                   </div>
                 </div>
+
+                {/* BR#21: Payment Status Indicator */}
+                {paymentStatus !== 'IDLE' && (
+                  <div
+                    className={`p-4 rounded-xl border flex items-center gap-3 ${
+                      paymentStatus === 'SUCCESS'
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : paymentStatus === 'FAILED'
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-[#e4e2e2] bg-[#f5f3f3]'
+                    }`}
+                  >
+                    {(paymentStatus === 'PENDING' || paymentStatus === 'PROCESSING') && (
+                      <Loader2 className="w-5 h-5 text-[#d71920] animate-spin shrink-0" />
+                    )}
+                    {paymentStatus === 'SUCCESS' && (
+                      <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                    )}
+                    <div>
+                      <p className="font-bold text-sm text-[#1b1c1c]">
+                        {paymentStatus === 'PENDING' && 'Đang khởi tạo giao dịch...'}
+                        {paymentStatus === 'PROCESSING' &&
+                          (paymentMethod === 'VNPAY'
+                            ? 'Đang xử lý thanh toán qua VNPay...'
+                            : 'Đang chờ quét mã QR PayOS...')}
+                        {paymentStatus === 'SUCCESS' && 'Thanh toán thành công!'}
+                        {paymentStatus === 'FAILED' && 'Thanh toán thất bại!'}
+                      </p>
+                      <p className="text-xs text-[#5f5e5e] mt-0.5">
+                        {paymentStatus === 'PROCESSING' && paymentMethod === 'PAYOS' &&
+                          'Mở ứng dụng ngân hàng và quét mã QR để thanh toán'}
+                        {paymentStatus === 'FAILED' &&
+                          'Vui lòng thử lại hoặc chọn phương thức thanh toán khác'}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Security statement */}
                 <div className="p-4 rounded-xl bg-[#f5f3f3] border border-[#e4e2e2] text-xs text-[#5f5e5e] space-y-1">
@@ -261,7 +383,7 @@ export const Checkout: React.FC = () => {
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-[#1b1c1c] line-clamp-2">
-                        Dune: Hành Tinh Cát - Phần 2
+                        {bookingDraft?.movieTitle || 'Dune: Hành Tinh Cát - Phần 2'}
                       </h3>
                       <p className="text-[11px] text-[#5f5e5e] mt-1">166 phút</p>
                     </div>
@@ -270,9 +392,12 @@ export const Checkout: React.FC = () => {
                   {/* Cinema & Showtime details */}
                   <div className="p-3 rounded-lg bg-[#f5f3f3] space-y-1 text-xs">
                     <p className="font-bold text-[#1b1c1c]">NexCinema Complex Lê Duẩn</p>
-                    <p className="text-[#5f5e5e]">Phòng chiếu IMAX Laser (Tầng 4)</p>
+                    <p className="text-[#5f5e5e]">
+                      {bookingDraft?.roomName || 'Phòng chiếu IMAX Laser'} (Tầng 4)
+                    </p>
                     <p className="font-bold text-[#d71920] pt-1">
-                      11:30 - Thứ Ba, 29/10/2024
+                      {bookingDraft?.showtimeTime || '11:30'} -{' '}
+                      {bookingDraft?.showtimeDate || 'Thứ Ba, 29/10/2024'}
                     </p>
                   </div>
 
@@ -280,15 +405,15 @@ export const Checkout: React.FC = () => {
                   <div className="space-y-1.5 text-xs text-[#5f5e5e] pt-2 border-t border-[#e4e2e2]">
                     <div className="flex justify-between">
                       <span>Loại vé & Vị trí ghế:</span>
-                      <strong className="text-[#1b1c1c]">{seatsList.length}x Ghế VIP ({seatsList.join(', ')})</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Đơn giá vé:</span>
-                      <span>110.000 đ x {seatsList.length}</span>
+                      <strong className="text-[#1b1c1c]">
+                        {seatsList.length}x Ghế ({seatsList.join(', ')})
+                      </strong>
                     </div>
                     <div className="flex justify-between">
                       <span>Tổng tạm tính:</span>
-                      <strong className="text-[#1b1c1c]">{totalAmount.toLocaleString('vi-VN')} đ</strong>
+                      <strong className="text-[#1b1c1c]">
+                        {totalAmount.toLocaleString('vi-VN')} đ
+                      </strong>
                     </div>
                   </div>
 
@@ -305,19 +430,35 @@ export const Checkout: React.FC = () => {
                   {/* Submit CTA */}
                   <button
                     onClick={handleProcessPayment}
-                    className="w-full py-3.5 px-4 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                    disabled={paymentStatus !== 'IDLE'}
+                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all ${
+                      paymentStatus === 'IDLE'
+                        ? 'bg-[#d71920] hover:bg-[#ae0011] text-white active:scale-[0.98] cursor-pointer'
+                        : 'bg-[#e4e2e2] text-[#5f5e5e] cursor-not-allowed'
+                    }`}
                   >
-                    <span>Thanh toán ngay ({totalAmount.toLocaleString('vi-VN')} đ)</span>
-                    <ArrowRight className="w-4 h-4" />
+                    {paymentStatus !== 'IDLE' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Đang xử lý...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Thanh toán ngay ({totalAmount.toLocaleString('vi-VN')} đ)</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
 
-                  <Link
-                    to="/booking/st-11:30"
-                    className="text-center text-xs font-semibold text-[#5f5e5e] hover:text-[#d71920] transition-colors flex items-center justify-center gap-1"
+                  {/* BR#22: Back button releases held seats */}
+                  <button
+                    onClick={handleBackFromPayment}
+                    disabled={paymentStatus !== 'IDLE'}
+                    className="text-center text-xs font-semibold text-[#5f5e5e] hover:text-[#d71920] transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Quay lại chọn ghế</span>
-                  </Link>
+                    <span>Quay lại chọn ghế (hủy giữ ghế)</span>
+                  </button>
                 </div>
               </div>
             </aside>
@@ -489,7 +630,7 @@ export const Checkout: React.FC = () => {
                     Thông tin đặt vé
                   </h2>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#f5f3f3] text-[11px] font-semibold text-[#5f5e5e]">
-                    Bước 1/3
+                    Bước 1/4
                   </span>
                 </div>
 
