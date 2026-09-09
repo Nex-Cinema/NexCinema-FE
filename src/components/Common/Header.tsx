@@ -101,10 +101,10 @@ const Header: React.FC = () => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.06)] border-b border-gray-100">
-        <div className="h-20 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-6">
+        <div className="h-20 max-w-[1280px] mx-auto px-3 sm:px-4 lg:px-5 flex items-center justify-between gap-6">
           {/* BRAND LOGO & NAV */}
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-2.5 -ml-1.5 hover:opacity-90 transition-opacity">
               <img
                 src={UITLogo}
                 alt="NexCinema Logo"
