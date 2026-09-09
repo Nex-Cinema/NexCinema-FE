@@ -6,15 +6,36 @@ import toast from 'react-hot-toast';
 const QuickBookingWidget: React.FC = () => {
   const navigate = useNavigate();
 
-  const [selectedMovie, setSelectedMovie] = useState('dune2');
-  const [selectedDate, setSelectedDate] = useState('2024-10-28');
-  const [selectedTime, setSelectedTime] = useState('19:30');
+  const [selectedMovie, setSelectedMovie] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+
+  const handleMovieChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMovie(e.target.value);
+    setSelectedDate('');
+    setSelectedTime('');
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDate(e.target.value);
+    setSelectedTime('');
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTime(e.target.value);
+  };
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Đang chuyển tới màn hình chọn ghế...");
-    navigate(`/booking/${selectedMovie}`);
+    if (!selectedMovie || !selectedDate || !selectedTime) {
+      toast.error('Vui lòng chọn đầy đủ thông tin phim, ngày và suất chiếu!');
+      return;
+    }
+    toast.success('Đang chuyển tới màn hình chọn ghế...');
+    navigate(`/booking/st-11:30`);
   };
+
+  const isFormValid = Boolean(selectedMovie && selectedDate && selectedTime);
 
   return (
     <section className="relative z-20 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 -mt-12" id="quick-booking">
@@ -46,9 +67,10 @@ const QuickBookingWidget: React.FC = () => {
               <select 
                 id="quick-movie-select"
                 value={selectedMovie}
-                onChange={(e) => setSelectedMovie(e.target.value)}
+                onChange={handleMovieChange}
                 className="w-full h-11 pl-3 pr-8 rounded-lg bg-gray-100 text-gray-900 text-xs font-medium appearance-none focus:outline-none focus:ring-1 focus:ring-[#d71920] focus:bg-white cursor-pointer transition-colors"
               >
+                <option value="" disabled>--- Chọn phim ---</option>
                 <option value="dune2">Dune: Hành Tinh Cát 2 (IMAX, 2D)</option>
                 <option value="godzilla">Godzilla x Kong: Đế Chế Mới</option>
                 <option value="latmat7">Lật Mặt 7: Một Điều Ước</option>
@@ -63,16 +85,22 @@ const QuickBookingWidget: React.FC = () => {
           {/* STEP 2: CHỌN NGÀY */}
           <div className="flex flex-col space-y-1.5">
             <label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5" htmlFor="quick-date-select">
-              <span className="w-4 h-4 rounded-full bg-[#d71920] text-white text-[10px] flex items-center justify-center font-bold">2</span>
+              <span className={`w-4 h-4 rounded-full text-white text-[10px] flex items-center justify-center font-bold ${selectedMovie ? 'bg-[#d71920]' : 'bg-gray-400'}`}>2</span>
               Chọn ngày chiếu
             </label>
             <div className="relative">
               <select 
                 id="quick-date-select"
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 rounded-lg bg-gray-100 text-gray-900 text-xs font-medium appearance-none focus:outline-none focus:ring-1 focus:ring-[#d71920] focus:bg-white cursor-pointer transition-colors"
+                disabled={!selectedMovie}
+                onChange={handleDateChange}
+                className={`w-full h-11 pl-3 pr-8 rounded-lg text-xs font-medium appearance-none focus:outline-none transition-colors ${
+                  selectedMovie
+                    ? 'bg-gray-100 text-gray-900 focus:ring-1 focus:ring-[#d71920] focus:bg-white cursor-pointer'
+                    : 'bg-gray-100/60 text-gray-400 cursor-not-allowed opacity-70'
+                }`}
               >
+                <option value="" disabled>--- Chọn ngày chiếu ---</option>
                 <option value="2024-10-28">Hôm nay, 28/10/2024</option>
                 <option value="2024-10-29">Ngày mai, 29/10/2024</option>
                 <option value="2024-10-30">Thứ Tư, 30/10/2024</option>
@@ -87,16 +115,22 @@ const QuickBookingWidget: React.FC = () => {
           {/* STEP 3: CHỌN SUẤT CHIẾU */}
           <div className="flex flex-col space-y-1.5">
             <label className="text-xs font-semibold text-gray-500 flex items-center gap-1.5" htmlFor="quick-time-select">
-              <span className="w-4 h-4 rounded-full bg-[#d71920] text-white text-[10px] flex items-center justify-center font-bold">3</span>
+              <span className={`w-4 h-4 rounded-full text-white text-[10px] flex items-center justify-center font-bold ${selectedDate ? 'bg-[#d71920]' : 'bg-gray-400'}`}>3</span>
               Suất chiếu
             </label>
             <div className="relative">
               <select 
                 id="quick-time-select"
                 value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 rounded-lg bg-gray-100 text-gray-900 text-xs font-medium appearance-none focus:outline-none focus:ring-1 focus:ring-[#d71920] focus:bg-white cursor-pointer transition-colors"
+                disabled={!selectedDate}
+                onChange={handleTimeChange}
+                className={`w-full h-11 pl-3 pr-8 rounded-lg text-xs font-medium appearance-none focus:outline-none transition-colors ${
+                  selectedDate
+                    ? 'bg-gray-100 text-gray-900 focus:ring-1 focus:ring-[#d71920] focus:bg-white cursor-pointer'
+                    : 'bg-gray-100/60 text-gray-400 cursor-not-allowed opacity-70'
+                }`}
               >
+                <option value="" disabled>--- Chọn suất chiếu ---</option>
                 <option value="09:30">09:30 - Rạp 03 (2D Phụ đề)</option>
                 <option value="13:15">13:15 - Rạp 02 (2D Phụ đề)</option>
                 <option value="16:45">16:45 - Rạp IMAX (IMAX Laser)</option>
@@ -111,7 +145,12 @@ const QuickBookingWidget: React.FC = () => {
           <div className="flex flex-col justify-end">
             <button 
               type="submit"
-              className="w-full h-11 rounded-lg bg-[#d71920] hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer"
+              disabled={!isFormValid}
+              className={`w-full h-11 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                isFormValid
+                  ? 'bg-[#d71920] hover:bg-[#ae0011] text-white shadow-md active:scale-98 cursor-pointer'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-80'
+              }`}
             >
               <Ticket className="w-4 h-4" />
               <span>Mua vé ngay</span>
