@@ -2,9 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Info, UserPlus, ArrowLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -59,8 +61,8 @@ export const Register: React.FC = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      localStorage.setItem('accessToken', 'mock-register-jwt-token');
-      localStorage.setItem('user', JSON.stringify({ email, name: fullName, role: 'CUSTOMER' }));
+      const mockUser = { email, name: fullName, role: 'CUSTOMER' };
+      login('mock-register-jwt-token', mockUser);
       toast.success('Đăng ký tài khoản thành công!');
       navigate('/');
     }, 800);
@@ -69,8 +71,8 @@ export const Register: React.FC = () => {
   const handleGoogleSignup = () => {
     toast.loading('Đang kết nối tới Google OAuth...', { duration: 1500 });
     setTimeout(() => {
-      localStorage.setItem('accessToken', 'mock-google-register-token');
-      localStorage.setItem('user', JSON.stringify({ email: 'new.google.user@gmail.com', name: 'Google New User', role: 'CUSTOMER' }));
+      const mockUser = { email: 'new.google.user@gmail.com', name: 'Google New User', role: 'CUSTOMER' };
+      login('mock-google-register-token', mockUser);
       toast.success('Đăng ký với Google thành công!');
       navigate('/');
     }, 1500);

@@ -68,6 +68,7 @@ const FEATURED_MOVIES: FeaturedMovie[] = [
 
 const HeroBanner: React.FC = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
   const [activeIdx, setActiveIdx] = useState(0);
   const currentMovie = FEATURED_MOVIES[activeIdx];
 
@@ -80,6 +81,13 @@ const HeroBanner: React.FC = () => {
   };
 
   const handleGoToDetails = () => {
+    navigate(`/movie/${currentMovie.id}`);
+  };
+
+  const handleBookNow = () => {
+    if (!requireAuth(undefined, `/movie/${currentMovie.id}`)) {
+      return;
+    }
     navigate(`/movie/${currentMovie.id}`);
   };
 
@@ -145,7 +153,7 @@ const HeroBanner: React.FC = () => {
             {/* ACTION BUTTONS */}
             <div className="flex items-center gap-4 pt-2">
               <button 
-                onClick={handleGoToDetails}
+                onClick={handleBookNow}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#d71920] hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <Ticket className="w-4 h-4" />

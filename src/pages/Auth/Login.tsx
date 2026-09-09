@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Film } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/';
 
@@ -25,8 +27,8 @@ export const Login: React.FC = () => {
     // Mock login logic
     setTimeout(() => {
       setIsLoading(false);
-      localStorage.setItem('accessToken', 'mock-jwt-token-123456');
-      localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0], role: 'CUSTOMER' }));
+      const mockUser = { email, name: email.split('@')[0], role: 'CUSTOMER' };
+      login('mock-jwt-token-123456', mockUser);
       toast.success('Đăng nhập thành công!');
       navigate(redirectUrl);
     }, 600);
@@ -35,8 +37,8 @@ export const Login: React.FC = () => {
   const handleGoogleLogin = () => {
     toast.loading('Đang kết nối tới Google OAuth...', { duration: 1500 });
     setTimeout(() => {
-      localStorage.setItem('accessToken', 'mock-google-jwt-token');
-      localStorage.setItem('user', JSON.stringify({ email: 'user.google@gmail.com', name: 'Google User', role: 'CUSTOMER' }));
+      const mockUser = { email: 'user.google@gmail.com', name: 'Google User', role: 'CUSTOMER' };
+      login('mock-google-jwt-token', mockUser);
       toast.success('Đăng nhập Google thành công!');
       navigate(redirectUrl);
     }, 1500);

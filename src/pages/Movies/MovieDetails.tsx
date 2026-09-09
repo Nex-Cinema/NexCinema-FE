@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import {
   Play,
   Share2,
@@ -48,6 +49,7 @@ interface RoomShowtimeGroup {
 export const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
 
   // ── States ────────────────────────────────────────────────────────
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);

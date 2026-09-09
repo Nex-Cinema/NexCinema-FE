@@ -10,6 +10,7 @@ import Login from '@/pages/Auth/Login';
 import Register from '@/pages/Auth/Register';
 import ForgotPassword from '@/pages/Auth/ForgotPassword';
 import ResetPassword from '@/pages/Auth/ResetPassword';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -53,37 +54,45 @@ export const AppRoutes: React.FC = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* ── BOOKING CHEKOUT FLOW ROUTES ──────────────────────────── */}
+      {/* ── BOOKING CHECKOUT FLOW ROUTES (PROTECTED) ──────────────── */}
       <Route
         path="/checkout"
         element={
-          <MainLayout>
-            <Checkout />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Checkout />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/checkout/payment"
         element={
-          <MainLayout>
-            <Checkout />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Checkout />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/booking/:showtimeId"
         element={
-          <MainLayout>
-            <SeatSelection />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <SeatSelection />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/booking/confirmation"
         element={
-          <MainLayout>
-            <BookingConfirmation />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <BookingConfirmation />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
 
