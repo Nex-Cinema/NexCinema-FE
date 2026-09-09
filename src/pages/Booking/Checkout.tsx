@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+import BookingProgressBar from '../../components/common/BookingProgressBar';
+
 interface MovieOption {
   id: string;
   title: string;
@@ -142,34 +144,7 @@ export const Checkout: React.FC = () => {
       <div className="w-full bg-[#f5f3f3] text-[#1b1c1c] min-h-screen pb-16">
         <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-6">
           {/* STEPPER BAR STEP 3 */}
-          <div className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-[#e4e2e2]">
-            <div className="flex items-center justify-between max-w-2xl mx-auto">
-              <Link to="/checkout" className="flex items-center gap-2 text-[#5f5e5e]">
-                <div className="w-8 h-8 rounded-full bg-[#d71920] text-white flex items-center justify-center font-bold text-xs">
-                  <Check className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-semibold">1. Chọn suất</span>
-              </Link>
-
-              <div className="h-[2px] flex-1 mx-4 bg-[#d71920]" />
-
-              <Link to="/booking/st-11:30" className="flex items-center gap-2 text-[#5f5e5e]">
-                <div className="w-8 h-8 rounded-full bg-[#d71920] text-white flex items-center justify-center font-bold text-xs">
-                  <Check className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-semibold">2. Chọn ghế</span>
-              </Link>
-
-              <div className="h-[2px] flex-1 mx-4 bg-[#d71920]" />
-
-              <div className="flex items-center gap-2 text-[#d71920]">
-                <div className="w-8 h-8 rounded-full bg-[#d71920] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                  3
-                </div>
-                <span className="text-sm font-bold text-[#d71920]">3. Thanh toán</span>
-              </div>
-            </div>
-          </div>
+          <BookingProgressBar currentStep={3} />
 
           {/* MAIN 2-COLUMN PAYMENT GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -357,36 +332,7 @@ export const Checkout: React.FC = () => {
     <div className="w-full bg-[#f5f3f3] text-[#1b1c1c] min-h-screen pb-16">
       <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-6">
         {/* STEPPER BAR STEP 1 */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-[#e4e2e2]">
-          <div className="flex items-center justify-between max-w-2xl mx-auto relative">
-            <div className="absolute top-1/2 left-10 right-10 h-0.5 -translate-y-1/2 bg-[#e4e2e2] z-0" />
-            <div className="absolute top-1/2 left-10 w-1/3 h-0.5 -translate-y-1/2 bg-[#d71920] z-0" />
-
-            {/* Step 1: Active */}
-            <div className="relative z-10 flex flex-col items-center gap-1">
-              <div className="w-10 h-10 rounded-full bg-[#d71920] text-white flex items-center justify-center font-bold text-sm shadow-md">
-                1
-              </div>
-              <span className="text-xs font-bold text-[#d71920]">1. Chọn suất</span>
-            </div>
-
-            {/* Step 2: Upcoming */}
-            <div className="relative z-10 flex flex-col items-center gap-1">
-              <div className="w-10 h-10 rounded-full bg-[#efeded] text-[#5f5e5e] flex items-center justify-center font-bold text-xs">
-                2
-              </div>
-              <span className="text-xs font-semibold text-[#5f5e5e]">2. Chọn ghế</span>
-            </div>
-
-            {/* Step 3: Upcoming */}
-            <div className="relative z-10 flex flex-col items-center gap-1">
-              <div className="w-10 h-10 rounded-full bg-[#efeded] text-[#5f5e5e] flex items-center justify-center font-bold text-xs">
-                3
-              </div>
-              <span className="text-xs font-semibold text-[#5f5e5e]">3. Thanh toán</span>
-            </div>
-          </div>
-        </div>
+        <BookingProgressBar currentStep={1} />
 
         {/* MAIN 2-COLUMN WIZARD LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

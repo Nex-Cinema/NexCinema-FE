@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+import BookingProgressBar from '../../components/common/BookingProgressBar';
+
 interface Seat {
   id: string; // e.g., "A1", "J4"
   row: string; // e.g., "A", "J"
@@ -161,40 +163,7 @@ export const SeatSelection: React.FC = () => {
     <div className="w-full bg-[#f5f3f3] text-[#1b1c1c] min-h-screen pb-16">
       <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-6">
         {/* ── TOP STEPPER BAR ────────────────────────────────────── */}
-        <div className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-[#e4e2e2]">
-          <div className="flex items-center justify-between max-w-2xl mx-auto">
-            {/* Step 1: Complete */}
-            <Link
-              to="/checkout"
-              className="flex items-center gap-2 text-[#5f5e5e] hover:text-[#d71920] transition-colors"
-            >
-              <div className="w-8 h-8 rounded-full bg-[#efeded] flex items-center justify-center text-[#5d3f3c] font-bold text-xs">
-                <Check className="w-4 h-4 text-[#5d3f3c]" />
-              </div>
-              <span className="text-xs font-semibold text-[#5f5e5e]">1. Chọn suất</span>
-            </Link>
-
-            <div className="h-[2px] flex-1 mx-4 bg-[#e4e2e2]" />
-
-            {/* Step 2: Active */}
-            <div className="flex items-center gap-2 text-[#d71920]">
-              <div className="w-8 h-8 rounded-full bg-[#d71920] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                2
-              </div>
-              <span className="text-sm font-bold text-[#d71920]">2. Chọn ghế</span>
-            </div>
-
-            <div className="h-[2px] flex-1 mx-4 bg-[#e4e2e2]" />
-
-            {/* Step 3: Upcoming */}
-            <div className="flex items-center gap-2 text-[#5f5e5e]/60">
-              <div className="w-8 h-8 rounded-full bg-[#efeded] flex items-center justify-center font-bold text-xs text-[#5f5e5e]/70">
-                3
-              </div>
-              <span className="text-xs font-semibold text-[#5f5e5e]/70">3. Thanh toán</span>
-            </div>
-          </div>
-        </div>
+        <BookingProgressBar currentStep={2} />
 
         {/* ── MAIN TWO-COLUMN LAYOUT ──────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
