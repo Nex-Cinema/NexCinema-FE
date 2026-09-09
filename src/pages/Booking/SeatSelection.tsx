@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Check,
   Clock,
   Ticket,
   ArrowRight,
@@ -49,51 +48,17 @@ export const SeatSelection: React.FC = () => {
   const [currentShowtimeTime, setCurrentShowtimeTime] = useState('11:30');
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
 
-  // Hold timer state — only starts after user confirms seat selection (BR#4)
-  const [isHoldActive, setIsHoldActive] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(SEAT_HOLD_DURATION_S);
-
   // Scroll to top when page mounts or showtime changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentShowtimeId]);
 
-  // ── 10-Minute Hold Timer Countdown ─────────────────────────────
-  // Timer ONLY runs when hold is active (after user confirms seats — BR#4)
-  useEffect(() => {
-    if (!isHoldActive) return;
-
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          // BR#5: Timer expired → auto release + reset
-          toast.error('Hết thời gian giữ ghế! Hệ thống đã giải phóng vị trí ghế.');
-          setIsHoldActive(false);
-          setSelectedSeatIds([]);
-          setTimeLeft(SEAT_HOLD_DURATION_S);
-          return SEAT_HOLD_DURATION_S;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isHoldActive]);
-
-  // BR#6: Cleanup on unmount — release held seats
+  // BR#6: Cleanup on unmount — release held seats if needed
   useEffect(() => {
     return () => {
-      // In production, call cancelHeldSeats(maSuatChieu, seatIds) here
-      // Currently mock — no actual API call
+      // In production, call cancelHeldSeats(maSuatChieu, seatIds) here if needed
     };
   }, []);
-
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   // ── Generate Seat Map ─────────────────────────────────────────────
   // Rows A-I: single seats, Row K: couple seats
@@ -141,12 +106,6 @@ export const SeatSelection: React.FC = () => {
     // BR#7 & BR#8: Cannot click sold or held seats
     if (seat.status === 'SOLD' || seat.status === 'HELD') return;
 
-    // If hold is already active, don't allow changing seats (must release first)
-    if (isHoldActive) {
-      toast.error('Ghế đã được xác nhận giữ. Nhấn "Hủy giữ ghế" để chọn lại.');
-      return;
-    }
-
     if (seat.type === 'COUPLE') {
       // BR#11: Couple seats select 2 adjacent seats
       const colNum = seat.col;
@@ -184,10 +143,6 @@ export const SeatSelection: React.FC = () => {
   // BR#2: Switch showtime directly from Seat Selection screen → reset seats
   const handleChangeShowtime = (slotId: string, slotTime: string) => {
     if (slotId === currentShowtimeId) return;
-    if (isHoldActive) {
-      toast.error('Vui lòng hủy giữ ghế trước khi đổi suất chiếu.');
-      return;
-    }
     setCurrentShowtimeId(slotId);
     setCurrentShowtimeTime(slotTime);
     setSelectedSeatIds([]);
@@ -201,39 +156,10 @@ export const SeatSelection: React.FC = () => {
     return sum + (isVipOrCouple ? 110000 : 50000);
   }, 0);
 
-  // BR#17: Confirm seat selection → mock hold API → start timer
-  const handleConfirmSeats = () => {
+  // Directly hold seats and navigate to payment step
+  const handleContinueToPayment = () => {
     if (selectedSeatIds.length === 0) {
       toast.error('Vui lòng chọn ít nhất 1 ghế hợp lệ!');
-      return;
-    }
-
-    // Mock: call POST /dat-ve/giu-ghe
-    // In production: await holdSeats(currentShowtimeId, seatIds)
-    toast.loading('Đang giữ ghế...', { id: 'hold-seats' });
-
-    setTimeout(() => {
-      toast.success('Đã giữ ghế thành công! Bạn có 10 phút để hoàn tất thanh toán.', {
-        id: 'hold-seats',
-      });
-      setIsHoldActive(true);
-      setTimeLeft(SEAT_HOLD_DURATION_S);
-    }, 600);
-  };
-
-  // Release hold and allow re-selection
-  const handleReleaseHold = () => {
-    // Mock: call POST /dat-ve/huy-giu-ghe
-    setIsHoldActive(false);
-    setSelectedSeatIds([]);
-    setTimeLeft(SEAT_HOLD_DURATION_S);
-    toast.success('Đã hủy giữ ghế. Bạn có thể chọn lại.');
-  };
-
-  // Navigate to payment step (only when hold is active)
-  const handleContinueToPayment = () => {
-    if (!isHoldActive) {
-      toast.error('Vui lòng xác nhận giữ ghế trước khi thanh toán!');
       return;
     }
 
@@ -249,10 +175,12 @@ export const SeatSelection: React.FC = () => {
         formatText: '2D IMAX Phụ Đề',
         seats: selectedSeatIds,
         totalAmount,
-        holdTimeLeft: timeLeft,
+        holdTimeLeft: SEAT_HOLD_DURATION_S,
         holdStartedAt: Date.now(),
       })
     );
+
+    toast.success('Đã chọn ghế thành công! Chuyển sang bước thanh toán...');
     navigate('/checkout/payment');
   };
 
@@ -482,20 +410,13 @@ export const SeatSelection: React.FC = () => {
                   <h2 className="font-bold text-base text-[#1b1c1c] uppercase tracking-wide">
                     Thông tin đặt vé
                   </h2>
-                  {isHoldActive ? (
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-[#d71920] font-extrabold text-xs border border-red-200 animate-pulse">
-                      <Timer className="w-4 h-4" />
-                      <span>{formatTimer(timeLeft)}</span>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-gray-400 font-bold text-xs border border-gray-200"
-                      title="Thời gian giữ ghế 10 phút sẽ đếm ngược khi xác nhận giữ ghế"
-                    >
-                      <Timer className="w-4 h-4 text-gray-400" />
-                      <span>10:00</span>
-                    </div>
-                  )}
+                  <div
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-[#d71920] font-bold text-xs border border-red-200"
+                    title="Thời gian giữ ghế 10 phút sẽ bắt đầu khi chuyển sang thanh toán"
+                  >
+                    <Timer className="w-4 h-4 text-[#d71920]" />
+                    <span>10:00</span>
+                  </div>
                 </div>
 
                 {/* Movie Brief Card */}
@@ -570,39 +491,19 @@ export const SeatSelection: React.FC = () => {
                   </span>
                 </div>
 
-                {/* ── CTA Buttons ── */}
-                {!isHoldActive ? (
-                  /* Before hold: "Xác nhận chọn ghế" button */
-                  <button
-                    onClick={handleConfirmSeats}
-                    disabled={selectedSeatIds.length === 0}
-                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                      selectedSeatIds.length > 0
-                        ? 'bg-[#d71920] hover:bg-[#ae0011] text-white shadow-md active:scale-[0.98] cursor-pointer'
-                        : 'bg-[#e4e2e2] text-[#5f5e5e] cursor-not-allowed'
-                    }`}
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>XÁC NHẬN GIỮ GHẾ</span>
-                  </button>
-                ) : (
-                  /* After hold: "Tiếp tục thanh toán" + "Hủy giữ ghế" */
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={handleContinueToPayment}
-                      className="w-full py-3 px-4 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
-                    >
-                      <span>TIẾP TỤC THANH TOÁN</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={handleReleaseHold}
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#5f5e5e] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all border border-[#e4e2e2]"
-                    >
-                      <span>Hủy giữ ghế & chọn lại</span>
-                    </button>
-                  </div>
-                )}
+                {/* ── CTA Button ── */}
+                <button
+                  onClick={handleContinueToPayment}
+                  disabled={selectedSeatIds.length === 0}
+                  className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                    selectedSeatIds.length > 0
+                      ? 'bg-[#d71920] hover:bg-[#ae0011] text-white shadow-md active:scale-[0.98] cursor-pointer'
+                      : 'bg-[#e4e2e2] text-[#5f5e5e] cursor-not-allowed'
+                  }`}
+                >
+                  <span>TIẾP TỤC THANH TOÁN</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
 
                 {/* Back to Showtime Link */}
                 <Link

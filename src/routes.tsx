@@ -6,6 +6,10 @@ import MovieDetails from '@/pages/Movies/MovieDetails';
 import Checkout from '@/pages/Booking/Checkout';
 import SeatSelection from '@/pages/Booking/SeatSelection';
 import BookingConfirmation from '@/pages/Booking/BookingConfirmation';
+import Login from '@/pages/Auth/Login';
+import Register from '@/pages/Auth/Register';
+import ForgotPassword from '@/pages/Auth/ForgotPassword';
+import ResetPassword from '@/pages/Auth/ResetPassword';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -42,6 +46,12 @@ export const AppRoutes: React.FC = () => {
           </MainLayout>
         }
       />
+
+      {/* ── AUTHENTICATION ROUTES ──────────────────────────────────── */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* ── BOOKING CHEKOUT FLOW ROUTES ──────────────────────────── */}
       <Route
