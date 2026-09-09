@@ -1,0 +1,1307 @@
+/* ============================================================
+   NexCinema — Cinema Booking System Design System
+   ============================================================
+   Stack: React 19 + Vite + TailwindCSS v4
+   Fonts: Montserrat (Display/Heading) + Inter (Body/UI)
+
+   TABLE OF CONTENTS
+   -----------------
+   1.  Google Fonts Import
+   2.  CSS Custom Properties (Design Tokens)
+   3.  Base / Reset
+   4.  Typography Scale
+   5.  Component Classes
+       5a. Buttons
+       5b. Cards
+       5c. Glass & Panels
+       5d. Inputs & Forms
+       5e. Badges & Labels
+       5f. Booking Progress
+       5g. Seat Map
+       5h. Admin / Staff UI
+   6.  Animation & Keyframes
+   7.  Utility Classes
+   8.  Scrollbar
+   ============================================================ */
+
+/* ============================================================
+   1. GOOGLE FONTS IMPORT
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   2. CSS CUSTOM PROPERTIES — DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* --- Background Layers --- */
+  --color-bg: #0B1020;
+  /* Canvas chính (body) */
+  --color-bg-panel: #131A2A;
+  /* Card, sidebar, glass panel */
+  --color-bg-elevated: #1B2435;
+  /* Input, dropdown, raised card */
+  --color-bg-overlay: rgba(11, 16, 32, 0.92);
+  /* Modal backdrop */
+
+  /* --- Cinema Brand Colors --- */
+  /* Gold — đặc trưng của rạp chiếu phim cao cấp */
+  --color-gold: #FFB000;
+  --color-gold-hover: #E59A00;
+  --color-gold-dim: rgba(255, 176, 0, 0.15);
+  --color-gold-glow: rgba(255, 176, 0, 0.35);
+
+  /* Cinema Red — ghế đang chọn, CTA đặt vé */
+  --color-red: #ff436e;
+  --color-red-hover: #e0325a;
+  --color-red-dim: rgba(255, 67, 110, 0.12);
+  --color-red-glow: rgba(255, 67, 110, 0.45);
+
+  /* Purple — ambient glow, VIP seat accent */
+  --color-purple: #7C3AED;
+  --color-purple-dim: rgba(124, 58, 237, 0.15);
+
+  /* Pink — Couple seat accent */
+  --color-pink: #ec4899;
+  --color-pink-dim: rgba(236, 72, 153, 0.15);
+
+  /* --- Semantic Colors --- */
+  --color-success: #10b981;
+  --color-success-dim: rgba(16, 185, 129, 0.12);
+  --color-warning: #f59e0b;
+  --color-warning-dim: rgba(245, 158, 11, 0.12);
+  --color-danger: #ef4444;
+  --color-danger-dim: rgba(239, 68, 68, 0.12);
+  --color-info: #3b82f6;
+  --color-info-dim: rgba(59, 130, 246, 0.12);
+
+  /* --- Text Hierarchy --- */
+  --color-text: #F8FAFC;
+  /* Heading, body primary */
+  --color-text-muted: #94a3b8;
+  /* Secondary, label */
+  --color-text-dim: #475569;
+  /* Placeholder, disabled */
+  --color-text-ghost: #1e293b;
+  /* Barely visible text on dark bg */
+
+  /* --- Borders --- */
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border-hover: rgba(255, 255, 255, 0.15);
+  --color-border-focus: var(--color-gold);
+
+  /* --- Aliases (backward-compat with existing code) --- */
+  --navy-deep: var(--color-bg);
+  --navy-light: var(--color-bg-panel);
+  --purple-glow: var(--color-purple);
+  --white-light: var(--color-text);
+  --btn-neon: var(--color-gold);
+  --btn-neon-hover: var(--color-gold-hover);
+
+  /* --- Typography --- */
+  --font-display: 'Montserrat', 'Inter', sans-serif;
+  --font-body: 'Inter', 'Montserrat', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* --- Font Scale (Desktop) --- */
+  --text-display: clamp(2.5rem, 5vw, 4.5rem);
+  /* 40–72px — H1 trang chủ */
+  --text-h1: clamp(2rem, 4vw, 3.5rem);
+  /* 32–56px */
+  --text-h2: clamp(1.625rem, 3vw, 2.5rem);
+  /* 26–40px */
+  --text-h3: clamp(1.25rem, 2.5vw, 1.75rem);
+  /* 20–28px */
+  --text-h4: clamp(1.125rem, 2vw, 1.25rem);
+  /* 18–20px */
+  --text-lg: 1.125rem;
+  /* 18px — Body large */
+  --text-base: 1rem;
+  /* 16px — Body */
+  --text-sm: 0.875rem;
+  /* 14px — Secondary */
+  --text-xs: 0.75rem;
+  /* 12px — Caption */
+  --text-2xs: 0.6875rem;
+  /* 11px — Tag / Badge */
+  --text-3xs: 0.625rem;
+  /* 10px — Micro label */
+
+  /* --- Font Weights --- */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  --fw-black: 900;
+
+  /* --- Letter Spacing --- */
+  --tracking-tight: -0.03em;
+  /* Display headings */
+  --tracking-normal: 0em;
+  --tracking-wide: 0.05em;
+  /* Capsule nav */
+  --tracking-wider: 0.08em;
+  /* Buttons, labels */
+  --tracking-widest: 0.15em;
+  /* Micro labels */
+
+  /* --- Spacing Scale --- */
+  --sp-1: 0.25rem;
+  /* 4px */
+  --sp-2: 0.5rem;
+  /* 8px */
+  --sp-3: 0.75rem;
+  /* 12px */
+  --sp-4: 1rem;
+  /* 16px */
+  --sp-5: 1.25rem;
+  /* 20px */
+  --sp-6: 1.5rem;
+  /* 24px */
+  --sp-8: 2rem;
+  /* 32px */
+  --sp-10: 2.5rem;
+  /* 40px */
+  --sp-12: 3rem;
+  /* 48px */
+  --sp-16: 4rem;
+  /* 64px */
+
+  /* --- Border Radius --- */
+  --radius-sm: 0.5rem;
+  /* 8px — input, badge */
+  --radius-md: 0.75rem;
+  /* 12px — button */
+  --radius-lg: 1rem;
+  /* 16px — card */
+  --radius-xl: 1.5rem;
+  /* 24px — panel, modal */
+  --radius-2xl: 2rem;
+  /* 32px — large card */
+  --radius-full: 9999px;
+  /* Pill — capsule nav, rounded button */
+
+  /* --- Shadows --- */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-panel: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 20px 80px rgba(0, 0, 0, 0.7);
+  --shadow-gold: 0 0 20px rgba(255, 176, 0, 0.20);
+  --shadow-gold-hover: 0 0 35px rgba(255, 176, 0, 0.40);
+  --shadow-red: 0 0 20px rgba(255, 67, 110, 0.25);
+  --shadow-red-hover: 0 0 35px rgba(255, 67, 110, 0.50);
+
+  /* --- Transitions --- */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-cinema: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Seat Map Colors --- */
+  --seat-empty: #232B3A;
+  --seat-empty-stroke: #475569;
+  --seat-selected: var(--color-red);
+  --seat-sold: #0E131F;
+  --seat-held: #2A160F;
+  --seat-vip-bg: #18112C;
+  --seat-vip-stroke: var(--color-purple);
+  --seat-couple-bg: #281123;
+  --seat-couple-stroke: var(--color-pink);
+
+  /* --- Payment Status Colors --- */
+  --status-pending: var(--color-warning);
+  --status-processing: var(--color-info);
+  --status-success: var(--color-success);
+  --status-failed: var(--color-danger);
+  --status-cancelled: var(--color-text-dim);
+  --status-expired: var(--color-text-dim);
+
+  /* --- Admin / Staff Specific --- */
+  --admin-bg: #060b14;
+  --admin-panel: #0d1526;
+  --admin-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   3. BASE / RESET
+   ============================================================ */
+@layer base {
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    /* Dual ambient — violet top-left, gold top-right */
+    background-image:
+      radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.10) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, rgba(255, 176, 0, 0.07) 0px, transparent 55%),
+      radial-gradient(at 50% 100%, rgba(11, 16, 32, 1) 0px, transparent 60%);
+    background-attachment: fixed;
+    background-size: cover;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--fw-regular);
+    line-height: 1.6;
+    @apply antialiased;
+  }
+
+  /* ---- Headings ---- */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    color: var(--color-text);
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  p,
+  li {
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: var(--font-body);
+  }
+}
+
+/* ============================================================
+   4. TYPOGRAPHY SCALE
+   ============================================================
+
+   Từ Typography Showcase image:
+   • Display — trang chủ hero, H1 lớn
+   • Headings — section titles
+   • Body — nội dung, mô tả
+   • Interactive — button, label, badge, caption
+   • Cinematic Numerics — giá vé, thời lượng, rating
+*/
+@layer base {
+  /* --- Display (Hero Section) --- */
+  /*
+    Sử dụng: Slogan trang chủ "Khám phá điện ảnh đỉnh cao tại NexCinema"
+    Font: Montserrat Black 900
+    Size: 56–72px responsive
+    Tracking: -0.03em (tight, cinematic)
+    Dùng class: .text-display
+  */
+
+  /* --- H1 (Page Title) --- */
+  /*
+    Sử dụng: "Ưu đãi vé đôi chỉ từ 120.000đ mỗi thứ Tư"
+    Font: Montserrat ExtraBold 800
+    Size: 40–56px
+  */
+
+  /* --- H2 (Section Title) --- */
+  /*
+    Sử dụng: "Phim đang chiếu rạp hôm nay", "Lịch chiếu theo cụm rạp và định dạng IMAX 3D"
+    Font: Montserrat Bold 700
+    Size: 28–40px
+  */
+
+  /* --- H3 (Card Title, Modal Header) --- */
+  /*
+    Sử dụng: Tên phim trong card, header trong modal đặt vé
+    Font: Montserrat Bold 700
+    Size: 20–28px
+  */
+
+  /* --- Body Large --- */
+  /*
+    Sử dụng: Mô tả phim (nội dung phim), intro section
+    Font: Inter Regular 400
+    Size: 18px
+    Line-height: 1.7
+  */
+
+  /* --- Body --- */
+  /*
+    Sử dụng: Thông tin đạo diễn, diễn viên, review
+    Font: Inter Regular 400
+    Size: 16px
+    Line-height: 1.6
+  */
+
+  /* --- Body Small --- */
+  /*
+    Sử dụng: Metadata phim (thể loại, thời lượng, ngày chiếu)
+    Font: Inter Medium 500
+    Size: 14px
+  */
+
+  /* --- Caption / Tag --- */
+  /*
+    Sử dụng: Badge loại ghế (VIP, Đôi, Thường), tag thể loại, thông báo nhỏ
+    Font: Inter SemiBold 600 hoặc Black 900
+    Size: 10–12px
+    Transform: UPPERCASE
+    Tracking: 0.08–0.15em
+  */
+
+  /* --- Cinematic Numeric (từ hình: Cinema Data & Numerical) --- */
+  /*
+    Sử dụng: Giá vé "360.000 đ", Điểm đánh giá "7.8", Thời lượng "08:42"
+    Font: Montserrat Black 900
+    Size: giá vé = 24–32px, rating = 36–48px
+    Color: var(--color-gold) hoặc var(--color-text)
+  */
+}
+
+/* ============================================================
+   5. COMPONENT CLASSES
+   ============================================================ */
+@layer components {
+
+  /* ----------------------------------------------------------
+     5a. BUTTONS
+     ----------------------------------------------------------
+     btn-bright   — Gold gradient, CTA phụ (Xem phim, Tìm hiểu thêm)
+     btn-primary  — Cinema Red, CTA chính (Đặt vé, Mua vé, Tiếp tục)
+     btn-ghost    — Glass outline, hành động thứ cấp
+     btn-danger   — Đỏ nguy hiểm (Hủy đặt vé, Đăng xuất)
+     btn-icon     — Nút chỉ có icon, hình tròn
+     ---------------------------------------------------------- */
+
+  /* Gold button — luxury accent */
+  .btn-bright {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#FFB000] to-[#E59A00] hover:from-[#E59A00] hover:to-[#CC8800] text-slate-900 font-bold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 select-none whitespace-nowrap;
+    box-shadow: var(--shadow-gold);
+  }
+
+  .btn-bright:hover {
+    box-shadow: var(--shadow-gold-hover);
+  }
+
+  .btn-bright:disabled {
+    @apply opacity-40 cursor-not-allowed;
+    box-shadow: none;
+  }
+
+  /* Cinema Red button — Đặt vé / Mua vé */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-[#ff436e] hover:bg-[#e0325a] text-white font-extrabold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 select-none whitespace-nowrap;
+    box-shadow: var(--shadow-red);
+  }
+
+  .btn-primary:hover {
+    box-shadow: var(--shadow-red-hover);
+  }
+
+  .btn-primary:disabled {
+    @apply opacity-40 cursor-not-allowed;
+    box-shadow: none;
+  }
+
+  /* Glass / Ghost button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white font-semibold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 select-none whitespace-nowrap;
+  }
+
+  /* Danger — hủy đặt vé, đăng xuất */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 select-none whitespace-nowrap;
+  }
+
+  /* Icon-only button */
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/15 border border-white/8 hover:border-white/20 text-gray-300 hover:text-white transition-all duration-200 active:scale-90;
+  }
+
+  /* ----------------------------------------------------------
+     5b. CARDS
+     ----------------------------------------------------------
+     .movie-card     — Card phim (poster + info)
+     .booking-card   — Card trong booking flow
+     .info-card      — Card thông tin chung
+     ---------------------------------------------------------- */
+
+  /* Movie Card — grid phim đang chiếu / sắp chiếu */
+  .movie-card {
+    @apply relative overflow-hidden rounded-2xl bg-[#1B2435] border border-white/5 transition-all duration-500 hover:-translate-y-1.5 hover:border-[#FFB000]/30;
+    box-shadow: var(--shadow-card);
+  }
+
+  .movie-card:hover {
+    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255, 176, 0, 0.12);
+  }
+
+  /* Booking card — hiển thị tóm tắt đặt vé */
+  .booking-card {
+    @apply relative rounded-2xl p-5 bg-[#131A2A] border border-white/7 transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Generic info card */
+  .info-card {
+    @apply rounded-xl p-5 bg-white/3 border border-white/7 transition-all duration-200 hover:bg-white/5 hover:border-white/12;
+  }
+
+  /* Admin / Staff data row */
+  .admin-row {
+    @apply flex items-center gap-4 px-5 py-4 rounded-xl bg-[#0d1526] hover:bg-[#111d35] border border-transparent hover:border-white/6 transition-all duration-200;
+  }
+
+  /* ----------------------------------------------------------
+     5c. GLASS & PANELS
+     ----------------------------------------------------------
+     .glass-effect   — Frosted glass panel (navbar, sidebar)
+     .glass-dark     — Darker glass (modal, dropdown)
+     .panel          — Opaque panel (sidebar, settings)
+     ---------------------------------------------------------- */
+
+  .glass-effect {
+    background: rgba(19, 26, 42, 0.80);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: background var(--transition-base);
+  }
+
+  .glass-effect:hover {
+    background: rgba(19, 26, 42, 0.90);
+  }
+
+  .glass-dark {
+    background: rgba(6, 11, 20, 0.92);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .panel {
+    @apply rounded-3xl p-6 bg-[#131A2A] border border-white/5;
+    box-shadow: var(--shadow-panel);
+  }
+
+  /* ----------------------------------------------------------
+     5d. INPUTS & FORMS
+     ----------------------------------------------------------
+     .input-field    — Text input cho client
+     .input-admin    — Input cho admin panel
+     .select-field   — Select dropdown
+     .textarea-field — Textarea
+     .form-label     — Label cho form group
+     ---------------------------------------------------------- */
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/7 border border-white/8 hover:border-white/15 text-white placeholder:text-gray-500 text-sm font-medium outline-none transition-all duration-200 focus:bg-white/8 focus:border-[#FFB000]/60 focus:ring-2 focus:ring-[#FFB000]/20;
+  }
+
+  .input-admin {
+    @apply w-full px-4 py-2.5 rounded-lg bg-white/4 border border-white/8 text-white placeholder:text-gray-600 text-sm outline-none transition-all duration-200 focus:border-white/20 focus:ring-1 focus:ring-white/10;
+  }
+
+  .select-field {
+    @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/8 text-white text-sm font-medium outline-none transition-all duration-200 focus:border-[#FFB000]/60 focus:ring-2 focus:ring-[#FFB000]/20;
+    appearance: none;
+  }
+
+  .textarea-field {
+    @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/8 text-white placeholder:text-gray-500 text-sm font-medium outline-none resize-y transition-all duration-200 focus:border-[#FFB000]/60 focus:ring-2 focus:ring-[#FFB000]/20;
+  }
+
+  .form-label {
+    @apply block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2;
+  }
+
+  /* Search bar in Navbar */
+  .search-bar {
+    @apply bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 outline-none transition-all duration-300 w-48 focus:w-64 focus:ring-2 focus:ring-[#FFB000]/50 focus:bg-white/8;
+  }
+
+  /* ----------------------------------------------------------
+     5e. BADGES & LABELS
+     ----------------------------------------------------------
+     .badge          — Default pill badge
+     .badge-gold     — Gold (nổi bật, IMAX, Premium)
+     .badge-red      — Đang chiếu, Hot
+     .badge-success  — Đã xác nhận, Thành công
+     .badge-warning  — Đang xử lý, Pending
+     .badge-danger   — Thất bại, Hủy
+     .badge-purple   — VIP
+     .badge-pink     — Couple
+     .badge-muted    — Tag thể loại phim (muted)
+     .genre-tag      — Tag thể loại phim
+     ---------------------------------------------------------- */
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-[#FFB000]/15 text-[#FFB000] border border-[#FFB000]/25;
+  }
+
+  .badge-red {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-[#ff436e]/12 text-[#ff436e] border border-[#ff436e]/25;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-emerald-500/12 text-emerald-400 border border-emerald-500/25;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-amber-500/12 text-amber-400 border border-amber-500/25;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-red-500/12 text-red-400 border border-red-500/25;
+  }
+
+  .badge-purple {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-violet-500/12 text-violet-400 border border-violet-500/25;
+  }
+
+  .badge-pink {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-pink-500/12 text-pink-400 border border-pink-500/25;
+  }
+
+  .badge-muted {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-white/5 text-gray-400 border border-white/8;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap bg-blue-500/12 text-blue-400 border border-blue-500/25;
+  }
+
+  /* Genre tag (thể loại phim) */
+  .genre-tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/15 text-gray-400 hover:text-white text-xs font-semibold transition-all duration-200 cursor-pointer;
+  }
+
+  .genre-tag.active {
+    @apply bg-[#FFB000]/10 border-[#FFB000]/30 text-[#FFB000];
+  }
+
+  /* Rating badge */
+  .rating-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFB000]/10 border border-[#FFB000]/20 text-[#FFB000] font-black text-sm;
+  }
+
+  /* ----------------------------------------------------------
+     5f. BOOKING PROGRESS STEPS
+     ----------------------------------------------------------
+     Booking flow indicator:
+     Chọn phim / Suất → Chọn ghế → Thanh toán → Xác nhận
+
+     Usage:
+     <div class="booking-progress">
+       <div class="booking-step completed">1</div>
+       <div class="booking-step-line"></div>
+       <div class="booking-step active">2</div>
+       <div class="booking-step-line"></div>
+       <div class="booking-step">3</div>
+       <div class="booking-step-line"></div>
+       <div class="booking-step">4</div>
+     </div>
+     ---------------------------------------------------------- */
+
+  .booking-progress {
+    @apply flex items-center justify-center gap-0 w-full;
+  }
+
+  .booking-step {
+    @apply relative z-10 w-9 h-9 rounded-full flex items-center justify-center text-xs font-black border-2 border-white/20 bg-[#131A2A] text-gray-500 transition-all duration-300 shrink-0;
+  }
+
+  .booking-step.active {
+    border-color: var(--color-red);
+    background: rgba(255, 67, 110, 0.12);
+    color: var(--color-red);
+    box-shadow: 0 0 16px rgba(255, 67, 110, 0.3);
+  }
+
+  .booking-step.completed {
+    border-color: var(--color-success);
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-success);
+  }
+
+  .booking-step-line {
+    @apply flex-1 h-px bg-white/10 transition-all duration-500;
+    min-width: 2rem;
+  }
+
+  .booking-step-line.completed {
+    background: rgba(16, 185, 129, 0.4);
+  }
+
+  /* ----------------------------------------------------------
+     5g. SEAT MAP
+     ----------------------------------------------------------
+     Dùng trực tiếp trong SeatSelection.jsx
+     Các class xác định trạng thái ghế cho seat icon SVG
+     ---------------------------------------------------------- */
+
+  /* Container sơ đồ ghế */
+  .seat-map-container {
+    @apply w-full overflow-x-auto pb-4 rounded-xl flex justify-start lg:justify-center;
+    scrollbar-gutter: stable;
+  }
+
+  /* Screen frame */
+  .screen-frame {
+    @apply w-full max-w-2xl h-12 relative flex items-center justify-center mx-auto mb-6;
+    background: linear-gradient(to bottom, rgba(255, 67, 110, 0.06), transparent);
+    border-top: 2px solid rgba(255, 67, 110, 0.35);
+    border-radius: 0 0 50% 50% / 0 0 20px 20px;
+    box-shadow: 0 -4px 20px rgba(255, 67, 110, 0.15);
+  }
+
+  .screen-frame::before {
+    content: 'MÀN HÌNH';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: rgba(255, 67, 110, 0.5);
+    font-family: var(--font-body);
+  }
+
+  /* Seat legend */
+  .seat-legend {
+    @apply flex flex-wrap items-center justify-center gap-5 bg-white/4 border border-white/6 px-6 py-4 rounded-2xl mb-4;
+  }
+
+  .seat-legend-item {
+    @apply flex items-center gap-2 text-[10px] text-slate-400 uppercase tracking-wider font-bold;
+  }
+
+  /* Seat hold timer indicator */
+  .seat-hold-indicator {
+    @apply flex items-center gap-2 px-4 py-3 rounded-xl border border-white/5 bg-white/3 text-slate-400 mb-4;
+  }
+
+  /* ----------------------------------------------------------
+     5h. ADMIN / STAFF UI
+     ----------------------------------------------------------
+     Sidebar, table, stat card cho trang quản trị
+     ---------------------------------------------------------- */
+
+  /* Admin sidebar nav item */
+  .admin-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white text-sm font-semibold hover:bg-white/5 transition-all duration-200 cursor-pointer;
+  }
+
+  .admin-nav-item.active {
+    @apply bg-[#FFB000]/8 text-[#FFB000] border-r-2 border-[#FFB000];
+  }
+
+  /* Admin stat card */
+  .stat-card {
+    @apply relative rounded-2xl p-6 bg-[#0d1526] border border-white/5 overflow-hidden transition-all duration-300 hover:border-white/10;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Admin table */
+  .admin-table {
+    @apply w-full text-sm;
+  }
+
+  .admin-table th {
+    @apply text-xs font-bold uppercase tracking-widest text-gray-500 px-4 py-3 text-left border-b border-white/5;
+  }
+
+  .admin-table td {
+    @apply px-4 py-3.5 text-gray-300 border-b border-white/3;
+  }
+
+  .admin-table tr:hover td {
+    @apply bg-white/2;
+  }
+
+  /* Staff check-in card */
+  .checkin-card {
+    @apply rounded-2xl p-6 bg-[#0d1526] border border-white/5 text-white;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Payment method card */
+  .payment-method-card {
+    @apply relative flex items-center gap-4 p-4 rounded-xl bg-white/3 border-2 border-white/8 cursor-pointer transition-all duration-200 hover:bg-white/6 hover:border-white/15;
+  }
+
+  .payment-method-card.selected {
+    border-color: var(--color-gold);
+    background: rgba(255, 176, 0, 0.06);
+    box-shadow: 0 0 20px rgba(255, 176, 0, 0.10);
+  }
+
+  /* Booking summary row */
+  .summary-row {
+    @apply flex items-center justify-between py-3 border-b border-white/5 text-sm;
+  }
+
+  .summary-row:last-child {
+    @apply border-none;
+  }
+
+  .summary-label {
+    @apply text-gray-400 font-medium;
+  }
+
+  .summary-value {
+    @apply text-white font-bold;
+  }
+
+  .summary-total .summary-label {
+    @apply text-base font-bold text-white;
+  }
+
+  .summary-total .summary-value {
+    @apply text-2xl font-black text-[#FFB000];
+  }
+
+  /* Ticket / confirmation card */
+  .ticket-card {
+    @apply relative rounded-3xl overflow-hidden;
+    background: linear-gradient(135deg, #131A2A 0%, #1B2435 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* Ticket perforation line */
+  .ticket-perforation {
+    @apply relative h-px w-full my-0;
+    background: repeating-linear-gradient(to right,
+        transparent 0px,
+        transparent 6px,
+        rgba(255, 255, 255, 0.08) 6px,
+        rgba(255, 255, 255, 0.08) 12px);
+  }
+
+  .ticket-perforation::before,
+  .ticket-perforation::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: var(--color-bg);
+    border-radius: 50%;
+  }
+
+  .ticket-perforation::before {
+    left: -10px;
+  }
+
+  .ticket-perforation::after {
+    right: -10px;
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: rgba(6, 11, 20, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .modal-box {
+    @apply relative w-full max-w-lg rounded-3xl p-7 bg-[#131A2A] border border-white/8;
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* Toast/notification (matches App.jsx Toaster config) */
+  .toast-custom {
+    background: #131A2A !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+  }
+
+  /* Showtime slot button */
+  .showtime-slot {
+    @apply flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold cursor-pointer border border-white/8 bg-white/4 text-gray-300 hover:bg-white/8 hover:border-white/15 transition-all duration-200;
+  }
+
+  .showtime-slot.active {
+    background: linear-gradient(135deg, #ff436e, #e0325a);
+    border-color: #ff436e;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 67, 110, 0.40);
+  }
+
+  /* Format badge (IMAX, 2D, 3D, ScreenX) */
+  .format-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-white/6 border border-white/10 text-gray-300;
+  }
+
+  .format-badge.imax {
+    @apply bg-[#FFB000]/10 border-[#FFB000]/25 text-[#FFB000];
+  }
+
+  .format-badge.3d {
+    @apply bg-purple-500/10 border-purple-500/25 text-purple-400;
+  }
+
+  /* Divider with label */
+  .divider-label {
+    @apply relative flex items-center gap-3 my-4;
+  }
+
+  .divider-label::before,
+  .divider-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .divider-label span {
+    @apply text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply rounded-xl bg-white/5;
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Spinner */
+  .spinner {
+    @apply inline-block rounded-full border-4 border-white/10 animate-spin;
+    border-top-color: var(--color-red);
+  }
+
+  .spinner-gold {
+    border-top-color: var(--color-gold) !important;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply flex flex-col items-center gap-4 py-20 text-center text-gray-500;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 text-gray-700;
+  }
+
+  .empty-state-title {
+    @apply text-lg font-bold text-gray-400;
+  }
+
+  .empty-state-desc {
+    @apply text-sm max-w-xs;
+  }
+}
+
+/* ============================================================
+   6. ANIMATION & KEYFRAMES
+   ============================================================ */
+@layer utilities {
+
+  /* Base animate-in utility */
+  .animate-in {
+    animation-duration: 0.4s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .duration-300 {
+    animation-duration: 300ms;
+  }
+
+  .duration-500 {
+    animation-duration: 500ms;
+  }
+
+  .duration-700 {
+    animation-duration: 700ms;
+  }
+
+  /* --- Fade --- */
+  .fade-in {
+    animation-name: anim-fade-in;
+  }
+
+  .fade-out {
+    animation-name: anim-fade-out;
+  }
+
+  /* --- Slide --- */
+  .slide-in-from-bottom-4 {
+    animation-name: anim-slide-up-sm;
+  }
+
+  .slide-in-from-top-4 {
+    animation-name: anim-slide-down-sm;
+  }
+
+  .slide-in-from-left-10 {
+    animation-name: anim-slide-right;
+  }
+
+  .slide-in-from-right-10 {
+    animation-name: anim-slide-left;
+  }
+
+  /* --- Scale --- */
+  .zoom-in {
+    animation-name: anim-zoom-in;
+  }
+}
+
+/* Keyframe definitions */
+@keyframes anim-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes anim-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes anim-slide-up-sm {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes anim-slide-down-sm {
+  from {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes anim-slide-right {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes anim-slide-left {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes anim-zoom-in {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes spin-cw {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-up-down {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 176, 0, 0.20);
+  }
+
+  50% {
+    box-shadow: 0 0 35px rgba(255, 176, 0, 0.50);
+  }
+}
+
+@keyframes seat-select-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ============================================================
+   7. UTILITY CLASSES
+   ============================================================ */
+@layer utilities {
+
+  /* --- Glow effects --- */
+  .text-glow {
+    text-shadow: 0 0 16px rgba(255, 176, 0, 0.50);
+  }
+
+  .text-glow-red {
+    text-shadow: 0 0 16px rgba(255, 67, 110, 0.50);
+  }
+
+  .text-glow-white {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+  }
+
+  .accent-glow {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .accent-glow-hover:hover {
+    box-shadow: var(--shadow-gold-hover);
+  }
+
+  .red-glow {
+    box-shadow: var(--shadow-red);
+  }
+
+  /* --- Gradient text --- */
+  .gradient-text-gold {
+    background: linear-gradient(135deg, #FFB000, #FFF0B3, #E59A00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-text-cinema {
+    background: linear-gradient(135deg, #ff436e, #FFB000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Typography utilities --- */
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  .tracking-cinema {
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .tracking-label {
+    letter-spacing: var(--tracking-widest);
+  }
+
+  .tracking-button {
+    letter-spacing: var(--tracking-wider);
+  }
+
+  /* --- Truncate helpers --- */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* --- Aspect ratio helpers --- */
+  .aspect-poster {
+    aspect-ratio: 2 / 3;
+  }
+
+  /* Poster phim */
+  .aspect-backdrop {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Backdrop phim */
+  .aspect-card {
+    aspect-ratio: 3 / 4;
+  }
+
+  /* --- Backdrop blur shorthand --- */
+  .backdrop-cinema {
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* --- Float animation --- */
+  .animate-float {
+    animation: float-up-down 3s ease-in-out infinite;
+  }
+
+  /* --- Ticker / marquee --- */
+  .ticker-wrapper {
+    @apply overflow-hidden whitespace-nowrap;
+  }
+
+  .ticker-content {
+    display: inline-flex;
+    animation: ticker-scroll 25s linear infinite;
+  }
+
+  .ticker-content:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* ============================================================
+   8. SCROLLBAR
+   ============================================================ */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.10) transparent;
+}
+
+/* WebKit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 9999px;
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Hide scrollbar completely */
+.scrollbar-none,
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
