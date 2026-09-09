@@ -27,7 +27,7 @@
 /* ============================================================
    1. GOOGLE FONTS IMPORT
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
@@ -99,8 +99,8 @@
   --btn-neon-hover: var(--color-gold-hover);
 
   /* --- Typography --- */
-  --font-display: 'Montserrat', 'Inter', sans-serif;
-  --font-body: 'Inter', 'Montserrat', sans-serif;
+  --font-display: 'Be Vietnam Pro', sans-serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
   /* --- Font Scale (Desktop) --- */
