@@ -1,5 +1,6 @@
 import React from 'react';
-import { Ticket, X, QrCode } from 'lucide-react';
+import { Ticket, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { TicketItem } from '@/types/user.type';
 
 interface ETicketModalProps {
@@ -67,10 +68,16 @@ export const ETicketModal: React.FC<ETicketModalProps> = ({ ticket, onClose }) =
             </div>
           </div>
 
-          {/* QR Code Stub */}
+          {/* QR Code */}
           <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-dashed border-gray-300 text-center">
             <div className="p-2 bg-white border border-gray-200 rounded-lg shadow-xs">
-              <QrCode className="w-32 h-32 text-gray-900" />
+              {/* ISSUE-10 FIX: Real QR code with ticket metadata */}
+              <QRCodeSVG
+                value={`NEXCINEMA:${ticket.code}:${ticket.seats}:${ticket.date}:${ticket.time}`}
+                size={128}
+                level="H"
+                includeMargin={false}
+              />
             </div>
             <span className="font-mono text-sm font-bold tracking-wider text-[#1b1c1c] mt-2">
               #{ticket.code}

@@ -46,6 +46,11 @@ export const SeatSelection: React.FC = () => {
   const [currentShowtimeId, setCurrentShowtimeId] = useState(showtimeId || 'st-11:30');
   const [currentShowtimeTime, setCurrentShowtimeTime] = useState('11:30');
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
+  // ISSUE-16: Age gate state
+  const [isAgeGateOpen, setIsAgeGateOpen] = useState(false);
+  // Mock movie for this showtime (in production this comes from API via showtimeId)
+  const MOVIE_AGE_RATING = 'C16'; // C16 — Dune 2
+  const MOVIE_TITLE = 'Dune: Hành Tinh Cát - Phần 2';
 
   // Scroll to top when page mounts or showtime changes
   useEffect(() => {
@@ -202,18 +207,29 @@ export const SeatSelection: React.FC = () => {
     return sum + (isVipOrCouple ? 110000 : 50000);
   }, 0);
 
-  // Directly hold seats and navigate to payment step
+  // ISSUE-16: Age gate check — trigger modal for rated films before payment
+  const AGE_RESTRICTED = ['C13', 'C16', 'C18'];
+
   const handleContinueToPayment = () => {
     if (selectedSeatIds.length === 0) {
       toast.error('Vui lòng chọn ít nhất 1 ghế hợp lệ!');
       return;
     }
+    // Show age gate for restricted films before proceeding
+    if (AGE_RESTRICTED.includes(MOVIE_AGE_RATING)) {
+      setIsAgeGateOpen(true);
+      return;
+    }
+    proceedToPayment();
+  };
 
+  // Actual navigation after age confirmed or not required
+  const proceedToPayment = () => {
     sessionStorage.setItem(
       'booking_draft',
       JSON.stringify({
         movieId: 'dune2',
-        movieTitle: 'Dune: Hành Tinh Cát - Phần 2',
+        movieTitle: MOVIE_TITLE,
         showtimeId: currentShowtimeId,
         showtimeTime: currentShowtimeTime,
         showtimeDate: 'Thứ Ba, 29/10/2024',
@@ -225,7 +241,6 @@ export const SeatSelection: React.FC = () => {
         holdStartedAt: Date.now(),
       })
     );
-
     toast.success('Đã chọn ghế thành công! Chuyển sang bước thanh toán...');
     navigate('/checkout/payment');
   };
@@ -571,6 +586,67 @@ export const SeatSelection: React.FC = () => {
           </aside>
         </div>
       </div>
+
+      {/* ── ISSUE-16: AGE GATE CONFIRMATION MODAL ─────────────────────────────── */}
+      {isAgeGateOpen && (
+        <div
+          onClick={() => setIsAgeGateOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center animate-in zoom-in duration-150 border border-gray-200"
+          >
+            {/* Rating badge */}
+            <div className="flex items-center justify-center mb-4">
+              <span
+                className={`px-4 py-2 rounded-xl font-black text-2xl shadow-sm ${
+                  MOVIE_AGE_RATING === 'C18'
+                    ? 'bg-red-600 text-white'
+                    : MOVIE_AGE_RATING === 'C16'
+                    ? 'bg-amber-500 text-gray-900'
+                    : 'bg-blue-600 text-white'
+                }`}
+              >
+                {MOVIE_AGE_RATING}
+              </span>
+            </div>
+
+            <h3 className="text-base font-bold text-[#1b1c1c]">Xác nhận độ tuổi</h3>
+            <p className="text-xs text-[#5f5e5e] mt-2 leading-relaxed">
+              Phim{' '}
+              <span className="font-bold text-[#1b1c1c]">"{MOVIE_TITLE}"</span> được xếp hạng{' '}
+              <span className="font-black text-[#d71920]">{MOVIE_AGE_RATING}</span>.
+              {MOVIE_AGE_RATING === 'C18'
+                ? ' Chỉ dành cho khán giả từ 18 tuổi trở lên.'
+                : MOVIE_AGE_RATING === 'C16'
+                ? ' Chỉ dành cho khán giả từ 16 tuổi trở lên.'
+                : ' Chỉ dành cho khán giả từ 13 tuổi trở lên.'}
+            </p>
+            <p className="text-[11px] text-gray-400 mt-2 italic">
+              Nhân viên rạp có thể yêu cầu xuất trình CCCD / Căn cước / Hộ chiếu tại cổng soát vé.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 mt-5">
+              <button
+                onClick={() => setIsAgeGateOpen(false)}
+                className="py-2.5 rounded-xl bg-[#f5f3f3] hover:bg-gray-200 text-[#1b1c1c] font-bold text-xs transition-colors cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  setIsAgeGateOpen(false);
+                  proceedToPayment();
+                }}
+                className="py-2.5 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+              >
+                Tôi đủ tuổi, tiếp tục
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

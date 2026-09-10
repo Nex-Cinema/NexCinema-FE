@@ -2,13 +2,13 @@ import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
-  QrCode,
   Ticket,
   Home,
   Store,
   Calendar,
   FileText,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 import BookingProgressBar from '../../components/common/BookingProgressBar';
 
@@ -108,7 +108,13 @@ export const BookingConfirmation: React.FC = () => {
             {/* QR CODE TICKET BOARD */}
             <div className="w-full bg-[#f5f3f3] rounded-xl p-6 border border-[#e4e2e2] flex flex-col items-center gap-3 my-2">
               <div className="bg-white p-3 rounded-lg shadow-sm border border-[#e4e2e2]">
-                <QrCode className="w-32 h-32 text-[#1b1c1c]" />
+                {/* ISSUE-10 FIX: Real QR code encoding ticket data */}
+                <QRCodeSVG
+                  value={`NEXCINEMA:${bookingData.orderCode}:${bookingData.seats.join(',')}:${bookingData.showtime}`}
+                  size={128}
+                  level="H"
+                  includeMargin={false}
+                />
               </div>
               <div className="text-center">
                 <span className="text-[11px] text-[#5f5e5e] uppercase tracking-wider font-semibold block">
