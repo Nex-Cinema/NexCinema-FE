@@ -6,7 +6,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Info,
-  Timer,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -101,6 +100,37 @@ export const SeatSelection: React.FC = () => {
 
   const seatMap = generateSeats();
 
+  // ── ISSUE-13 FIX: Single Seat Gap Rule ───────────────────────────
+  // Returns true if the proposed selectedIds would isolate a single AVAILABLE seat
+  // between two blocked positions (SOLD, HELD, or SELECTED) in the same row.
+  const hasIsolatedSeat = useCallback(
+    (proposedIds: string[]): boolean => {
+      const rowLetters = rows.filter((r) => r !== 'K'); // Couple row exempt
+      for (const row of rowLetters) {
+        const rowSeats = (seatMap[row] || []).filter((s) => s.type !== 'COUPLE');
+        for (let i = 0; i < rowSeats.length; i++) {
+          const s = rowSeats[i];
+          // Only check seats that are AVAILABLE and NOT in the new proposed selection
+          if (s.status === 'AVAILABLE' && !proposedIds.includes(s.id)) {
+            const leftBlocked =
+              i === 0 ||
+              rowSeats[i - 1].status === 'SOLD' ||
+              rowSeats[i - 1].status === 'HELD' ||
+              proposedIds.includes(rowSeats[i - 1].id);
+            const rightBlocked =
+              i === rowSeats.length - 1 ||
+              rowSeats[i + 1].status === 'SOLD' ||
+              rowSeats[i + 1].status === 'HELD' ||
+              proposedIds.includes(rowSeats[i + 1].id);
+            if (leftBlocked && rightBlocked) return true;
+          }
+        }
+      }
+      return false;
+    },
+    [rows, seatMap]
+  );
+
   // ── Actions ───────────────────────────────────────────────────────
   const handleToggleSeat = (seat: Seat) => {
     // BR#7 & BR#8: Cannot click sold or held seats
@@ -116,6 +146,7 @@ export const SeatSelection: React.FC = () => {
       const isPairSelected = selectedSeatIds.includes(id1) && selectedSeatIds.includes(id2);
 
       if (isPairSelected) {
+        // Deselecting — no gap check needed
         setSelectedSeatIds((prev) => prev.filter((id) => id !== id1 && id !== id2));
       } else {
         // BR#3: Max 8 seats
@@ -128,11 +159,26 @@ export const SeatSelection: React.FC = () => {
     } else {
       // Standard or VIP single seat
       if (selectedSeatIds.includes(seat.id)) {
-        setSelectedSeatIds((prev) => prev.filter((id) => id !== seat.id));
+        // Deselecting: check that removal doesn't isolate neighbour
+        const afterRemoval = selectedSeatIds.filter((id) => id !== seat.id);
+        if (hasIsolatedSeat(afterRemoval)) {
+          toast.error('Không thể bỏ chọn ghế này vì sẽ tạo ra 1 ghế trống đơn lẻ!');
+          return;
+        }
+        setSelectedSeatIds(afterRemoval);
       } else {
         // BR#3: Max 8 seats
         if (selectedSeatIds.length >= MAX_SEATS_PER_BOOKING) {
           toast.error(`Tối đa chỉ được chọn ${MAX_SEATS_PER_BOOKING} ghế trong một lần đặt vé!`);
+          return;
+        }
+        // ISSUE-13: Gap Rule — check proposed state before committing
+        const proposed = [...selectedSeatIds, seat.id];
+        if (hasIsolatedSeat(proposed)) {
+          toast.error(
+            'Không thể chọn ghế này vì sẽ để trống 1 ghế đơn lẻ giữa các ghế đã chọn/đã bán. Vui lòng chọn ghế liền kề!',
+            { duration: 4000 }
+          );
           return;
         }
         setSelectedSeatIds((prev) => [...prev, seat.id]);
@@ -405,18 +451,14 @@ export const SeatSelection: React.FC = () => {
               <div className="h-1.5 w-full bg-[#d71920]" />
 
               <div className="p-6 flex flex-col gap-5">
-                {/* Header & Timer Badge */}
+                {/* Header */}
                 <div className="flex items-center justify-between">
                   <h2 className="font-bold text-base text-[#1b1c1c] uppercase tracking-wide">
                     Thông tin đặt vé
                   </h2>
-                  <div
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-[#d71920] font-bold text-xs border border-red-200"
-                    title="Thời gian giữ ghế 10 phút sẽ bắt đầu khi chuyển sang thanh toán"
-                  >
-                    <Timer className="w-4 h-4 text-[#d71920]" />
-                    <span>10:00</span>
-                  </div>
+                  <span className="text-[10px] text-[#5f5e5e] font-medium border border-dashed border-gray-300 px-2 py-0.5 rounded-full">
+                    Bước 2 / 4
+                  </span>
                 </div>
 
                 {/* Movie Brief Card */}

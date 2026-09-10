@@ -115,9 +115,14 @@ export const Checkout: React.FC = () => {
       setHoldTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          toast.error('Hết thời gian giữ ghế! Vui lòng chọn ghế lại.');
-          navigate('/checkout');
-          return 600;
+          // ISSUE-07 FIX: Release held seats and redirect immediately on expiry
+          sessionStorage.removeItem('booking_draft');
+          toast.error(
+            '⏰ Hết thời gian giữ ghế! Vui lòng chọn ghế lại.',
+            { duration: 5000 }
+          );
+          navigate('/checkout', { replace: true });
+          return 0; // ← Fixed: return 0 not 600
         }
         return prev - 1;
       });
@@ -360,10 +365,25 @@ export const Checkout: React.FC = () => {
                     <span className="text-xs font-bold text-[#5f5e5e] uppercase">
                       Thời gian giữ vé:
                     </span>
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 text-[#d71920] font-black text-sm border border-red-200">
-                      <Timer className="w-4 h-4" />
-                      <span>{formatTimer(holdTimeLeft)}</span>
-                    </div>
+                    {/* ISSUE-08 FIX: Urgent visual states for timer < 2min / < 30s */}
+                  {(() => {
+                    const isCritical = holdTimeLeft < 30;
+                    const isUrgent = holdTimeLeft < 120;
+                    return (
+                      <div
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full font-black text-sm border transition-all ${
+                          isCritical
+                            ? 'bg-red-600 text-white border-red-700 animate-pulse'
+                            : isUrgent
+                            ? 'bg-red-100 text-red-700 border-red-300'
+                            : 'bg-red-50 text-[#d71920] border-red-200'
+                        }`}
+                      >
+                        <Timer className={`w-4 h-4 ${isCritical ? 'animate-spin' : ''}`} />
+                        <span>{formatTimer(holdTimeLeft)}</span>
+                      </div>
+                    );
+                  })()}
                   </div>
 
                   {/* Movie Info */}
