@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 interface DateItem {
   dayLabel: string; // e.g. "Thứ Hai"
@@ -19,8 +22,19 @@ const DATES: DateItem[] = [
 ];
 
 const TodayShowtimesSection: React.FC = () => {
+  const navigate = useNavigate();
+  const { requireAuth } = useAuth();
   const [selectedDate, setSelectedDate] = useState('2024-10-28');
   const [formatFilter, setFormatFilter] = useState<'all' | '2d' | 'imax'>('all');
+
+  const handleShowtimeClick = (slotId: string) => {
+    const targetUrl = `/booking/${slotId}`;
+    if (!requireAuth(undefined, targetUrl)) {
+      return;
+    }
+    toast.success('Đang chuyển đến màn hình chọn ghế...');
+    navigate(targetUrl);
+  };
 
   return (
     <section className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-16" id="showtimes-section">
@@ -123,19 +137,19 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng IMAX Laser (Âm thanh 12 kênh)
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-101')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">13:30</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 48 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-102')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">16:45</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 22 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-[#d71920] text-white shadow-xs group text-left cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-103')} className="px-3.5 py-2 rounded-lg bg-[#d71920] text-white shadow-xs group text-left cursor-pointer">
                     <div className="font-bold text-xs">19:30</div>
                     <div className="text-[10px] text-white/80">Còn 8 ghế (Hot)</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-104')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">22:15</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 64 ghế</div>
                   </button>
@@ -147,15 +161,15 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng Rạp 02 • 2D Phụ đề
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-201')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">10:00</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 85 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-202')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">14:15</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 51 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-203')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">17:40</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 30 ghế</div>
                   </button>
@@ -185,19 +199,19 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng Rạp 01 • 3D Dolby Atmos
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-301')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">11:15</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 40 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-302')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">15:00</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 18 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-303')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">18:30</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 12 ghế</div>
                   </button>
-                  <button className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
+                  <button onClick={() => handleShowtimeClick('st-304')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
                     <div className="font-bold text-xs">21:05</div>
                     <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 55 ghế</div>
                   </button>

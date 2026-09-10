@@ -59,10 +59,11 @@ const Header: React.FC = () => {
   };
 
   const handleTicketHistoryClick = () => {
-    if (!requireAuth(undefined, '/profile', 'Vui lòng đăng nhập để xem lịch sử đặt vé.')) {
+    if (!requireAuth(undefined, '/profile?tab=transactions', 'Vui lòng đăng nhập để xem lịch sử đặt vé.')) {
       return;
     }
-    navigate('/profile');
+    setIsDropdownOpen(false);
+    navigate('/profile?tab=transactions');
   };
 
   const handleShowtimesClick = () => {
@@ -279,10 +280,10 @@ const Header: React.FC = () => {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold tracking-wide transition-all shadow-xs active:scale-95 cursor-pointer ml-1"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold tracking-wide transition-all shadow-xs active:scale-95 cursor-pointer whitespace-nowrap shrink-0 ml-1"
               >
-                <User className="w-4 h-4" />
-                <span>Đăng nhập</span>
+                <User className="w-4 h-4 shrink-0" />
+                <span className="whitespace-nowrap">Đăng nhập</span>
               </Link>
             )}
 

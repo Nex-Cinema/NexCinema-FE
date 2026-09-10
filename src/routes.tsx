@@ -12,6 +12,8 @@ import ForgotPassword from '@/pages/Auth/ForgotPassword';
 import ResetPassword from '@/pages/Auth/ResetPassword';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 
+import ClientProfile from '@/pages/Customer/ClientProfile';
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -45,6 +47,18 @@ export const AppRoutes: React.FC = () => {
           <MainLayout>
             <Home />
           </MainLayout>
+        }
+      />
+
+      {/* ── CUSTOMER PROFILE ROUTE (PROTECTED) ─────────────────────── */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ClientProfile />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
 

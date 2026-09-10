@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Film } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Film } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 
@@ -64,14 +64,14 @@ export const Login: React.FC = () => {
 
       {/* ── MAIN CONTENT ── */}
       <main className="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-center py-8 lg:py-12">
-        <div className="w-full max-w-[480px]">
+        <div className="w-full max-w-[540px]">
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-[#e4e2e2] transition-all">
             {/* Card Header */}
             <div className="flex flex-col items-center text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-[#d71920] mb-3 border border-red-100">
                 <Film className="w-7 h-7" />
               </div>
-              <h1 className="text-2xl font-bold text-[#1b1c1c] mb-1">Đăng nhập</h1>
+              <h1 className="text-2xl font-bold text-[#1b1c1c] mb-1 whitespace-nowrap">Đăng nhập</h1>
               <p className="text-xs text-[#5f5e5e]">
                 Chào mừng bạn trở lại với trải nghiệm điện ảnh NexCinema
               </p>
@@ -148,17 +148,16 @@ export const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-11 mt-2 rounded-lg bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] cursor-pointer disabled:opacity-70"
+                className="w-full h-12 mt-2 rounded-lg bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-base tracking-normal flex items-center justify-center shadow-sm transition-all active:scale-[0.99] cursor-pointer disabled:opacity-70 whitespace-nowrap shrink-0"
               >
-                <span>{isLoading ? 'Đang xử lý...' : 'Đăng nhập'}</span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="whitespace-nowrap">{isLoading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG NHẬP'}</span>
               </button>
             </form>
 
             {/* Divider */}
             <div className="relative my-6 flex items-center justify-center">
               <div className="w-full h-px bg-[#e4e2e2]"></div>
-              <span className="absolute px-3 bg-white text-xs font-semibold text-[#5f5e5e] uppercase">
+              <span className="absolute px-3 bg-white text-xs font-medium text-[#5f5e5e] uppercase">
                 Hoặc
               </span>
             </div>
@@ -167,9 +166,9 @@ export const Login: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full h-11 rounded-lg bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c] font-semibold text-xs flex items-center justify-center gap-3 transition-all border border-[#e4e2e2] cursor-pointer active:scale-[0.99]"
+              className="w-full h-12 rounded-lg bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c] font-medium text-base flex items-center justify-center gap-3 transition-all border border-[#e4e2e2] cursor-pointer active:scale-[0.99]"
             >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"

@@ -62,9 +62,16 @@ export const MovieDetails: React.FC = () => {
     formatTag: string;
   } | null>(null);
 
-  // Scroll to top when page mounts
+  // Scroll to showtimes section if hash or query present, else top
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.location.hash === '#lich-chieu-section' || window.location.search.includes('booking=true')) {
+      setTimeout(() => {
+        const el = document.getElementById('lich-chieu-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [id]);
 
   // ── Mock Movie Data (Dune 2 as primary reference) ────────────────

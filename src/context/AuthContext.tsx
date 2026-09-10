@@ -68,37 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return true;
       }
 
-      // Display Toast notification with action button to navigate to Login
-      toast(
-        (t) => (
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="font-semibold text-gray-800">{customMsg}</span>
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                const redirect = targetPath || window.location.pathname;
-                navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
-              }}
-              className="px-3 py-1 bg-[#d71920] hover:bg-[#ae0011] text-white font-bold rounded-md transition-colors cursor-pointer shrink-0 shadow-xs"
-            >
-              Đăng nhập
-            </button>
-          </div>
-        ),
-        {
-          id: 'auth-guard-toast',
-          duration: 4500,
-          icon: '🔒',
-          style: {
-            borderRadius: '10px',
-            background: '#ffffff',
-            color: '#1b1c1c',
-            border: '1px solid #e4e2e2',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-          },
-        }
-      );
-
+      toast.error(customMsg);
+      const redirect = targetPath || window.location.pathname + window.location.hash;
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
       return false;
     },
     [isAuthenticated, navigate]

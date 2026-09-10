@@ -86,10 +86,11 @@ const HeroBanner: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    if (!requireAuth(undefined, `/movie/${currentMovie.id}`)) {
+    const targetUrl = `/movie/${currentMovie.id}#lich-chieu-section`;
+    if (!requireAuth(undefined, targetUrl)) {
       return;
     }
-    navigate(`/movie/${currentMovie.id}`);
+    navigate(targetUrl);
   };
 
   return (

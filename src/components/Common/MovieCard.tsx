@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Ticket, Clock, Star } from 'lucide-react';
 import { Movie } from '@/types/movie.type';
 import { useAuth } from '@/context/AuthContext';
@@ -10,15 +10,19 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
+  const navigate = useNavigate();
   const { requireAuth } = useAuth();
 
   const handleBooking = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!requireAuth(undefined, `/movie/${movie.id}`)) {
+    const targetUrl = `/movie/${movie.id}#lich-chieu-section`;
+    if (!requireAuth(undefined, targetUrl)) {
       return;
     }
     if (onBookingClick) {
       onBookingClick(movie);
+    } else {
+      navigate(targetUrl);
     }
   };
   const getAgeRatingBadge = (rating: Movie['ageRating']) => {
