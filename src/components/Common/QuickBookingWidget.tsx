@@ -27,6 +27,15 @@ const QuickBookingWidget: React.FC = () => {
     setSelectedTime(e.target.value);
   };
 
+  // ISSUE-11 FIX: Map selected time → correct showtimeId instead of hardcoded 'st-11:30'
+  const TIME_TO_SHOWTIME_ID: Record<string, string> = {
+    '09:30': 'st-09:30',
+    '13:15': 'st-13:15',
+    '16:45': 'st-16:45',
+    '19:30': 'st-19:30',
+    '21:50': 'st-21:50',
+  };
+
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMovie || !selectedDate || !selectedTime) {
@@ -34,8 +43,10 @@ const QuickBookingWidget: React.FC = () => {
       return;
     }
 
+    const showtimeId = TIME_TO_SHOWTIME_ID[selectedTime] ?? `st-${selectedTime}`;
+    const targetBookingUrl = `/booking/${showtimeId}`;
+
     // Auth Guard: Require login before booking
-    const targetBookingUrl = '/booking/st-11:30';
     if (!requireAuth(undefined, targetBookingUrl)) {
       return;
     }

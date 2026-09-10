@@ -25,20 +25,31 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
       navigate(targetUrl);
     }
   };
+  // ISSUE-03 FIX: Age rating badge with legal tooltip descriptions
   const getAgeRatingBadge = (rating: Movie['ageRating']) => {
-    switch (rating) {
-      case 'P':
-        return <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[11px] shadow-xs">P</span>;
-      case 'K':
-        return <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[11px] shadow-xs">K</span>;
-      case 'C13':
-        return <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-bold text-[11px] shadow-xs">C13</span>;
-      case 'C16':
-        return <span className="px-2 py-0.5 rounded bg-amber-500 text-gray-900 font-bold text-[11px] shadow-xs">C16</span>;
-      case 'C18':
-      default:
-        return <span className="px-2 py-0.5 rounded bg-red-600 text-white font-bold text-[11px] shadow-xs">C18</span>;
-    }
+    const AGE_LABELS: Record<Movie['ageRating'], string> = {
+      P: 'P — Phổ biến: Phù hợp mọi lứa tuổi',
+      K: 'K — Trẻ em: Dưới 13 tuổi cần có sự đồng hành của người lớn',
+      C13: 'C13 — Từ 13 tuổi trở lên',
+      C16: 'C16 — Từ 16 tuổi trở lên',
+      C18: 'C18 — Từ 18 tuổi trở lên',
+    };
+    const classes: Record<Movie['ageRating'], string> = {
+      P: 'bg-emerald-600 text-white',
+      K: 'bg-emerald-500 text-white',
+      C13: 'bg-blue-600 text-white',
+      C16: 'bg-amber-500 text-gray-900 ring-1 ring-amber-600',
+      C18: 'bg-red-600 text-white ring-1 ring-red-800',
+    };
+    return (
+      <span
+        className={`px-2 py-0.5 rounded font-black text-[11px] shadow-sm tracking-wide ${classes[rating]}`}
+        title={AGE_LABELS[rating]}
+        aria-label={AGE_LABELS[rating]}
+      >
+        {rating}
+      </span>
+    );
   };
 
   return (

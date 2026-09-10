@@ -22,17 +22,25 @@ interface Seat {
 }
 
 // ── Mock Data ─────────────────────────────────────────────────────
-const SHOWTIME_PILLS = [
-  { id: 'st-10:45', time: '10:45' },
-  { id: 'st-11:30', time: '11:30', isCurrent: true },
-  { id: 'st-13:00', time: '13:00' },
-  { id: 'st-13:45', time: '13:45' },
-  { id: 'st-15:15', time: '15:15' },
-  { id: 'st-16:00', time: '16:00' },
-  { id: 'st-17:30', time: '17:30' },
-  { id: 'st-18:15', time: '18:15' },
-  { id: 'st-19:45', time: '19:45' },
-  { id: 'st-20:30', time: '20:30' },
+interface ShowtimePill {
+  id: string;
+  time: string;
+  isCurrent?: boolean;
+  seatsLeft?: number;
+  isSoldOut?: boolean;
+}
+
+const SHOWTIME_PILLS: ShowtimePill[] = [
+  { id: 'st-10:45', time: '10:45', seatsLeft: 0, isSoldOut: true },
+  { id: 'st-11:30', time: '11:30', isCurrent: true, seatsLeft: 42 },
+  { id: 'st-13:00', time: '13:00', seatsLeft: 6 }, // Low stock (< 10)
+  { id: 'st-13:45', time: '13:45', seatsLeft: 76 },
+  { id: 'st-15:15', time: '15:15', seatsLeft: 0, isSoldOut: true },
+  { id: 'st-16:00', time: '16:00', seatsLeft: 18 },
+  { id: 'st-17:30', time: '17:30', seatsLeft: 4 }, // Low stock (< 10)
+  { id: 'st-18:15', time: '18:15', seatsLeft: 52 },
+  { id: 'st-19:45', time: '19:45', seatsLeft: 64 },
+  { id: 'st-20:30', time: '20:30', seatsLeft: 30 },
 ];
 
 const MAX_SEATS_PER_BOOKING = 8;
@@ -192,7 +200,11 @@ export const SeatSelection: React.FC = () => {
   };
 
   // BR#2: Switch showtime directly from Seat Selection screen → reset seats
-  const handleChangeShowtime = (slotId: string, slotTime: string) => {
+  const handleChangeShowtime = (slotId: string, slotTime: string, isSoldOut?: boolean) => {
+    if (isSoldOut) {
+      toast.error('Suất chiếu này đã hết vé! Vui lòng chọn suất khác.');
+      return;
+    }
     if (slotId === currentShowtimeId) return;
     setCurrentShowtimeId(slotId);
     setCurrentShowtimeTime(slotTime);
@@ -293,17 +305,34 @@ export const SeatSelection: React.FC = () => {
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {SHOWTIME_PILLS.map((pill) => {
                   const isCurrent = pill.id === currentShowtimeId;
+                  const isLowStock = pill.seatsLeft !== undefined && pill.seatsLeft > 0 && pill.seatsLeft < 10;
                   return (
                     <button
                       key={pill.id}
-                      onClick={() => handleChangeShowtime(pill.id, pill.time)}
-                      className={`px-4 py-1.5 rounded-full font-bold text-xs whitespace-nowrap transition-colors ${
-                        isCurrent
-                          ? 'bg-[#d71920] text-white shadow-sm'
+                      disabled={pill.isSoldOut}
+                      onClick={() => handleChangeShowtime(pill.id, pill.time, pill.isSoldOut)}
+                      title={pill.isSoldOut ? 'Suất chiếu đã hết vé' : isLowStock ? `Còn ${pill.seatsLeft} ghế` : `Suất chiếu ${pill.time}`}
+                      className={`px-3.5 py-1.5 rounded-full font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                        pill.isSoldOut
+                          ? 'bg-[#e4e2e2]/70 text-[#8e8c8c] line-through cursor-not-allowed opacity-70 border border-[#e4e2e2]'
+                          : isCurrent
+                          ? 'bg-[#d71920] text-white shadow-sm ring-2 ring-[#d71920]/30'
+                          : isLowStock
+                          ? 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'
                           : 'bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c]'
                       }`}
                     >
-                      {pill.time}
+                      <span>{pill.time}</span>
+                      {pill.isSoldOut && (
+                        <span className="text-[10px] no-underline font-normal text-[#ba1a1a]">
+                          (Hết vé)
+                        </span>
+                      )}
+                      {!pill.isSoldOut && isLowStock && (
+                        <span className="text-[10px] font-semibold text-amber-700">
+                          (Còn {pill.seatsLeft})
+                        </span>
+                      )}
                     </button>
                   );
                 })}

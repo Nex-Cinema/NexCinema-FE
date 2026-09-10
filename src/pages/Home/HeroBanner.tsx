@@ -73,6 +73,14 @@ const HeroBanner: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const currentMovie = FEATURED_MOVIES[activeIdx];
 
+  // ISSUE-12 FIX: Auto-rotate carousel every 6 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev === FEATURED_MOVIES.length - 1 ? 0 : prev + 1));
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [activeIdx]);
+
   const handlePrev = () => {
     setActiveIdx((prev) => (prev === 0 ? FEATURED_MOVIES.length - 1 : prev - 1));
   };
@@ -193,21 +201,39 @@ const HeroBanner: React.FC = () => {
               ))}
             </div>
 
-            <div className="hidden md:flex items-center gap-2">
-              <button 
-                onClick={handlePrev}
-                aria-label="Phim trước"
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={handleNext}
-                aria-label="Phim kế tiếp"
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+            {/* ISSUE-12 FIX: Navigation controls visible on mobile + dots indicator */}
+            <div className="flex items-center gap-3">
+              {/* Carousel Dot Indicators */}
+              <div className="flex items-center gap-1.5 mr-2">
+                {FEATURED_MOVIES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveIdx(idx)}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${
+                      activeIdx === idx ? 'w-6 bg-[#d71920]' : 'w-2 bg-white/40 hover:bg-white/70'
+                    }`}
+                    aria-label={`Chuyển đến slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Prev / Next buttons */}
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handlePrev}
+                  aria-label="Phim trước"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={handleNext}
+                  aria-label="Phim kế tiếp"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
 

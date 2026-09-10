@@ -31,10 +31,10 @@ export const BookingConfirmation: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // BR#16: Read booking confirmation data from sessionStorage (dynamic, not hardcoded)
+  // BR#16: Read booking confirmation data from sessionStorage or localStorage (dynamic, not hardcoded)
   const bookingData: ConfirmationData = useMemo(() => {
     try {
-      const saved = sessionStorage.getItem('booking_confirmation');
+      const saved = sessionStorage.getItem('booking_confirmation') || localStorage.getItem('booking_confirmation');
       if (saved) {
         const parsed = JSON.parse(saved);
         return {
@@ -70,12 +70,9 @@ export const BookingConfirmation: React.FC = () => {
     };
   }, []);
 
-  // Clean up session data after reading (one-time use)
+  // ISSUE-18 FIX: Clean up booking draft on mount, but KEEP confirmation data so back/forward navigation works
   useEffect(() => {
-    return () => {
-      sessionStorage.removeItem('booking_confirmation');
-      sessionStorage.removeItem('booking_draft');
-    };
+    sessionStorage.removeItem('booking_draft');
   }, []);
 
   return (
