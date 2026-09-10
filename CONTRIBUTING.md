@@ -36,7 +36,7 @@ Dự án sử dụng **GitHub Flow** (trunk-based với feature branches).
 | Branch | Mục đích |
 |---|---|
 | `main` | Production — chỉ merge qua PR |
-| `develop` | Staging / integration |
+| `staging` | Staging / integration |
 | `feature/*` | Feature mới |
 | `fix/*` | Bug fix |
 | `hotfix/*` | Fix khẩn cấp trực tiếp lên main |

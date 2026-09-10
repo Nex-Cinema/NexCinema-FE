@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Ticket, Clock, Star } from 'lucide-react';
 import { Movie } from '@/types/movie.type';
+import { useAuth } from '@/context/AuthContext';
 
 interface MovieCardProps {
   movie: Movie;
@@ -9,6 +10,17 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
+  const { requireAuth } = useAuth();
+
+  const handleBooking = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!requireAuth(undefined, `/movie/${movie.id}`)) {
+      return;
+    }
+    if (onBookingClick) {
+      onBookingClick(movie);
+    }
+  };
   const getAgeRatingBadge = (rating: Movie['ageRating']) => {
     switch (rating) {
       case 'P':
@@ -65,7 +77,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) => {
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
           {onBookingClick ? (
             <button 
-              onClick={() => onBookingClick(movie)}
+              onClick={handleBooking}
               className="px-4 py-2.5 rounded-lg bg-[#d71920] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               <Ticket className="w-4 h-4" /> Đặt vé

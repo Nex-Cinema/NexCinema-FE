@@ -192,7 +192,7 @@ export const Login: React.FC = () => {
 
             {/* Footer */}
             <div className="mt-6 text-center text-xs text-[#5f5e5e]">
-              Chưa có tài khoản?{' '}
+              Chưa có tài khoản?
               <Link to="/register" className="text-[#d71920] font-bold hover:underline ml-1">
                 Đăng ký ngay
               </Link>

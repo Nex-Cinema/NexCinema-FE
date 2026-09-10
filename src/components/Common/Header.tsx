@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import InfoModal, { ModalType } from './InfoModal';
 import profileAvatar from '@/assets/profile.png';
 import UITLogo from '@/assets/LogoUIT2.jpg';
+import { useAuth } from '@/context/AuthContext';
 
 const SEARCH_SUGGESTIONS = [
   { id: 'dune2', title: 'Dune: Hành Tinh Cát - Phần 2', genre: 'Khoa học viễn tưởng, Hành động', rating: '9.4' },
@@ -18,6 +19,7 @@ const SEARCH_SUGGESTIONS = [
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, user, logout, requireAuth } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -28,11 +30,8 @@ const Header: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
 
-  const token = localStorage.getItem('accessToken');
-  const role = localStorage.getItem('userRole');
-  const storedName = localStorage.getItem('userName');
-  const isLoggedIn = Boolean(token && role === 'CUSTOMER');
-  const displayName = storedName || 'Hoàng Nam';
+  const isLoggedIn = isAuthenticated;
+  const displayName = user?.name || 'Khách hàng';
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -54,19 +53,16 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
-    toast.loading('Đang đăng xuất...');
-    localStorage.clear();
-    toast.dismiss();
+    logout();
     toast.success('Đã đăng xuất tài khoản!');
     navigate('/login');
   };
 
   const handleTicketHistoryClick = () => {
-    if (isLoggedIn) {
-      navigate('/profile');
-    } else {
-      navigate('/login', { state: { from: '/profile' } });
+    if (!requireAuth(undefined, '/profile', 'Vui lòng đăng nhập để xem lịch sử đặt vé.')) {
+      return;
     }
+    navigate('/profile');
   };
 
   const handleShowtimesClick = () => {
@@ -221,64 +217,74 @@ const Header: React.FC = () => {
               <span className="text-xs font-semibold whitespace-nowrap">Lịch sử đặt vé</span>
             </button>
 
-            {/* USER PROFILE & DROPDOWN */}
-            <div className="flex items-center gap-2 pl-1 relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 cursor-pointer focus:outline-none"
-              >
-                <img
-                  src={profileAvatar}
-                  alt={displayName}
-                  className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-                <div className="hidden lg:flex items-center gap-1 cursor-pointer select-none">
-                  <span className="text-xs font-semibold text-gray-900">{displayName}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-500 transition-transform ${
-                      isDropdownOpen ? 'rotate-180' : ''
-                    }`}
+            {/* USER ACCOUNT SECTION: LOGIN BUTTON vs PROFILE DROPDOWN */}
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2 pl-1 relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 cursor-pointer focus:outline-none"
+                >
+                  <img
+                    src={profileAvatar}
+                    alt={displayName}
+                    className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-xs"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
                   />
-                </div>
-              </button>
+                  <div className="hidden lg:flex items-center gap-1 cursor-pointer select-none">
+                    <span className="text-xs font-semibold text-gray-900">{displayName}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-500 transition-transform ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
 
-              {/* DROPDOWN MENU */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 text-left animate-in zoom-in duration-150">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-[11px] text-gray-500">Tài khoản</p>
-                    <p className="text-xs font-bold text-gray-900 truncate">{displayName}</p>
-                  </div>
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <User className="w-4 h-4 text-gray-500" />
-                    Trang cá nhân
-                  </Link>
-                  <button
-                    onClick={handleTicketHistoryClick}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-left"
-                  >
-                    <Ticket className="w-4 h-4 text-gray-500" />
-                    Lịch sử đặt vé
-                  </button>
-                  <div className="border-t border-gray-100 mt-1 pt-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                {/* DROPDOWN MENU */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 text-left animate-in zoom-in duration-150">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-[11px] text-gray-500">Tài khoản</p>
+                      <p className="text-xs font-bold text-gray-900 truncate">{displayName}</p>
+                    </div>
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" />
-                      Đăng xuất
+                      <User className="w-4 h-4 text-gray-500" />
+                      Trang cá nhân
+                    </Link>
+                    <button
+                      onClick={handleTicketHistoryClick}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-left"
+                    >
+                      <Ticket className="w-4 h-4 text-gray-500" />
+                      Lịch sử đặt vé
                     </button>
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Đăng xuất
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold tracking-wide transition-all shadow-xs active:scale-95 cursor-pointer ml-1"
+              >
+                <User className="w-4 h-4" />
+                <span>Đăng nhập</span>
+              </Link>
+            )}
 
             {/* MOBILE MENU TOGGLE */}
             <button
