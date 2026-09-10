@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ticket, Play, Clock, Star, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface FeaturedMovie {
   id: string;
