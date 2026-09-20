@@ -29,6 +29,7 @@ import SeatMapTemplates from './pages/Admin/SeatMapTemplates';
 import Shifts from './pages/Admin/Shifts';
 import Customers from './pages/Admin/Customers';
 import Transactions from './pages/Admin/Transactions';
+import PaymentGateways from './pages/Admin/PaymentGateways';
 
 // Staff Pages
 import SellTicketWizard from './pages/Staff/SellTicket/SellTicketWizard';
@@ -114,6 +115,7 @@ function App() {
           <Route path="/admin/showtimes" element={<Showtimes />} />
           <Route path="/admin/customers" element={<Customers />} />
           <Route path="/admin/transactions" element={<Transactions />} />
+          <Route path="/admin/payment-gateways" element={<PaymentGateways />} />
           <Route path="/admin/stats" element={<Stats />} />
         </Route>
 

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ShieldCheck, Clock } from 'lucide-react';
 import { formatVND } from '../../utils/formatHelper';
 import toast from 'react-hot-toast';
 import { simulatedCheckout, realCheckout } from '../../api/bookingApi';
 import { getBookingDetail } from '../../api/bookingHistoryApi';
-import { createPayOSPayment, createVNPayPayment } from '../../api/paymentApi';
+import { createPayOSPayment, createVNPayPayment, getPaymentGateways } from '../../api/paymentApi';
 import PayOSModal from '../../components/payment/PayOSModal';
 
 const Payment = ({ 
@@ -24,6 +24,22 @@ const Payment = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPayOSModal, setShowPayOSModal] = useState(false);
   const [payOSData, setPayOSData] = useState(null);
+  const [gatewayAvailability, setGatewayAvailability] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    getPaymentGateways()
+      .then((gateways) => {
+        if (ignore) return;
+        const availability = Object.fromEntries(gateways.map((gateway) => [gateway.provider, gateway.available]));
+        setGatewayAvailability(availability);
+        if (!availability.PAYOS && availability.VNPAY) setPaymentMethod('VNPAY');
+      })
+      .catch(() => { if (!ignore) setGatewayAvailability({ PAYOS: false, VNPAY: false }); });
+    return () => { ignore = true; };
+  }, []);
+
+  const isGatewayAvailable = (provider) => gatewayAvailability?.[provider] === true;
 
   const formatTimeSeconds = (seconds) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -202,8 +218,8 @@ const Payment = ({
           
           {/* Phương thức 1: PayOS */}
           <label 
-            onClick={() => setPaymentMethod('PAYOS')}
-            className={`flex items-center gap-4 p-5 rounded-xl border transition-all cursor-pointer ${
+            onClick={() => isGatewayAvailable('PAYOS') && setPaymentMethod('PAYOS')}
+            className={`flex items-center gap-4 p-5 rounded-xl border transition-all ${isGatewayAvailable('PAYOS') ? 'cursor-pointer' : 'cursor-not-allowed opacity-55'} ${
               paymentMethod === 'PAYOS' 
                 ? 'border-(--client-primary) bg-red-50 shadow-sm' 
                 : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50'
@@ -213,6 +229,7 @@ const Payment = ({
               type="radio" 
               name="payment" 
               checked={paymentMethod === 'PAYOS'} 
+              disabled={!isGatewayAvailable('PAYOS')}
               onChange={() => {}} 
               className="accent-blue-500 w-4 h-4 cursor-pointer"
             />
@@ -222,13 +239,14 @@ const Payment = ({
             <div className="flex flex-col flex-1">
               <span className="text-sm font-bold text-neutral-950 md:text-base">PayOS</span>
               <span className="text-xs font-medium text-neutral-500">Quét mã QR / chuyển khoản ngân hàng qua PayOS</span>
+              {!isGatewayAvailable('PAYOS') && gatewayAvailability && <span className="mt-1 text-[10px] font-bold uppercase text-amber-700">Tạm thời chưa khả dụng</span>}
             </div>
           </label>
 
           {/* Phương thức 2: VNPAY */}
           <label 
-            onClick={() => setPaymentMethod('VNPAY')}
-            className={`flex items-center gap-4 p-5 rounded-xl border transition-all cursor-pointer ${
+            onClick={() => isGatewayAvailable('VNPAY') && setPaymentMethod('VNPAY')}
+            className={`flex items-center gap-4 p-5 rounded-xl border transition-all ${isGatewayAvailable('VNPAY') ? 'cursor-pointer' : 'cursor-not-allowed opacity-55'} ${
               paymentMethod === 'VNPAY' 
                 ? 'border-(--client-primary) bg-red-50 shadow-sm' 
                 : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50'
@@ -238,6 +256,7 @@ const Payment = ({
               type="radio" 
               name="payment" 
               checked={paymentMethod === 'VNPAY'} 
+              disabled={!isGatewayAvailable('VNPAY')}
               onChange={() => {}} 
               className="accent-blue-500 w-4 h-4 cursor-pointer"
             />
@@ -247,14 +266,15 @@ const Payment = ({
             <div className="flex flex-col flex-1">
               <span className="text-sm font-bold text-neutral-950 md:text-base">VNPay</span>
               <span className="text-xs font-medium text-neutral-500">Thanh toán qua cổng thanh toán VNPay</span>
+              {!isGatewayAvailable('VNPAY') && gatewayAvailability && <span className="mt-1 text-[10px] font-bold uppercase text-amber-700">Tạm thời chưa khả dụng</span>}
             </div>
           </label>
 
           {/* NÚT THANH TOÁN CHỦ ĐẠO */}
           <button 
             onClick={handleConfirmPayment}
-            disabled={isSubmitting}
-            className={`client-primary-button mt-4 w-full py-4 text-center text-base ${isSubmitting ? 'cursor-not-allowed opacity-50' : ''}`}
+            disabled={isSubmitting || !isGatewayAvailable(paymentMethod)}
+            className={`client-primary-button mt-4 w-full py-4 text-center text-base ${isSubmitting || !isGatewayAvailable(paymentMethod) ? 'cursor-not-allowed opacity-50' : ''}`}
           >
             {isSubmitting ? 'Đang xử lý...' : 'Xác Nhận Thanh Toán'}
           </button>

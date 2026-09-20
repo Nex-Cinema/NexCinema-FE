@@ -1,5 +1,7 @@
 import axiosClient from './axiosClient';
 
+export const getPaymentGateways = () => axiosClient.get('/payment/gateways');
+
 /**
  * Tạo link thanh toán PayOS
  * @param {string} maPhieuDat 

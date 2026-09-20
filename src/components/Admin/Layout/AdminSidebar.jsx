@@ -5,7 +5,7 @@ import AdminConfirmDialog from '../Common/AdminConfirmDialog';
 import {
   BarChart3, CalendarDays, ChevronRight, CircleUserRound, Clock3,
   Film, Grid3X3, LogOut, ReceiptText, Theater,
-  UserRoundCog, WalletCards, X,
+  UserRoundCog, WalletCards, X, CreditCard,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -30,6 +30,7 @@ const navigationGroups = [
       { name: 'Ca làm việc', icon: Clock3, path: '/admin/shifts' },
       { name: 'Khách hàng', icon: CircleUserRound, path: '/admin/customers' },
       { name: 'Giao dịch', icon: ReceiptText, path: '/admin/transactions' },
+      { name: 'Cổng thanh toán', icon: CreditCard, path: '/admin/payment-gateways' },
     ],
   },
 ];
