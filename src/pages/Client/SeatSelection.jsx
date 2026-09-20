@@ -1,470 +1,179 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Clock, Armchair, DollarSign } from 'lucide-react';
-import { formatVND } from '../../utils/formatHelper';
-import { getSeatMap, holdSeats } from '../../api/bookingApi';
+import { ChevronLeft, ChevronRight, Clock, MonitorPlay } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getSeatMap, holdSeats } from '../../api/bookingApi';
+import { CinemaSeat, SeatLegend } from '../../components/Seats/SeatVisuals';
+import { formatVND } from '../../utils/formatHelper';
 
-// --- SVGs FOR SEATS FROM STAFF SECTION ---
-const SeatIcon = ({ className, strokeClassName }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Backrest */}
-    <path d="M6 4c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2v9H6V4z" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.75" />
-    {/* Cushion */}
-    <path d="M5 13c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v3c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2v-3z" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} />
-    {/* Left Armrest */}
-    <rect x="3" y="7" width="2.5" height="10" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.9" />
-    {/* Right Armrest */}
-    <rect x="18.5" y="7" width="2.5" height="10" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.9" />
-  </svg>
-);
+const parseStructure = (value) => {
+  if (!value) return null;
+  try { return typeof value === 'string' ? JSON.parse(value) : value; } catch { return null; }
+};
 
-const CoupleSeatIcon = ({ className, strokeClassName }) => (
-  <svg className={className} viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Backrest */}
-    <path d="M6 4c0-1.1.9-2 2-2h32c1.1 0 2 .9 2 2v9H6V4z" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.75" />
-    {/* Cushion */}
-    <path d="M5 13c0-1.1.9-2 2-2h34c1.1 0 2 .9 2 2v3c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2v-3z" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} />
-    {/* Left Armrest */}
-    <rect x="3" y="7" width="2.5" height="10" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.9" />
-    {/* Right Armrest */}
-    <rect x="42.5" y="7" width="2.5" height="10" rx="1" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className={strokeClassName} opacity="0.9" />
-  </svg>
-);
+const isAislePosition = (structure, rowIndex, columnIndex) => {
+  if (!structure?.aisles) return false;
+  if (structure.aisles.cols?.includes(columnIndex + 1) || structure.aisles.rows?.includes(rowIndex + 1)) return true;
+  const customRow = structure.aisles.custom?.find((item) => item.row === rowIndex);
+  return Boolean(customRow?.cols?.includes(columnIndex) || customRow?.cols?.includes(columnIndex + 1));
+};
 
-// --- STATIC HOLD INDICATOR FOR SELECTION PAGE ---
-const SeatHoldIndicator = () => (
-  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border mb-4 font-black transition-all bg-white/5 border-white/5 text-slate-400">
-    <Clock size={16} className="text-[#ff436e]" />
-    <span className="text-[11px] uppercase tracking-wider flex-1 font-bold">
-      Hạn thanh toán:
-    </span>
-    <span className="text-xs font-bold text-white bg-[#ff436e]/10 px-2.5 py-1 rounded-lg">
-      10 phút
-    </span>
-  </div>
-);
+const getSeatState = (seat) => {
+  if (seat.TrangThai === 'DA_DAT') return 'sold';
+  if (seat.TrangThai === 'DANG_GIU') return 'held';
+  return 'available';
+};
 
-// --- MAIN SEAT SELECTION COMPONENT ---
-const SeatSelection = ({ 
-  availableSlots, 
-  selectedSlotIndex, 
-  setSelectedSlotIndex, 
-  onBack, 
-  formatTime,
-  onConfirmBooking,
-  shouldReloadSeatMap
-}) => {
+const SeatMap = ({ data, selectedSeats, onSeatClick }) => {
+  const { rows, totalColumns, structure } = useMemo(() => {
+    if (!data) return { rows: [], totalColumns: 0, structure: null };
+    const grouped = data.Ghe.reduce((result, seat) => {
+      const row = seat.TenGhe.charAt(0);
+      result[row] ||= {};
+      result[row][Number.parseInt(seat.TenGhe.slice(1), 10)] = seat;
+      return result;
+    }, {});
+    return {
+      rows: Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)),
+      totalColumns: data.SoDoGhe.TongCot,
+      structure: parseStructure(data.SoDoGhe.CauTruc),
+    };
+  }, [data]);
+
+  return (
+    <div className="mx-auto flex min-w-max flex-col items-center px-4 pb-3">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <span className="w-7" />
+        {Array.from({ length: totalColumns }, (_, index) => (
+          <span key={index} className="grid h-5 w-9 place-items-center font-mono text-[10px] font-bold text-slate-400">{index + 1}</span>
+        ))}
+        <span className="w-7" />
+      </div>
+      <div className="flex flex-col gap-1">
+        {rows.map(([rowName, columns], rowIndex) => (
+          <div key={rowName} className="flex items-center gap-1.5">
+            <span className="w-7 text-center font-mono text-xs font-bold text-slate-400">{rowName}</span>
+            {Array.from({ length: totalColumns }, (_, columnIndex) => {
+              const seat = columns[columnIndex + 1];
+              if (!seat || isAislePosition(structure, rowIndex, columnIndex)) return <span key={`${rowName}-${columnIndex}`} className="h-9 w-9 shrink-0" />;
+              const state = getSeatState(seat);
+              const selected = selectedSeats.some((item) => item.MaGheSuatChieu === seat.MaGheSuatChieu);
+              return <CinemaSeat key={seat.MaGheSuatChieu} label={seat.TenGhe} typeName={seat.TenLoaiGhe} state={state} selected={selected} disabled={state !== 'available'} onClick={() => onSeatClick(seat)} title={`${seat.TenGhe} · ${seat.TenLoaiGhe} · ${seat.GiaVeTinhToan.toLocaleString('vi-VN')} đ`} />;
+            })}
+            <span className="w-7 text-center font-mono text-xs font-bold text-slate-400">{rowName}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SeatSelection = ({ availableSlots, selectedSlotIndex, setSelectedSlotIndex, onBack, formatTime, onConfirmBooking, shouldReloadSeatMap }) => {
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [seatMapData, setSeatMapData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isHolding, setIsHolding] = useState(false);
-
-  const lastMaSuatChieuRef = useRef("");
+  const lastShowtimeId = useRef('');
+  const currentSlot = availableSlots[selectedSlotIndex];
+  const totalAmount = selectedSeats.reduce((total, seat) => total + seat.GiaVeTinhToan, 0);
 
   useEffect(() => {
-    const fetchSeats = async () => {
-      const currentSlot = availableSlots[selectedSlotIndex];
-      const maSuatChieu = currentSlot?.MaSuatChieu || currentSlot?.showId;
-      if (!maSuatChieu) return;
-
+    const showtimeId = currentSlot?.MaSuatChieu || currentSlot?.showId;
+    if (!showtimeId) return undefined;
+    let ignore = false;
+    const loadSeats = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const res = await getSeatMap(maSuatChieu);
-        setSeatMapData(res);
-        
-        // Reset only when the showtime actually changes
-        if (lastMaSuatChieuRef.current !== maSuatChieu) {
+        const result = await getSeatMap(showtimeId);
+        if (ignore) return;
+        setSeatMapData(result);
+        if (lastShowtimeId.current !== showtimeId) {
           setSelectedSeats([]);
-          lastMaSuatChieuRef.current = maSuatChieu;
+          lastShowtimeId.current = showtimeId;
         }
-      } catch (err) {
-        console.error("Error fetching seat map:", err);
-        toast.error("Không thể tải sơ đồ ghế của suất chiếu này.");
+      } catch (error) {
+        if (!ignore) toast.error('Không thể tải sơ đồ ghế của suất chiếu này.');
+        console.error('Error fetching seat map:', error);
       } finally {
-        setIsLoading(false);
+        if (!ignore) setIsLoading(false);
       }
     };
-    fetchSeats();
-  }, [selectedSlotIndex, availableSlots, shouldReloadSeatMap]);
-
-  const calculateTotalAmount = () => {
-    return selectedSeats.reduce((total, seat) => total + seat.GiaVeTinhToan, 0);
-  };
+    loadSeats();
+    return () => { ignore = true; };
+  }, [currentSlot, shouldReloadSeatMap]);
 
   const handleSeatClick = (seat) => {
-    if (seat.TrangThai !== "TRONG") return;
-
-    if (selectedSeats.some(s => s.MaGheSuatChieu === seat.MaGheSuatChieu)) {
-      setSelectedSeats(selectedSeats.filter(s => s.MaGheSuatChieu !== seat.MaGheSuatChieu));
-    } else {
-      setSelectedSeats([...selectedSeats, seat]);
-    }
+    if (seat.TrangThai !== 'TRONG') return;
+    setSelectedSeats((current) => current.some((item) => item.MaGheSuatChieu === seat.MaGheSuatChieu)
+      ? current.filter((item) => item.MaGheSuatChieu !== seat.MaGheSuatChieu)
+      : [...current, seat]);
   };
 
   const handleConfirm = async () => {
-    if (selectedSeats.length === 0) return;
-    
-    // Auth Guard
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      toast.error("Vui lòng đăng nhập tài khoản khách hàng để thực hiện đặt vé!");
-      const currentSlot = availableSlots[selectedSlotIndex];
-      navigate("/login", { state: { from: `/movie/${currentSlot?.MaPhim}` } });
+    if (!selectedSeats.length) return;
+    if (!localStorage.getItem('accessToken')) {
+      toast.error('Vui lòng đăng nhập tài khoản khách hàng để thực hiện đặt vé!');
+      navigate('/login', { state: { from: `/movie/${currentSlot?.MaPhim}` } });
       return;
     }
-
-    const currentSlot = availableSlots[selectedSlotIndex];
-    const maSuatChieu = currentSlot?.MaSuatChieu || currentSlot?.showId;
-    if (!maSuatChieu) {
-      toast.error("Không tìm thấy thông tin suất chiếu.");
-      return;
-    }
-
+    const showtimeId = currentSlot?.MaSuatChieu || currentSlot?.showId;
+    if (!showtimeId) return toast.error('Không tìm thấy thông tin suất chiếu.');
     try {
       setIsHolding(true);
-      const seatIds = selectedSeats.map(s => s.MaGheSuatChieu);
-      
-      await holdSeats(maSuatChieu, seatIds);
-      
-      // On success, proceed to visual payment step
-      onConfirmBooking(selectedSeats, calculateTotalAmount(), seatIds, maSuatChieu);
-    } catch (err) {
-      console.error("Hold seats error:", err);
-      if (err.response?.status === 401) {
-        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        navigate("/login", { state: { from: `/movie/${currentSlot?.MaPhim}` } });
-      } else if (err.response?.status === 403) {
-        toast.error("Tài khoản không có quyền giữ ghế");
-      } else {
-        const errMsg = err.response?.data?.message || err.message || "Giữ ghế thất bại, vui lòng chọn ghế khác.";
-        toast.error(errMsg);
-      }
-      
-      // Reload seat map on failure
-      try {
-        const res = await getSeatMap(maSuatChieu);
-        setSeatMapData(res);
-      } catch (reloadErr) {
-        console.error("Error reloading seat map after hold failure:", reloadErr);
-      }
-    } finally {
-      setIsHolding(false);
-    }
-  };
-
-  // Group and sort seats logic (copied from staff implementation)
-  const renderSeatGrid = () => {
-    if (!seatMapData) return null;
-
-    const { SoDoGhe, Ghe: gheList } = seatMapData;
-    const totalCols = SoDoGhe.TongCot;
-
-    // Group seats by row letter
-    const seatsByRow = {};
-    gheList.forEach((seat) => {
-      const rowLetter = seat.TenGhe.charAt(0);
-      if (!seatsByRow[rowLetter]) {
-        seatsByRow[rowLetter] = [];
-      }
-      seatsByRow[rowLetter].push(seat);
-    });
-
-    // Sort each row's seats by column number
-    Object.keys(seatsByRow).forEach((row) => {
-      seatsByRow[row].sort((a, b) => {
-        const colA = parseInt(a.TenGhe.substring(1), 10);
-        const colB = parseInt(b.TenGhe.substring(1), 10);
-        return colA - colB;
-      });
-    });
-
-    const sortedRowKeys = Object.keys(seatsByRow).sort();
-
-    return (
-      <div className="w-full flex flex-col items-center">
-        {/* Column numbers header */}
-        <div className="flex gap-1.5 items-center justify-center mb-3 min-w-max px-4 shrink-0">
-          <div className="w-8 shrink-0"></div>
-          {Array.from({ length: totalCols }).map((_, idx) => (
-            <div key={idx} className="w-9 h-6 flex items-center justify-center text-xs font-black text-gray-500 font-mono shrink-0">
-              {idx + 1}
-            </div>
-          ))}
-          <div className="w-8 shrink-0"></div>
-        </div>
-
-        {/* Seat grid rows */}
-        <div className="flex flex-col gap-1.5 min-w-max px-4">
-          {sortedRowKeys.map((rowLetter) => {
-            const rowSeats = seatsByRow[rowLetter] || [];
-            
-            // Build columns mapping to detect aisles
-            const colMap = {};
-            rowSeats.forEach((seat) => {
-              const colNum = parseInt(seat.TenGhe.substring(1), 10);
-              colMap[colNum] = seat;
-            });
-
-            return (
-              <div key={rowLetter} className="flex gap-1.5 items-center justify-center">
-                <div className="w-8 text-center text-gray-400 font-black text-sm shrink-0 font-mono">
-                  {rowLetter}
-                </div>
-
-                {Array.from({ length: totalCols }).map((_, idx) => {
-                  const colNum = idx + 1;
-                  const seat = colMap[colNum];
-
-                  let isAisle = false;
-                  if (SoDoGhe?.CauTruc) {
-                    try {
-                      const struct = typeof SoDoGhe.CauTruc === 'string' ? JSON.parse(SoDoGhe.CauTruc) : SoDoGhe.CauTruc;
-                      const rIndex = rowLetter.charCodeAt(0) - 65;
-                      const cIndex = colNum - 1;
-                      isAisle = struct?.aisles?.cols?.includes(cIndex + 1) || struct?.aisles?.rows?.includes(rIndex + 1);
-                      if (!isAisle && struct?.aisles?.custom) {
-                        const customRow = struct.aisles.custom.find(item => item.row === rIndex);
-                        if (customRow) {
-                          isAisle = customRow.cols.includes(cIndex) || customRow.cols.includes(cIndex + 1);
-                        }
-                      }
-                    } catch {
-                      // Invalid legacy seat-map metadata falls back to the physical seats list.
-                    }
-                  }
-
-                  // Aisle gap if no seat is configured in this grid slot or it is defined as an aisle
-                  if (!seat || isAisle) {
-                    return (
-                      <div key={`aisle-${rowLetter}-${colNum}`} className="w-9 h-9 shrink-0"></div>
-                    );
-                  }
-
-                  const isSold = seat.TrangThai === "DA_DAT";
-                  const isHeld = seat.TrangThai === "DANG_GIU";
-                  const isSelected = selectedSeats.some(s => s.MaGheSuatChieu === seat.MaGheSuatChieu);
-                  const isVIP = seat.TenLoaiGhe.toUpperCase().includes("VIP");
-                  const isCouple = seat.TenLoaiGhe.toUpperCase().includes("ĐÔI") || seat.TenLoaiGhe.toUpperCase().includes("COUPLE");
-
-                  // Seat icon styling classes matching staff design
-                  let iconClass = "text-neutral-200";
-                  let strokeClass = "stroke-neutral-400";
-                  let textClass = "text-neutral-700 group-hover:text-neutral-950";
-
-                  if (isVIP) {
-                    iconClass = "text-amber-200";
-                    strokeClass = "stroke-amber-500";
-                    textClass = "text-amber-900";
-                  }
-                  if (isCouple) {
-                    iconClass = "text-pink-200";
-                    strokeClass = "stroke-pink-500";
-                    textClass = "text-pink-900";
-                  }
-                  if (isSelected) {
-                    iconClass = "text-[#d71920]";
-                    strokeClass = "stroke-[#d71920]";
-                    textClass = "text-white font-black";
-                  }
-                  if (isSold) {
-                    iconClass = "text-neutral-300 opacity-60";
-                    strokeClass = "stroke-neutral-400 opacity-60";
-                    textClass = "text-neutral-500 font-medium opacity-60";
-                  }
-                  if (isHeld) {
-                    iconClass = "text-[#2A160F] opacity-40";
-                    strokeClass = "stroke-orange-900/40 opacity-40";
-                    textClass = "text-orange-600/50 font-medium opacity-40";
-                  }
-
-                  return (
-                    <button
-                      key={seat.MaGheSuatChieu}
-                      disabled={isSold || isHeld}
-                      onClick={() => handleSeatClick(seat)}
-                      className={`h-9 rounded transition-all duration-200 flex items-center justify-center shrink-0 relative group select-none border-0 bg-transparent
-                        ${isCouple ? "w-[76px]" : "w-9"} 
-                        ${isSold || isHeld ? "cursor-not-allowed" : "cursor-pointer hover:scale-105"}
-                      `}
-                      title={`${seat.TenGhe} - ${seat.TenLoaiGhe} (${seat.GiaVeTinhToan.toLocaleString()}đ)`}
-                    >
-                      {isCouple ? (
-                        <CoupleSeatIcon className={`absolute inset-0 w-full h-full ${iconClass}`} strokeClassName={strokeClass} />
-                      ) : (
-                        <SeatIcon className={`absolute inset-0 w-full h-full ${iconClass}`} strokeClassName={strokeClass} />
-                      )}
-                      
-                      <span className={`relative z-10 text-[9px] font-black font-mono tracking-tighter transition-colors ${textClass}`}>
-                        {seat.TenGhe}
-                      </span>
-                    </button>
-                  );
-                })}
-
-                <div className="w-8 text-center text-gray-400 font-black text-sm shrink-0 font-mono">
-                  {rowLetter}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+      const seatIds = selectedSeats.map((seat) => seat.MaGheSuatChieu);
+      await holdSeats(showtimeId, seatIds);
+      onConfirmBooking(selectedSeats, totalAmount, seatIds, showtimeId);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        navigate('/login', { state: { from: `/movie/${currentSlot?.MaPhim}` } });
+      } else if (error.response?.status === 403) toast.error('Tài khoản không có quyền giữ ghế');
+      else toast.error(error.response?.data?.message || error.message || 'Giữ ghế thất bại, vui lòng chọn ghế khác.');
+      try { setSeatMapData(await getSeatMap(showtimeId)); } catch (reloadError) { console.error('Error reloading seat map:', reloadError); }
+    } finally { setIsHolding(false); }
   };
 
   return (
-    <div className="grid min-h-screen animate-in grid-cols-1 items-start gap-8 fade-in duration-500 lg:grid-cols-[280px_1fr]">
-      
-      {/* SIDEBAR TRÁI */}
-      <aside className="flex w-full flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-6 text-left shadow-sm">
-        <div>
-          <button 
-            onClick={onBack}
-            className="mb-4 flex cursor-pointer items-center gap-1 text-sm font-semibold text-neutral-500 transition-colors hover:text-neutral-950"
-          >
-            <ChevronLeft size={16}/> Quay lại chi tiết
-          </button>
-          
-          <SeatHoldIndicator />
-
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Khung giờ trống</h3>
+    <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto lg:grid-cols-[250px_minmax(0,1fr)] lg:overflow-hidden">
+      <aside className="flex min-h-fit flex-col overflow-visible rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-black/5 lg:min-h-0 lg:overflow-hidden">
+        <button onClick={onBack} className="mb-3 flex items-center gap-1 text-xs font-semibold text-neutral-500 transition-colors hover:text-neutral-950"><ChevronLeft size={15} /> Quay lại chi tiết</button>
+        <div className="mb-3 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-xs font-semibold text-neutral-600">
+          <Clock size={15} className="text-(--client-primary)" /><span className="flex-1">Hạn thanh toán</span><strong className="rounded-full bg-white px-2 py-1 text-[10px] text-(--client-primary)">10 phút</strong>
         </div>
-        
-        <div className="flex flex-col gap-3">
-          {availableSlots.map((slot, index) => {
-            const isSelected = index === selectedSlotIndex;
-            return (
-              <button
-                key={index}
-                onClick={() => { 
-                  setSelectedSlotIndex(index); 
-                }} 
-                className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                  isSelected 
-                    ? 'bg-(--client-primary) text-white shadow-sm' 
-                    : 'border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-red-200 hover:bg-red-50'
-                }`}
-              >
-                <Clock size={16} />
-                <span>{formatTime(slot.time || slot.GioChieu)}</span>
-              </button>
-            );
-          })}
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[.14em] text-neutral-500">Chọn suất chiếu</p>
+        <div className="min-h-0 space-y-2 overflow-y-auto pr-1">
+          {availableSlots.map((slot, index) => (
+            <button key={slot.MaSuatChieu || slot.showId || index} onClick={() => setSelectedSlotIndex(index)} className={`flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${index === selectedSlotIndex ? 'bg-(--client-primary) text-white shadow-[0_8px_20px_rgba(215,25,32,.18)]' : 'bg-neutral-50 text-neutral-600 hover:bg-red-50 hover:text-(--client-primary)'}`}>
+              <Clock size={15} /> {formatTime(slot.time || slot.GioChieu)}
+            </button>
+          ))}
         </div>
       </aside>
 
-      {/* PHÒNG CHIẾU CHÍNH */}
-      <div className="w-full flex flex-col items-center gap-8">
-        <h2 className="text-2xl font-extrabold tracking-tight text-neutral-950">Chọn ghế ngồi</h2>
-        
-        {/* Screen indicator (curved screen frame) */}
-        <div className="w-full max-w-2xl flex items-center justify-between shrink-0 select-none px-4 mt-2">
-          <span className="text-[9px] text-slate-500 uppercase tracking-[0.3em] font-black hidden md:inline">
-            MÀN HÌNH CONG CAO CẤP
-          </span>
-
-          <div className="w-64 h-16 relative flex items-center justify-center mx-4">
-            <div className="absolute inset-0 rounded bg-red-50 blur-md"></div>
-            <div className="relative flex h-full w-full items-center justify-center rounded border border-red-200 bg-white shadow-sm">
-              <div className="absolute inset-x-4 top-1 h-1 rounded-[100%] border-t-2 border-(--client-primary)"></div>
-              <svg className="mt-1 h-7 w-7 text-(--client-primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="13" rx="2" />
-                <path d="M12 16v5M9 21h6M9 8l5 3.5L9 15V8z" />
-              </svg>
-            </div>
-          </div>
-
-          <span className="text-[9px] text-slate-500 uppercase tracking-[0.3em] font-black hidden md:inline">
-            MÀN HÌNH CONG CAO CẤP
-          </span>
+      <section className="grid min-h-[620px] grid-rows-[auto_auto_auto_minmax(190px,1fr)_auto] overflow-hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 lg:min-h-0">
+        <div className="flex items-start justify-between gap-4">
+          <div><span className="text-[9px] font-bold uppercase tracking-[.2em] text-(--client-primary)">Bước 02</span><h1 className="text-xl font-extrabold tracking-tight text-neutral-950">Chọn ghế ngồi</h1></div>
+          <div className="text-right text-xs text-neutral-500"><strong className="block text-sm text-neutral-950">{formatTime(currentSlot?.time || currentSlot?.GioChieu || '00:00')}</strong>{seatMapData?.SoDoGhe && <span>{seatMapData.SoDoGhe.TongHang} hàng · {seatMapData.SoDoGhe.TongCot} cột</span>}</div>
         </div>
-
-        {/* Legend */}
-        <div className="mb-2 flex max-w-2xl shrink-0 select-none flex-wrap items-center justify-center gap-6 rounded-xl border border-neutral-200 bg-white px-6 py-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <SeatIcon className="h-6 w-6 text-neutral-200" strokeClassName="stroke-neutral-400" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">CÒN TRỐNG</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <SeatIcon className="w-6 h-6 text-[#ff436e] filter drop-shadow-[0_0_8px_rgba(255,67,110,0.4)]" strokeClassName="stroke-[#ff436e]" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">ĐANG CHỌN</span>
-          </div>
-          <div className="flex items-center gap-2 opacity-40">
-            <SeatIcon className="w-6 h-6 text-[#0E131F]" strokeClassName="stroke-slate-900/60" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">ĐÃ ĐẶT</span>
-          </div>
-          <div className="flex items-center gap-2 opacity-50">
-            <SeatIcon className="w-6 h-6 text-[#2A160F]" strokeClassName="stroke-orange-900/40" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">ĐANG GIỮ</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <SeatIcon className="w-6 h-6 text-[#18112C]" strokeClassName="stroke-purple-500/70" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">GHẾ VIP</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CoupleSeatIcon className="w-12 h-6 text-[#281123]" strokeClassName="stroke-pink-500/60" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">GHẾ ĐÔI</span>
-          </div>
+        <div className="mx-auto mt-2 flex w-full max-w-2xl items-center gap-3" aria-label="Vị trí màn hình">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-red-200" /><div className="flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-[9px] font-bold uppercase tracking-[.18em] text-(--client-primary)"><MonitorPlay size={15} /> Màn hình</div><span className="h-px flex-1 bg-gradient-to-l from-transparent to-red-200" />
         </div>
-
-        {/* Dynamic Seats Area */}
-        <div className="w-full overflow-x-auto pb-4 rounded-xl flex justify-start lg:justify-center" style={{ scrollbarGutter: 'stable' }}>
-          {isLoading ? (
-            <div className="flex flex-col items-center gap-4 py-20 min-w-[600px] w-full justify-center">
-              <div className="w-12 h-12 border-4 border-[#ff436e] border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-glow text-[#ff436e] text-sm uppercase font-bold tracking-widest">Đang tải sơ đồ ghế...</span>
-            </div>
-          ) : (
-            renderSeatGrid()
-          )}
+        <SeatLegend className="border-b border-neutral-100 py-2.5" />
+        <div className="min-h-0 overflow-auto py-2 custom-scrollbar">
+          {isLoading ? <div className="grid h-full min-h-48 place-items-center text-center"><div><span className="mx-auto block size-8 animate-spin rounded-full border-2 border-red-100 border-t-(--client-primary)" /><p className="mt-3 text-xs font-semibold text-neutral-500">Đang tải sơ đồ ghế…</p></div></div> : <SeatMap data={seatMapData} selectedSeats={selectedSeats} onSeatClick={handleSeatClick} />}
         </div>
-
-        {/* SUẤT CHIẾU & SỐ TIỀN ĐỘNG */}
-        {selectedSeats.length > 0 && (
-          <div className="grid w-full max-w-2xl animate-in grid-cols-1 items-center gap-4 rounded-xl border border-neutral-200 bg-white p-5 text-left text-sm shadow-sm duration-300 slide-in-from-bottom-4 md:grid-cols-3">
-            <div className="flex items-center gap-3 border-b md:border-b-0 md:border-r border-white/5 pb-3 md:pb-0 md:pr-4">
-              <div className="w-10 h-10 bg-[#ff436e]/10 rounded-xl flex items-center justify-center text-[#ff436e]"><Clock size={18} /></div>
-              <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Suất Chiếu</p>
-                <p className="text-white font-extrabold text-base mt-0.5">
-                  {availableSlots[selectedSlotIndex] ? formatTime(availableSlots[selectedSlotIndex].time || availableSlots[selectedSlotIndex].GioChieu) : '00:00'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 border-b md:border-b-0 md:border-r border-white/5 pb-3 md:pb-0 md:pr-4">
-              <div className="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center text-yellow-400"><Armchair size={18} /></div>
-              <div className="min-w-0 flex-1">
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Ghế Đã Chọn</p>
-                <p className="text-white font-extrabold text-base mt-0.5 truncate">
-                  {selectedSeats.map(s => s.TenGhe).join(', ')}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 pl-0 md:pl-2">
-              <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center text-green-400"><DollarSign size={18} /></div>
-              <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Tổng Thanh Toán</p>
-                <p className="text-green-400 font-black text-xl mt-0.5">{formatVND(calculateTotalAmount())}</p>
-              </div>
-            </div>
+        <div className="grid items-center gap-3 border-t border-neutral-100 pt-3 sm:grid-cols-[1fr_auto]">
+          <div className="grid min-w-0 grid-cols-3 gap-3 text-xs">
+            <div><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Suất chiếu</span><strong className="text-neutral-950">{formatTime(currentSlot?.time || currentSlot?.GioChieu || '00:00')}</strong></div>
+            <div className="min-w-0"><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Ghế đã chọn</span><strong className="block truncate text-neutral-950">{selectedSeats.length ? selectedSeats.map((seat) => seat.TenGhe).join(', ') : 'Chưa chọn'}</strong></div>
+            <div><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Tổng tiền</span><strong className="text-(--client-primary)">{formatVND(totalAmount)}</strong></div>
           </div>
-        )}
-
-        {/* NÚT TIẾP TỤC THANH TOÁN */}
-        <button 
-          disabled={selectedSeats.length === 0 || isHolding}
-          onClick={handleConfirm}
-          className={`bg-[#ff436e] hover:bg-[#e0325a] text-white font-extrabold px-10 py-3.5 rounded-full transition-all flex items-center gap-2 text-sm uppercase tracking-wider cursor-pointer ${
-            (selectedSeats.length === 0 || isHolding) ? 'opacity-40 cursor-not-allowed shadow-none' : 'shadow-[0_0_30px_rgba(255,67,110,0.4)] active:scale-95'
-          }`}
-        >
-          <span>{isHolding ? 'Đang xử lý...' : `Tiếp tục thanh toán (${selectedSeats.length} ghế)`}</span>
-          <ChevronRight size={16} />
-        </button>
-
-      </div>
+          <button disabled={!selectedSeats.length || isHolding} onClick={handleConfirm} className="group flex h-11 items-center justify-center gap-3 rounded-full bg-(--client-primary) pl-5 pr-2 text-xs font-bold text-white transition-all duration-500 ease-[cubic-bezier(.32,.72,0,1)] enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40">
+            {isHolding ? 'Đang giữ ghế…' : `Tiếp tục (${selectedSeats.length})`}<span className="grid size-7 place-items-center rounded-full bg-white/15 transition-transform duration-500 group-hover:translate-x-0.5"><ChevronRight size={15} /></span>
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

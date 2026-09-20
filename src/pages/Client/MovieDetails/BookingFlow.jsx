@@ -93,8 +93,8 @@ const BookingFlow = ({
 
   // stage === 'seat'
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8">
-      <BookingStepper current={2} />
+    <div className="mx-auto flex h-[calc(100dvh-5rem)] max-w-[1440px] flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+      <BookingStepper current={2} compact />
       <SeatSelection
         availableSlots={availableSlots}
         selectedSlotIndex={selectedSlotIndex}

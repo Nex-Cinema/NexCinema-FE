@@ -6,6 +6,7 @@ import { Lock, Unlock, Save } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toastHelper';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import AdminButton from '../../components/Admin/Common/AdminButton';
+import { CinemaSeat, SeatLegend } from '../../components/Seats/SeatVisuals';
 
 const SeatMaps = () => {
   const { roomId } = useParams();
@@ -136,18 +137,7 @@ const SeatMaps = () => {
     }
   };
 
-  const getSeatColor = (typeId, khaDung) => {
-    if (khaDung === 0) return 'admin-seat--locked';
-    const type = seatTypes.find(t => t.MaLoaiGhe === typeId);
-    const typeName = type?.TenLoaiGhe || '';
-    if (typeName.includes('VIP')) {
-      return 'admin-seat--vip';
-    }
-    if (typeName.includes('Sweetbox')) {
-      return 'admin-seat--sweetbox';
-    }
-    return 'admin-seat--standard';
-  };
+  const getSeatTypeName = (typeId) => seatTypes.find((type) => type.MaLoaiGhe === typeId)?.TenLoaiGhe || 'Thường';
 
   if (loading) return (
     <AdminLayout>
@@ -193,7 +183,7 @@ const SeatMaps = () => {
                       className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all group cursor-pointer"
                     >
                       <span className="text-sm font-bold text-slate-300 group-hover:text-white">{type.TenLoaiGhe}</span>
-                      <div className={`w-4 h-4 rounded ${getSeatColor(type.MaLoaiGhe, 1)} border border-white/10`}></div>
+                      <CinemaSeat label="" typeName={type.TenLoaiGhe} compact disabled className="pointer-events-none !h-6 !w-8" />
                     </button>
                   ))}
                 </div>
@@ -253,46 +243,29 @@ const SeatMaps = () => {
                   );
                 }
                 return (
-                  <button
+                  <CinemaSeat
                     key={seat.MaChiTietSoDo}
-                    onClick={(e) => handleSeatClick(seat.MaChiTietSoDo, e)}
-                    className={`admin-seat group/seat
-                      ${getSeatColor(seat.MaLoaiGhe, seat.KhaDung)}
-                      ${selectedSeats.includes(seat.MaChiTietSoDo) ? 'admin-seat--selected' : ''}
-                    `}
-                  >
-                    {seat.KhaDung === 0 ? <Lock size={12} className="opacity-50" /> : `${seat.Hang}${seat.Cot}`}
-                    
-                    {/* Tooltip on hover */}
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#0a0d14] rounded text-[8px] text-white opacity-0 group-hover/seat:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none border border-white/10">
-                      Hàng {seat.Hang} - Cột {seat.Cot}
-                    </div>
-                  </button>
+                    label={`${seat.Hang}${seat.Cot}`}
+                    typeName={getSeatTypeName(seat.MaLoaiGhe)}
+                    state={seat.KhaDung === 0 ? 'locked' : 'available'}
+                    selected={selectedSeats.includes(seat.MaChiTietSoDo)}
+                    compact
+                    onClick={(event) => handleSeatClick(seat.MaChiTietSoDo, event)}
+                  />
                 );
               })}
             </div>
 
             {/* Legend */}
-            <div className="admin-seat-legend">
-              <div className="flex items-center gap-3">
-                <div className="admin-seat-swatch admin-seat--standard"></div>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thường</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="admin-seat-swatch admin-seat--vip"></div>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">VIP</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="admin-seat-swatch admin-seat--sweetbox"></div>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sweetbox</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="admin-seat-swatch admin-seat--locked flex items-center justify-center">
-                  <Lock size={10} />
-                </div>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Đã Khóa</span>
-              </div>
-            </div>
+            <SeatLegend
+              className="mt-10"
+              items={[
+                { label: 'Thường', typeName: 'Thường' },
+                { label: 'VIP', typeName: 'VIP' },
+                { label: 'Sweetbox', typeName: 'Sweetbox' },
+                { label: 'Đã khóa', typeName: 'Thường', state: 'locked' },
+              ]}
+            />
           </div>
         </div>
       </div>

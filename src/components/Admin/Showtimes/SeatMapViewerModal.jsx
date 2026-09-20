@@ -1,11 +1,11 @@
 import Modal from '../Common/Modal';
+import { CinemaSeat, SeatLegend } from '../../Seats/SeatVisuals';
 
-const getSeatColor = (status, khaDung, isVIP) => {
-  if (khaDung === 0) return 'admin-showtime-seat--locked';
-  if (status === 1) return 'admin-showtime-seat--sold';
-  if (status === 2) return 'admin-showtime-seat--held';
-  if (isVIP) return 'admin-showtime-seat--vip';
-  return 'admin-showtime-seat--empty';
+const getSeatState = (seat) => {
+  if (seat.KhaDung === 0) return 'locked';
+  if (seat.TrangThai === 1) return 'sold';
+  if (seat.TrangThai === 2) return 'held';
+  return 'available';
 };
 
 const SeatsGrid = ({ seats }) => {
@@ -55,15 +55,15 @@ const SeatsGrid = ({ seats }) => {
             <span className="w-6 text-xs font-black text-slate-600 font-mono text-center">{rowName}</span>
             <div className="flex gap-2">
               {rowsMap[rowName].map(seat => {
-                const isVIP = seat.TenLoaiGhe?.toUpperCase().includes('VIP');
                 return (
-                  <div
+                  <CinemaSeat
                     key={seat.MaGheSuatChieu}
-                    title={`Ghế: ${seat.label} | Loại: ${seat.TenLoaiGhe || 'Thường'} | ${seat.TrangThai === 0 ? 'Trống' : seat.TrangThai === 1 ? 'Đã đặt' : 'Đang giữ'}`}
-                    className={`admin-showtime-seat ${getSeatColor(seat.TrangThai, seat.KhaDung, isVIP)}`}
-                  >
-                    {seat.label}
-                  </div>
+                    label={seat.label}
+                    typeName={seat.TenLoaiGhe}
+                    state={getSeatState(seat)}
+                    compact
+                    disabled
+                  />
                 );
               })}
             </div>
@@ -71,20 +71,16 @@ const SeatsGrid = ({ seats }) => {
           </div>
         ))}
       </div>
-      <div className="admin-showtime-seat-legend">
-        {[
-          { color: 'admin-showtime-seat--empty', label: 'Trống' },
-          { color: 'admin-showtime-seat--vip', label: 'Ghế VIP' },
-          { color: 'admin-showtime-seat--held', label: 'Đang giữ' },
-          { color: 'admin-showtime-seat--sold', label: 'Đã bán' },
-          { color: 'admin-showtime-seat--locked', label: 'Bị khóa' },
-        ].map(({ color, label }) => (
-          <div key={label} className="flex items-center gap-2">
-            <div className={`admin-showtime-seat-swatch ${color}`} />
-            <span>{label}</span>
-          </div>
-        ))}
-      </div>
+      <SeatLegend
+        className="mt-6 border-t border-neutral-200 pt-4"
+        items={[
+          { label: 'Trống', typeName: 'Thường' },
+          { label: 'Ghế VIP', typeName: 'VIP' },
+          { label: 'Đang giữ', typeName: 'Thường', state: 'held' },
+          { label: 'Đã bán', typeName: 'Thường', state: 'sold' },
+          { label: 'Bị khóa', typeName: 'Thường', state: 'locked' },
+        ]}
+      />
     </div>
   );
 };
