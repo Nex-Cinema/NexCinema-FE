@@ -8,6 +8,7 @@ import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
 import AdminTable from '../../components/Admin/Common/AdminTable';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 import StatusBadge from '../../components/Admin/Common/StatusBadge';
 import { banners, blogPosts } from '../../constants/adminContentData';
 import { showSuccess } from '../../utils/toastHelper';
@@ -77,7 +78,7 @@ const ContentListPage = ({ kind }) => {
   return (
     <AdminLayout>
       <AdminPageHeader title={config.title} subtitle={config.subtitle} action={<AdminButton icon={Plus} onClick={() => navigate(`${config.basePath}/new`)}>{config.createLabel}</AdminButton>} />
-      <AdminToolbar searchPlaceholder={`Tìm kiếm ${config.title.toLowerCase()}...`} searchValue={query} onSearchChange={(value) => { setQuery(value); setPage(1); }} filterSlot={<select className="admin-input min-w-44" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}>{['Tất cả', 'Bản nháp', 'Đã lên lịch', 'Đã xuất bản', 'Đang hoạt động'].map((value) => <option key={value}>{value}</option>)}</select>} />
+      <AdminToolbar searchPlaceholder={`Tìm kiếm ${config.title.toLowerCase()}...`} searchValue={query} onSearchChange={(value) => { setQuery(value); setPage(1); }} filterSlot={<AdminFilterSelect aria-label="Lọc theo trạng thái" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}>{['Tất cả', 'Bản nháp', 'Đã lên lịch', 'Đã xuất bản', 'Đang hoạt động'].map((value) => <option key={value}>{value}</option>)}</AdminFilterSelect>} />
       <AdminTable columns={columns} data={paginatedRows} rowKey="id" />
       <AdminPagination page={page} pageSize={pageSize} total={filteredRows.length} onPageChange={setPage} onPageSizeChange={(value) => { setPageSize(value); setPage(1); }} />
       <AdminConfirmDialog isOpen={Boolean(pendingDelete)} title={pendingDelete ? `Xóa “${pendingDelete.title || pendingDelete.name}”?` : 'Xóa nội dung?'} message={kind === 'blog' ? 'Bài viết sẽ không còn xuất hiện trên website. Hành động này không thể hoàn tác.' : 'Banner sẽ bị gỡ khỏi tất cả vị trí đang hiển thị trên website.'} confirmText={kind === 'blog' ? 'Xóa bài viết' : 'Xóa banner'} onConfirm={handleDelete} onCancel={() => setPendingDelete(null)} />

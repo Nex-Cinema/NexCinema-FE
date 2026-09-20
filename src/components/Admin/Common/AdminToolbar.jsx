@@ -19,14 +19,14 @@ const AdminToolbar = ({ children, searchPlaceholder, searchValue, onSearchChange
 
       {/* Filter and custom content block */}
       {filterSlot && (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="admin-toolbar-filters">
           {filterSlot}
         </div>
       )}
 
       {/* Action block */}
       {actionSlot && (
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="admin-toolbar-actions">
           {actionSlot}
         </div>
       )}

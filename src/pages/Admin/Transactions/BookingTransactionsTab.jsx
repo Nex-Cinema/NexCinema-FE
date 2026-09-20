@@ -2,6 +2,7 @@ import AdminTable from '../../../components/Admin/Common/AdminTable';
 import StatusBadge from '../../../components/Admin/Common/StatusBadge';
 import AdminToolbar from '../../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../../components/Admin/Common/AdminPagination';
+import AdminFilterSelect from '../../../components/Admin/Common/AdminFilterSelect';
 import { formatPrice } from './formatPrice';
 import { Landmark, CreditCard, DollarSign, RotateCcw } from 'lucide-react';
 import { normalizePaymentMethod, getPaymentMethodLabel } from '../../../utils/paymentMethodHelper';
@@ -108,8 +109,8 @@ export default function BookingTransactionsTab() {
             filterSlot={
               <>
                 {/* Status Filter */}
-                <select 
-                  className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
+                <AdminFilterSelect
+                  aria-label="Lọc giao dịch theo trạng thái"
                   value={filters.status || 'All'}
                   onChange={e => setFilterVal('status', e.target.value)}
                 >
@@ -117,11 +118,11 @@ export default function BookingTransactionsTab() {
                   <option value="Success">Thành công (Success)</option>
                   <option value="Refunded">Đã hoàn tiền (Refunded)</option>
                   <option value="Failed">Thất bại (Failed)</option>
-                </select>
+                </AdminFilterSelect>
 
                 {/* Method Filter */}
-                <select 
-                  className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
+                <AdminFilterSelect
+                  aria-label="Lọc theo phương thức thanh toán"
                   value={filters.method || 'All'}
                   onChange={e => setFilterVal('method', e.target.value)}
                 >
@@ -132,7 +133,7 @@ export default function BookingTransactionsTab() {
                   <option value="TIEN_MAT">Tiền mặt</option>
                   <option value="CHUYEN_KHOAN">Chuyển khoản</option>
                   <option value="MOMO">MoMo (cũ)</option>
-                </select>
+                </AdminFilterSelect>
               </>
             }
           />

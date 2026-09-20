@@ -14,6 +14,8 @@ import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
 import AdminButton from '../../components/Admin/Common/AdminButton';
+import AdminDateFilter from '../../components/Admin/Common/AdminDateFilter';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 
 const today = new Date().toISOString().substring(0, 10);
 
@@ -234,59 +236,42 @@ const Showtimes = () => {
           filterSlot={
             <>
               {/* Date Filter */}
-              <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-[9px] focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20 transition-all">
-                <span className="text-slate-500 text-[10px] font-black uppercase tracking-wider select-none">Ngày:</span>
-                <input
-                  type="date"
-                  value={filters.date || ''}
-                  onChange={e => setFilterVal('date', e.target.value || '')}
-                  className="bg-transparent border-none text-xs font-bold text-slate-300 focus:outline-none cursor-pointer p-0 [color-scheme:dark]"
-                />
-                {filters.date && (
-                  <button
-                    type="button"
-                    onClick={() => setFilterVal('date', '')}
-                    className="text-xs text-red-400 hover:text-red-300 font-bold transition-all ml-1 cursor-pointer"
-                  >
-                    Xóa
-                  </button>
-                )}
-              </div>
+              <AdminDateFilter label="Ngày" value={filters.date} onChange={(value) => setFilterVal('date', value)} />
 
               {/* Movie Filter */}
-              <select
+              <AdminFilterSelect
+                aria-label="Lọc theo phim"
                 value={filters.movieId || 'All'}
                 onChange={e => setFilterVal('movieId', e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14] max-w-[200px]"
               >
                 <option value="All">Tất cả phim</option>
                 {movies.map(m => (
                   <option key={m.MaPhim} value={m.MaPhim}>{m.TenPhim}</option>
                 ))}
-              </select>
+              </AdminFilterSelect>
 
               {/* Room Filter */}
-              <select
+              <AdminFilterSelect
+                aria-label="Lọc theo phòng"
                 value={filters.roomId || 'All'}
                 onChange={e => setFilterVal('roomId', e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14] max-w-[150px]"
               >
                 <option value="All">Tất cả phòng</option>
                 {rooms.map(r => (
                   <option key={r.MaPhongChieu} value={r.MaPhongChieu}>{r.TenPhong}</option>
                 ))}
-              </select>
+              </AdminFilterSelect>
 
               {/* Active Status Filter */}
-              <select
+              <AdminFilterSelect
+                aria-label="Lọc theo trạng thái"
                 value={filters.activeStatus || 'All'}
                 onChange={e => setFilterVal('activeStatus', e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14] max-w-[150px]"
               >
                 <option value="All">Tất cả trạng thái</option>
                 <option value={1}>Khả dụng</option>
                 <option value={0}>Không khả dụng</option>
-              </select>
+              </AdminFilterSelect>
             </>
           }
         />

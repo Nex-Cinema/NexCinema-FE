@@ -2,6 +2,7 @@ import AdminTable from '../../../components/Admin/Common/AdminTable';
 import StatusBadge from '../../../components/Admin/Common/StatusBadge';
 import AdminToolbar from '../../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../../components/Admin/Common/AdminPagination';
+import AdminFilterSelect from '../../../components/Admin/Common/AdminFilterSelect';
 import { formatPrice } from './formatPrice';
 import { AlertTriangle, Eye, Check, X } from 'lucide-react';
 import Modal from '../../../components/Admin/Common/Modal';
@@ -111,8 +112,8 @@ export default function RefundRequestsTab({ activeTab }) {
             searchValue={keywordInput}
             onSearchChange={setKeywordInput}
             filterSlot={
-              <select 
-                className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
+              <AdminFilterSelect
+                aria-label="Lọc yêu cầu hoàn tiền theo trạng thái"
                 value={refundFilters.trangThai}
                 onChange={e => {
                   setRefundFilters(prev => ({ ...prev, trangThai: e.target.value }));
@@ -123,7 +124,7 @@ export default function RefundRequestsTab({ activeTab }) {
                 <option value="CHO_XU_LY">Chờ xử lý (CHO_XU_LY)</option>
                 <option value="DA_HOAN">Đã hoàn (DA_HOAN)</option>
                 <option value="TU_CHOI">Từ chối (TU_CHOI)</option>
-              </select>
+              </AdminFilterSelect>
             }
           />
 

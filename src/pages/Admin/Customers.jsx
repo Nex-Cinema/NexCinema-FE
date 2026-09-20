@@ -11,6 +11,9 @@ import { showSuccess, showError } from '../../utils/toastHelper';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
+import { AdminPersonCell } from '../../components/Admin/Common/AdminEntityCell';
+import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
 
 const Customers = () => {
@@ -130,17 +133,7 @@ const Customers = () => {
   const columns = [
     {
       header: 'Khách hàng',
-      render: (c) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600/20 to-rose-600/20 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-sm tracking-wide shrink-0">
-            {c.HoTen.charAt(0)}
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-bold text-white text-sm truncate">{c.HoTen}</span>
-            <span className="text-xs text-slate-500 truncate">{c.Email}</span>
-          </div>
-        </div>
-      )
+      render: (c) => <AdminPersonCell name={c.HoTen} email={c.Email} />
     },
     { header: 'Số điện thoại', accessor: 'SoDienThoai', className: 'text-sm text-slate-400 font-mono' },
     { header: 'Giới tính', accessor: 'GioiTinh', className: 'text-sm text-slate-400 font-semibold' },
@@ -155,21 +148,19 @@ const Customers = () => {
       className: 'text-right',
       render: (c) => (
         <div className="flex justify-end gap-2">
-          <button 
+          <button
             onClick={() => openHistoryDrawer(c)}
-            className="p-2 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 hover:text-white rounded-xl transition-all cursor-pointer"
+            className="admin-table-action"
             title="Lịch sử mua vé"
+            aria-label={`Xem lịch sử mua vé của ${c.HoTen}`}
           >
             <History size={16} />
           </button>
           <button 
             onClick={() => openLockModal(c)}
-            className={`p-2 bg-white/5 border border-white/5 rounded-xl transition-all cursor-pointer ${
-              c.TrangThai === 'Active' 
-                ? 'hover:bg-red-500/10 text-slate-400 hover:text-red-500 hover:border-red-500/20' 
-                : 'hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-500 hover:border-emerald-500/20'
-            }`} 
+            className={`admin-table-action ${c.TrangThai === 'Active' ? 'admin-table-action--danger' : ''}`}
             title={c.TrangThai === 'Active' ? 'Khóa tài khoản' : 'Mở khóa'}
+            aria-label={`${c.TrangThai === 'Active' ? 'Khóa' : 'Mở khóa'} tài khoản ${c.HoTen}`}
           >
             {c.TrangThai === 'Active' ? <UserX size={16} /> : <UserCheck size={16} />}
           </button>
@@ -191,25 +182,23 @@ const Customers = () => {
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         filterSlot={
-          <select 
-            className="bg-white/[0.04] border border-white/10 rounded-xl px-6 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
+          <AdminFilterSelect
+            aria-label="Lọc khách hàng theo trạng thái"
             value={filters.status || 'All'}
             onChange={e => setFilterVal('status', e.target.value)}
           >
             <option value="All">Tất cả trạng thái</option>
             <option value="Active">Đang hoạt động</option>
             <option value="Banned">Bị khóa</option>
-          </select>
+          </AdminFilterSelect>
         }
       />
 
       {/* Table */}
       {loading ? (
-        <div className="bg-white/5 border border-white/5 rounded-3xl h-64 animate-pulse" />
+        <AdminLoadingSkeleton rows={5} />
       ) : paginatedItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white/[0.02] border border-white/10 rounded-3xl text-sm font-semibold">
-          Không tìm thấy dữ liệu phù hợp
-        </div>
+        <AdminEmptyState title="Không tìm thấy khách hàng" description="Thử thay đổi từ khóa hoặc trạng thái tài khoản." />
       ) : (
         <>
           <AdminTable columns={columns} data={paginatedItems} rowKey="MaKhachHang" />

@@ -1,21 +1,12 @@
 import AdminTable from '../Common/AdminTable';
+import { AdminPersonCell } from '../Common/AdminEntityCell';
 import { Edit2, UserX, UserCheck } from 'lucide-react';
 
 const PersonnelTable = ({ staff, onEdit, onToggleStatus }) => {
   const columns = [
     {
       header: 'Nhân viên',
-      render: (person) => (
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white font-bold border border-white/10 shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.15)] text-sm">
-            {person.HoTen.charAt(0)}
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-white text-sm">{person.HoTen}</span>
-            <span className="text-[10px] text-slate-500 font-mono font-bold">{person.Email}</span>
-          </div>
-        </div>
-      ),
+      render: (person) => <AdminPersonCell name={person.HoTen} email={person.Email} />,
     },
     { header: 'Số điện thoại', accessor: 'SoDienThoai', className: 'text-sm text-slate-400 font-mono' },
     { header: 'Ngày sinh', accessor: 'NgaySinh', className: 'text-sm text-slate-400 font-mono' },
@@ -43,16 +34,13 @@ const PersonnelTable = ({ staff, onEdit, onToggleStatus }) => {
       className: 'text-right',
       render: (person) => (
         <div className="flex justify-end gap-1.5">
-          <button onClick={() => onEdit(person)} className="p-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl text-slate-400 hover:text-white transition-all cursor-pointer" title="Sửa">
+          <button onClick={() => onEdit(person)} className="admin-table-action" title="Sửa" aria-label={`Sửa ${person.HoTen}`}>
             <Edit2 size={16} />
           </button>
           <button onClick={() => onToggleStatus(person)}
-            className={`p-2 border border-transparent rounded-xl transition-all cursor-pointer ${
-              person.KhaDung === 1 
-                ? 'hover:bg-red-500/10 text-slate-500 hover:text-red-400 hover:border-red-500/10' 
-                : 'hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/10'
-            }`}
+            className={`admin-table-action ${person.KhaDung === 1 ? 'admin-table-action--danger' : ''}`}
             title={person.KhaDung === 1 ? 'Vô hiệu hóa' : 'Kích hoạt'}
+            aria-label={`${person.KhaDung === 1 ? 'Vô hiệu hóa' : 'Kích hoạt'} ${person.HoTen}`}
           >
             {person.KhaDung === 1 ? <UserX size={16} /> : <UserCheck size={16} />}
           </button>

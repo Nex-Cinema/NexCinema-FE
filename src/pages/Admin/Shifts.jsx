@@ -13,6 +13,8 @@ import { showSuccess, showError } from '../../utils/toastHelper';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
+import AdminDateFilter from '../../components/Admin/Common/AdminDateFilter';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 
 const Shifts = () => {
   const [activeTab, setActiveTab] = useState('shifts');
@@ -172,15 +174,15 @@ const Shifts = () => {
           searchValue={shiftPagination.searchQuery}
           onSearchChange={shiftPagination.setSearchQuery}
           filterSlot={
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc ca làm việc theo trạng thái"
               value={shiftPagination.filters.activeStatus || 'All'}
               onChange={e => shiftPagination.setFilterVal('activeStatus', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả trạng thái</option>
               <option value={1}>Khả dụng</option>
               <option value={0}>Không khả dụng</option>
-            </select>
+            </AdminFilterSelect>
           }
         />
       ) : (
@@ -191,35 +193,18 @@ const Shifts = () => {
           filterSlot={
             <>
               {/* Date Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500 text-xs font-semibold">Ngày làm:</span>
-                <input
-                  type="date"
-                  value={regPagination.filters.date || ''}
-                  onChange={e => regPagination.setFilterVal('date', e.target.value || '')}
-                  className="bg-white/[0.04] border border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer"
-                />
-                {regPagination.filters.date && (
-                  <button
-                    type="button"
-                    onClick={() => regPagination.setFilterVal('date', '')}
-                    className="text-xs text-red-400 hover:text-red-300 font-bold transition-all"
-                  >
-                    Xóa
-                  </button>
-                )}
-              </div>
+              <AdminDateFilter label="Ngày làm" value={regPagination.filters.date} onChange={(value) => regPagination.setFilterVal('date', value)} />
 
               {/* Status Filter */}
-              <select
+              <AdminFilterSelect
+                aria-label="Lọc đăng ký theo trạng thái"
                 value={regPagination.filters.activeStatus || 'All'}
                 onChange={e => regPagination.setFilterVal('activeStatus', e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
               >
                 <option value="All">Tất cả trạng thái</option>
                 <option value={1}>Hoạt động (Đăng ký)</option>
                 <option value={0}>Đã hủy</option>
-              </select>
+              </AdminFilterSelect>
             </>
           }
         />

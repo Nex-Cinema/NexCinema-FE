@@ -9,6 +9,8 @@ import AdminPagination from '../../components/Admin/Common/AdminPagination';
 import { AdminErrorState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
 import AdminTable from '../../components/Admin/Common/AdminTable';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
+import { AdminMovieCell } from '../../components/Admin/Common/AdminEntityCell';
 import StatusBadge from '../../components/Admin/Common/StatusBadge';
 import adminService from '../../services/adminService';
 import { showError, showSuccess } from '../../utils/toastHelper';
@@ -72,7 +74,7 @@ const Movies = () => {
   };
 
   const columns = [
-    { header: 'Phim', render: (movie) => <div className="admin-movie-cell"><div className="admin-poster-thumb">{movie.HinhAnh ? <img src={movie.HinhAnh} alt="" /> : <span>{movie.TenPhim?.[0]}</span>}</div><div><strong>{movie.TenPhim}</strong><small>{movie.DaoDien || 'Chưa cập nhật đạo diễn'}</small></div></div> },
+    { header: 'Phim', render: (movie) => <AdminMovieCell image={movie.HinhAnh} title={movie.TenPhim} subtitle={movie.DaoDien || 'Chưa cập nhật đạo diễn'} /> },
     { header: 'Trạng thái', render: (movie) => <StatusBadge status={getMovieStatus(movie)} /> },
     { header: 'Thể loại', accessor: 'TheLoai' },
     { header: 'Thời lượng', render: (movie) => `${movie.ThoiLuong || 0} phút` },
@@ -88,7 +90,7 @@ const Movies = () => {
         searchPlaceholder="Tìm theo tên phim, thể loại, đạo diễn..."
         searchValue={searchQuery}
         onSearchChange={(value) => { setSearchQuery(value); setPage(1); }}
-        filterSlot={<select className="admin-input min-w-44" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}>{['Tất cả', 'Đang chiếu', 'Sắp chiếu', 'Ngừng chiếu', 'Đang ẩn'].map((status) => <option key={status}>{status}</option>)}</select>}
+        filterSlot={<AdminFilterSelect aria-label="Lọc theo trạng thái" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}>{['Tất cả', 'Đang chiếu', 'Sắp chiếu', 'Ngừng chiếu', 'Đang ẩn'].map((status) => <option key={status}>{status}</option>)}</AdminFilterSelect>}
       />
       {loading ? <AdminLoadingSkeleton rows={6} /> : loadError ? <AdminErrorState onRetry={loadMovies} /> : <AdminTable columns={columns} data={paginatedMovies} rowKey="MaPhim" />}
       {!loading && !loadError && <AdminPagination page={page} pageSize={pageSize} total={filteredMovies.length} onPageChange={setPage} onPageSizeChange={(value) => { setPageSize(value); setPage(1); }} />}

@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/Admin/Layout/AdminLayout';
-import Modal from '../../components/Admin/Common/Modal';
 import AdminTable from '../../components/Admin/Common/AdminTable';
 import adminService from '../../services/adminService';
 import useAdminForm from '../../hooks/useAdminForm';
@@ -12,6 +11,10 @@ import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
 import AdminButton from '../../components/Admin/Common/AdminButton';
+import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
+import SeatMapPreviewModal from '../../components/Admin/SeatMaps/SeatMapPreviewModal';
+import SeatMapTemplateModal from '../../components/Admin/SeatMaps/SeatMapTemplateModal';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 
 const SeatMapTemplates = () => {
   const [templates, setTemplates] = useState([]);
@@ -38,16 +41,24 @@ const SeatMapTemplates = () => {
   };
 
   useEffect(() => {
-    loadData();
+    let ignore = false;
+    const fetchData = async () => {
+      const data = await adminService.getSeatMaps();
+      if (!ignore) {
+        setTemplates(data);
+        setLoading(false);
+      }
+    };
+    fetchData();
+    return () => { ignore = true; };
   }, []);
 
   const {
     formData,
     setFormData,
     handleChange,
-    handleSubmit,
-    resetForm
-  } = useAdminForm(initialFormState, async (data) => {
+    handleSubmit
+  } = useAdminForm(initialFormState, async (data, { resetForm }) => {
     try {
       if (editingTemplate) {
         await adminService.updateSeatMap(editingTemplate.MaSoDoGhe, {
@@ -175,42 +186,6 @@ const SeatMapTemplates = () => {
     }
   ];
 
-  // Preview Matrix Logic
-  const previewMatrix = useMemo(() => {
-    if (!previewTemplate) return [];
-    const { TongHang, TongCot, CauTruc } = previewTemplate;
-    let struct = { aisles: { rows: [], cols: [] } };
-    
-    if (CauTruc) {
-      try {
-        struct = typeof CauTruc === 'string' ? JSON.parse(CauTruc) : CauTruc;
-      } catch (e) { 
-        console.error("JSON Parse error", e); 
-      }
-    }
-
-    const result = [];
-    for (let r = 0; r < TongHang; r++) {
-      const row = [];
-      const rowChar = String.fromCharCode(65 + r);
-      for (let c = 0; c < TongCot; c++) {
-        let isAisle = struct?.aisles?.cols?.includes(c + 1) || struct?.aisles?.rows?.includes(r + 1);
-        if (!isAisle && struct?.aisles?.custom) {
-          const customRow = struct.aisles.custom.find(item => item.row === r);
-          if (customRow) {
-            isAisle = customRow.cols.includes(c) || customRow.cols.includes(c + 1);
-          }
-        }
-        row.push({
-          id: `${rowChar}${c + 1}`,
-          isAisle
-        });
-      }
-      result.push(row);
-    }
-    return result;
-  }, [previewTemplate]);
-
   return (
     <AdminLayout>
       <AdminPageHeader
@@ -229,25 +204,26 @@ const SeatMapTemplates = () => {
         filterSlot={
           <>
             {/* Active Status filter */}
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc theo trạng thái"
               value={filters.activeStatus || 'All'}
               onChange={e => setFilterVal('activeStatus', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả trạng thái</option>
               <option value={1}>Khả dụng</option>
               <option value={0}>Không khả dụng</option>
-            </select>
+            </AdminFilterSelect>
           </>
         }
       />
 
       {loading ? (
-        <div className="bg-white/5 border border-white/5 rounded-3xl h-64 animate-pulse"></div>
+        <AdminLoadingSkeleton rows={5} />
       ) : paginatedItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white/[0.02] border border-white/10 rounded-3xl text-sm font-semibold">
-          Không tìm thấy dữ liệu phù hợp
-        </div>
+        <AdminEmptyState
+          title="Không tìm thấy sơ đồ ghế"
+          description="Thử thay đổi từ khóa hoặc bộ lọc để xem thêm kết quả."
+        />
       ) : (
         <>
           <AdminTable columns={columns} data={paginatedItems} rowKey="MaSoDoGhe" showDetailAction={false} />
@@ -261,113 +237,19 @@ const SeatMapTemplates = () => {
         </>
       )}
 
-      {/* Create/Edit Modal */}
-      <Modal 
-        isOpen={isModalOpen} 
+      <SeatMapTemplateModal
+        isOpen={isModalOpen}
+        editingTemplate={editingTemplate}
+        formData={formData}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onClose={() => {
           setIsModalOpen(false);
           setEditingTemplate(null);
         }}
-        title={editingTemplate ? "Cập nhật sơ đồ mẫu" : "Tạo sơ đồ mẫu mới"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mã sơ đồ (MaSoDoGhe)</label>
-            <input 
-              type="text" name="MaSoDoGhe" required
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 text-white font-mono disabled:opacity-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-              value={formData.MaSoDoGhe} onChange={handleChange}
-              placeholder="VD: SM10x12"
-              disabled={!!editingTemplate}
-            />
-          </div>
+      />
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tổng số hàng</label>
-              <input 
-                type="number" name="TongHang" required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-                value={formData.TongHang} onChange={handleChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tổng số cột</label>
-              <input 
-                type="number" name="TongCot" required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-                value={formData.TongCot} onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cấu trúc (JSON)</label>
-            <textarea 
-              name="CauTruc"
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 text-white font-mono text-xs min-h-[100px] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-              value={formData.CauTruc} onChange={handleChange}
-            ></textarea>
-            <p className="text-[10px] text-slate-600">Định nghĩa vị trí lối đi (aisles) theo cột hoặc hàng.</p>
-          </div>
-
-          {editingTemplate && (
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Khả dụng (KhaDung)</label>
-              <select 
-                name="KhaDung"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-300 [&>option]:bg-[#0a0d14]"
-                value={formData.KhaDung}
-                onChange={handleChange}
-              >
-                <option value={1}>1 (Khả dụng)</option>
-                <option value={0}>0 (Chưa khả dụng)</option>
-              </select>
-            </div>
-          )}
-
-          <div className="flex gap-4 pt-4 border-t border-white/5">
-            <button 
-              type="button" 
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditingTemplate(null);
-              }} 
-              className="flex-grow py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 hover:text-white transition-all text-xs uppercase tracking-widest cursor-pointer text-slate-400"
-            >
-              Hủy
-            </button>
-            <button type="submit" className="flex-grow py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-lg shadow-red-500/20 transition-all text-xs uppercase tracking-widest cursor-pointer">Lưu mẫu</button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Preview Modal */}
-      <Modal
-        isOpen={!!previewTemplate}
-        onClose={() => setPreviewTemplate(null)}
-        title={`Xem trước: ${previewTemplate?.MaSoDoGhe}`}
-      >
-        <div className="flex flex-col items-center p-8">
-          <div className="admin-template-screen">
-            <span>Màn hình</span>
-          </div>
-          
-          <div 
-            className="admin-template-seat-grid custom-scrollbar"
-            style={{ gridTemplateColumns: `repeat(${previewTemplate?.TongCot}, minmax(0, 1fr))` }}
-          >
-            {previewMatrix.flat().map((cell, i) => (
-              <div 
-                key={i}
-                className={cell.isAisle ? 'admin-template-seat admin-template-seat--aisle' : 'admin-template-seat'}
-              >
-                {!cell.isAisle && cell.id}
-              </div>
-            ))}
-          </div>
-        </div>
-      </Modal>
+      <SeatMapPreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} />
 
       <ConfirmDialog
         isOpen={confirmState.isOpen}

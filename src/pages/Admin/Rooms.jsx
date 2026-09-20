@@ -1,19 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/Admin/Layout/AdminLayout';
-import Modal from '../../components/Admin/Common/Modal';
 import AdminTable from '../../components/Admin/Common/AdminTable';
 import StatusBadge from '../../components/Admin/Common/StatusBadge';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import adminService from '../../services/adminService';
 import useAdminForm from '../../hooks/useAdminForm';
-import { LayoutGrid, Plus, Edit2, Trash2, AlertCircle } from 'lucide-react';
+import { LayoutGrid, Plus, Edit2, Trash2 } from 'lucide-react';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { showSuccess, showError } from '../../utils/toastHelper';
 
 import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
+import AdminButton from '../../components/Admin/Common/AdminButton';
+import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
+import RoomModal from '../../components/Admin/Rooms/RoomModal';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 
 const Rooms = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,13 +240,9 @@ const Rooms = () => {
         title="Quản lý phòng chiếu"
         subtitle="Định nghĩa và kiểm soát cơ sở hạ tầng phòng chiếu vật lý."
         action={
-          <button 
-            onClick={handleOpenAddModal}
-            className="w-full md:w-auto bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-sm"
-          >
-            <Plus size={18} />
+          <AdminButton icon={Plus} onClick={handleOpenAddModal} className="w-full justify-center md:w-auto">
             Thêm phòng chiếu
-          </button>
+          </AdminButton>
         }
       />
 
@@ -255,10 +254,10 @@ const Rooms = () => {
         filterSlot={
           <>
             {/* Room Type filter */}
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc theo loại phòng"
               value={filters.roomType || 'All'}
               onChange={e => setFilterVal('roomType', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả loại phòng</option>
               {roomTypes.map(type => (
@@ -266,28 +265,29 @@ const Rooms = () => {
                   {type.TenLoaiPhong} ({type.MaLoaiPhong})
                 </option>
               ))}
-            </select>
+            </AdminFilterSelect>
 
             {/* Active Status filter */}
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc theo trạng thái"
               value={filters.activeStatus || 'All'}
               onChange={e => setFilterVal('activeStatus', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả trạng thái</option>
               <option value={1}>Khả dụng</option>
               <option value={0}>Không khả dụng</option>
-            </select>
+            </AdminFilterSelect>
           </>
         }
       />
 
       {loading ? (
-        <div className="bg-white/5 border border-white/5 rounded-3xl h-64 animate-pulse"></div>
+        <AdminLoadingSkeleton rows={5} />
       ) : paginatedItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white/[0.02] border border-white/10 rounded-3xl text-sm font-semibold">
-          Không tìm thấy dữ liệu phù hợp
-        </div>
+        <AdminEmptyState
+          title="Không tìm thấy phòng chiếu"
+          description="Thử thay đổi từ khóa hoặc bộ lọc để xem thêm kết quả."
+        />
       ) : (
         <>
           <AdminTable columns={columns} data={paginatedItems} rowKey="MaPhongChieu" />
@@ -301,116 +301,20 @@ const Rooms = () => {
         </>
       )}
 
-      <Modal 
-        isOpen={isModalOpen} 
+      <RoomModal
+        isOpen={isModalOpen}
+        editingRoom={editingRoom}
+        formData={formData}
+        errors={errors}
+        roomTypes={roomTypes}
+        seatMaps={seatMaps}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onClose={() => {
           setIsModalOpen(false);
           setEditingRoom(null);
         }}
-        title={editingRoom ? "Cập nhật phòng chiếu" : "Thêm phòng chiếu mới"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {errors.submit && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-4 rounded-xl flex items-center gap-2">
-              <AlertCircle size={16} className="shrink-0" />
-              <span>{errors.submit}</span>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tên phòng chiếu (TenPhong)</label>
-            <input 
-              type="text" 
-              name="TenPhong"
-              required
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-white font-bold placeholder:text-slate-500"
-              value={formData.TenPhong}
-              onChange={handleChange}
-              placeholder="VD: Phòng Chiếu 01"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mã loại phòng (MaLoaiPhong)</label>
-              <select 
-                name="MaLoaiPhong"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-                value={formData.MaLoaiPhong}
-                onChange={handleChange}
-              >
-                {roomTypes.map(type => (
-                  <option key={type.MaLoaiPhong} value={type.MaLoaiPhong}>
-                    {type.MaLoaiPhong} ({type.TenLoaiPhong})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mã sơ đồ ghế (MaSoDoGhe)</label>
-              <select 
-                name="MaSoDoGhe"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-                value={formData.MaSoDoGhe}
-                onChange={handleChange}
-              >
-                {seatMaps.map(map => (
-                  <option key={map.MaSoDoGhe} value={map.MaSoDoGhe}>
-                    {map.MaSoDoGhe} ({map.TongHang}x{map.TongCot})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Số ghế (SoGhe - Tự tính)</label>
-              <div className="w-full bg-white/[0.04] border border-white/5 rounded-xl py-3.5 px-4 text-slate-400 font-bold font-mono">
-                {getSeatCount(formData.MaSoDoGhe)} ghế
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Khả dụng (KhaDung)</label>
-              <select 
-                name="KhaDung"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-                value={formData.KhaDung}
-                onChange={handleChange}
-              >
-                <option value={1}>1 (Khả dụng)</option>
-                <option value={0}>0 (Chưa khả dụng)</option>
-              </select>
-            </div>
-          </div>
-
-          {editingRoom && (
-            <div className="grid grid-cols-2 gap-6 text-[10px] text-slate-500 font-mono bg-white/[0.01] p-3 rounded-lg border border-white/5">
-              <div>Ngày tạo: {editingRoom.NgayTao || '--:--'}</div>
-              <div>Ngày cập nhật: {editingRoom.NgayCapNhat || 'Chưa cập nhật'}</div>
-            </div>
-          )}
-
-          <div className="flex gap-4 pt-4 border-t border-white/5">
-            <button 
-              type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditingRoom(null);
-              }}
-              className="flex-grow py-3 px-6 rounded-xl font-bold text-slate-400 hover:bg-white/5 transition-all border border-white/5 hover:border-white/10 active:scale-95 uppercase tracking-widest text-xs cursor-pointer"
-            >
-              Hủy
-            </button>
-            <button 
-              type="submit"
-              className="flex-grow py-3 px-6 rounded-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 transition-all shadow-lg shadow-red-500/20 text-white active:scale-95 uppercase tracking-widest text-xs cursor-pointer"
-            >
-              {editingRoom ? "Cập nhật" : "Thêm phòng"}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      />
 
       <ConfirmDialog
         isOpen={confirmState.isOpen}

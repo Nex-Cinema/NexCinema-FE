@@ -10,6 +10,10 @@ import { showSuccess, showError } from '../../utils/toastHelper';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import AdminToolbar from '../../components/Admin/Common/AdminToolbar';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
+import AdminButton from '../../components/Admin/Common/AdminButton';
+import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
+import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
+import { Plus } from 'lucide-react';
 
 const defaultForm = {
   HoTen: '', SoDienThoai: '', Email: '', ChucVu: '', Role: 'Staff',
@@ -111,12 +115,7 @@ const Personnel = () => {
         title="Quản lý Nhân viên"
         subtitle="Quản lý hồ sơ nhân viên rạp chiếu phim."
         action={
-          <button 
-            onClick={openAdd} 
-            className="w-full md:w-auto bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-          >
-            + Thêm nhân viên
-          </button>
+          <AdminButton icon={Plus} onClick={openAdd} className="w-full justify-center md:w-auto">Thêm nhân viên</AdminButton>
         }
       />
 
@@ -128,37 +127,35 @@ const Personnel = () => {
         filterSlot={
           <>
             {/* Role filter */}
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc theo vai trò"
               value={filters.role || 'All'}
               onChange={e => setFilterVal('role', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả vai trò</option>
               <option value="Staff">Nhân viên (Staff)</option>
               <option value="Admin">Quản trị viên (Admin)</option>
-            </select>
+            </AdminFilterSelect>
 
             {/* Active Status filter */}
-            <select
+            <AdminFilterSelect
+              aria-label="Lọc theo trạng thái"
               value={filters.activeStatus || 'All'}
               onChange={e => setFilterVal('activeStatus', e.target.value)}
-              className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all cursor-pointer [&>option]:bg-[#0a0d14]"
             >
               <option value="All">Tất cả trạng thái</option>
               <option value={1}>Khả dụng</option>
               <option value={0}>Đã khóa</option>
-            </select>
+            </AdminFilterSelect>
           </>
         }
       />
 
       {/* Table */}
       {loading && staff.length === 0 ? (
-        <div className="bg-white/5 border border-white/5 rounded-3xl h-64 animate-pulse" />
+        <AdminLoadingSkeleton rows={5} />
       ) : paginatedItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white/[0.02] border border-white/10 rounded-3xl text-sm font-semibold">
-          Không tìm thấy dữ liệu phù hợp
-        </div>
+        <AdminEmptyState title="Không tìm thấy nhân viên" description="Thử thay đổi từ khóa, vai trò hoặc trạng thái tài khoản." />
       ) : (
         <>
           <PersonnelTable staff={paginatedItems} onEdit={openEdit} onToggleStatus={handleToggleStatus} />
