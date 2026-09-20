@@ -8,6 +8,7 @@ import customerService from './admin/customerService';
 import transactionService from './admin/transactionService';
 import statsService from './admin/statsService';
 import seatService from './admin/seatService';
+import * as paymentGatewayService from './admin/paymentGatewayService';
 
 const adminService = {
   ...movieService,
@@ -19,7 +20,8 @@ const adminService = {
   ...customerService,
   ...transactionService,
   ...statsService,
-  ...seatService
+  ...seatService,
+  ...paymentGatewayService
 };
 
 export default adminService;
