@@ -17,8 +17,8 @@ const ProfileInfoTab = ({
 }) => {
   return (
     <div className="flex flex-col gap-8 animate-in fade-in duration-300">
-      <h2 className="text-3xl font-black uppercase tracking-wider italic text-white">
-        Thông Tin Khách Hàng
+      <h2 className="text-3xl font-extrabold tracking-tight text-neutral-950">
+        Thông tin khách hàng
       </h2>
 
       {profileLoading ? (
@@ -33,8 +33,8 @@ const ProfileInfoTab = ({
       ) : (
         <>
           {/* KHỐI A: THÔNG TIN CÁ NHÂN */}
-          <div className="bg-white p-6 rounded-2xl flex flex-col gap-6 text-slate-900 shadow-xl">
-            <h3 className="text-xl font-extrabold border-b border-gray-100 pb-2 uppercase tracking-tight">
+          <div className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-900 shadow-sm">
+            <h3 className="border-b border-neutral-100 pb-3 text-xl font-extrabold tracking-tight">
               Thông tin cá nhân
             </h3>
 
@@ -106,7 +106,7 @@ const ProfileInfoTab = ({
                 <button
                   type="submit"
                   disabled={saving}
-                  className={`bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-6 py-3 rounded-lg text-sm uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`client-primary-button px-6 py-3 ${saving ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {saving ? 'Đang lưu...' : 'Lưu thông tin'}
                 </button>
@@ -115,8 +115,8 @@ const ProfileInfoTab = ({
           </div>
 
           {/* KHỐI B: ĐỔI MẬT KHẨU */}
-          <div className="bg-white p-6 rounded-2xl flex flex-col gap-6 text-slate-900 shadow-xl">
-            <h3 className="text-xl font-extrabold border-b border-gray-100 pb-2 uppercase tracking-tight">
+          <div className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-900 shadow-sm">
+            <h3 className="border-b border-neutral-100 pb-3 text-xl font-extrabold tracking-tight">
               Đổi mật khẩu
             </h3>
 
@@ -167,7 +167,7 @@ const ProfileInfoTab = ({
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className={`bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-6 py-3 rounded-lg text-sm uppercase tracking-wider transition-all active:scale-95 cursor-pointer ${changingPassword ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`client-primary-button px-6 py-3 ${changingPassword ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {changingPassword ? 'Đang xử lý...' : 'Đổi mật khẩu'}
                 </button>

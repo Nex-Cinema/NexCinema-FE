@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import ClientLayout from './layouts/ClientLayout';
+import AuthLayout from './layouts/AuthLayout';
 
 // Client Pages
 import Home from './pages/Client/Home';
@@ -66,11 +67,14 @@ function App() {
         }}
       />
       <Routes>
-        <Route element={<ClientLayout />}>
-          <Route path="/" element={<Home />} />
+        <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
+
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/booking/:showtimeId" element={<BookingEntry />} />
           <Route path="/movies/now-showing" element={<MoviesPage key="now" initialType="now" />} />

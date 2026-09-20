@@ -152,10 +152,10 @@ const MovieDetails = () => {
   // ── Loading / Not found ───────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen text-white bg-[#020617] flex items-center justify-center">
+      <div className="client-page-state">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff436e] mx-auto mb-4" />
-          <p className="text-gray-400">Đang tải thông tin chi tiết phim...</p>
+          <div className="client-loader mx-auto mb-4" />
+          <p>Đang tải thông tin chi tiết phim...</p>
         </div>
       </div>
     );
@@ -163,11 +163,11 @@ const MovieDetails = () => {
 
   if (!movie) {
     return (
-      <div className="min-h-screen text-white bg-[#020617] flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-400 text-lg">Không tìm thấy thông tin bộ phim này.</p>
+      <div className="client-page-state">
+        <p className="text-lg">Không tìm thấy thông tin bộ phim này.</p>
         <button
           onClick={() => navigate('/')}
-          className="px-6 py-2 bg-[#ff436e] hover:bg-[#e0325a] font-bold rounded-xl text-white"
+          className="client-primary-button"
         >
           Quay lại Trang Chủ
         </button>
@@ -204,7 +204,7 @@ const MovieDetails = () => {
 
   // ── Default: Movie detail page ────────────────────────────────────────────
   return (
-    <div className="min-h-screen pt-28 pb-12 px-6 md:px-20 max-w-7xl mx-auto flex flex-col gap-16 animate-in fade-in duration-500 relative">
+    <div className="relative mx-auto flex min-h-screen max-w-7xl animate-in flex-col gap-12 px-4 py-10 fade-in sm:px-6 lg:px-8">
 
       {/* Hero: poster + info */}
       <MovieHero

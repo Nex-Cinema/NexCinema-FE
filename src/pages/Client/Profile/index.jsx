@@ -357,7 +357,7 @@ const Profile = () => {
 
   // ────────────────────────────────────────────
   return (
-    <div className="min-h-screen pt-28 pb-16 px-6 md:px-16 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
+    <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 items-start gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
 
       {/* SIDEBAR */}
       <ProfileSidebar

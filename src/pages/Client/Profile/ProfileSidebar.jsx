@@ -39,9 +39,9 @@ const ProfileSidebar = ({
   ];
 
   return (
-    <div className="w-full lg:w-[280px] shrink-0 bg-[#3f3e85]/20 backdrop-blur-md rounded-3xl p-6 border border-white/5 text-center flex flex-col items-center gap-4 shadow-2xl">
+    <aside className="flex w-full shrink-0 flex-col items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm lg:w-[280px]">
       {/* Avatar */}
-      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-yellow-400 shadow-[0_0_20px_rgba(253,224,71,0.2)]">
+      <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-red-100 ring-4 ring-red-50">
         <img
           src={assets.profile || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"}
           alt="User Avatar"
@@ -51,13 +51,13 @@ const ProfileSidebar = ({
 
       {/* User name / username */}
       <div className="text-center w-full mb-2">
-        <h2 className="text-xl font-bold text-white tracking-wide truncate">
+        <h2 className="truncate text-xl font-bold tracking-tight text-neutral-950">
           {userInfo.name || 'Đang tải...'}
         </h2>
         <p className="text-[10px] text-gray-500 font-medium mt-0.5">@{userInfo.username}</p>
       </div>
 
-      <div className="w-full h-px bg-white/5 my-1" />
+      <div className="my-1 h-px w-full bg-neutral-200" />
 
       {/* Navigation */}
       <div className="w-full flex flex-col gap-1 text-left">
@@ -67,8 +67,8 @@ const ProfileSidebar = ({
             onClick={() => onTabChange(key)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
               activeTab === key
-                ? 'bg-white/10 text-yellow-400 font-bold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-red-50 text-(--client-primary) font-bold'
+                : 'text-neutral-500 hover:text-neutral-950 hover:bg-neutral-50'
             }`}
           >
             {icon}
@@ -76,7 +76,7 @@ const ProfileSidebar = ({
           </button>
         ))}
 
-        <div className="w-full h-px bg-white/5 my-2" />
+        <div className="my-2 h-px w-full bg-neutral-200" />
 
         {/* Logout */}
         <button
@@ -87,7 +87,7 @@ const ProfileSidebar = ({
           <span className="whitespace-nowrap">Đăng xuất</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 };
 

@@ -36,13 +36,13 @@ const ShowtimeSelector = ({
   onBook,
 }) => {
   return (
-    <div className="w-full bg-[#1b1223]/60 backdrop-blur-md border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col gap-8 shadow-2xl text-left">
+    <section className="flex w-full flex-col gap-8 rounded-2xl border border-neutral-200 bg-white p-6 text-left shadow-sm md:p-8">
 
       {/* ── Date strip ──────────────────────────────────── */}
       <div className="flex flex-col gap-4 w-full">
-        <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">Chọn Ngày Chiếu</p>
+        <p className="text-sm font-bold uppercase tracking-wider text-neutral-700">Chọn ngày chiếu</p>
         <div className="flex items-center gap-4">
-          <button className="text-gray-500 hover:text-white transition-colors">
+          <button className="text-neutral-400 transition-colors hover:text-neutral-900" aria-label="Ngày trước">
             <ChevronLeft size={24} />
           </button>
           <div className="flex gap-3 overflow-x-auto scrollbar-none py-1">
@@ -54,8 +54,8 @@ const ShowtimeSelector = ({
                   onClick={() => onSelectDate(d.id)}
                   className={`flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all cursor-pointer shrink-0 ${
                     isSelected
-                      ? 'bg-[#ff436e] border-[#ff436e] text-white font-bold shadow-[0_0_15px_rgba(255,67,110,0.4)] scale-105'
-                      : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30'
+                      ? 'bg-(--client-primary) border-(--client-primary) text-white font-bold shadow-sm'
+                      : 'border-neutral-200 bg-white text-neutral-500 hover:border-red-300 hover:bg-red-50'
                   }`}
                 >
                   <span className="text-[10px] uppercase opacity-70">{d.dayName}</span>
@@ -64,12 +64,12 @@ const ShowtimeSelector = ({
               );
             })}
             {realDates.length === 0 && (
-              <p className="text-gray-500 italic text-sm py-2">
+              <p className="py-2 text-sm italic text-neutral-500">
                 Hiện tại không có suất chiếu nào khả dụng cho phim này.
               </p>
             )}
           </div>
-          <button className="text-gray-500 hover:text-white transition-colors">
+          <button className="text-neutral-400 transition-colors hover:text-neutral-900" aria-label="Ngày sau">
             <ChevronRight size={24} />
           </button>
         </div>
@@ -77,8 +77,8 @@ const ShowtimeSelector = ({
 
       {/* ── Time-slot grid ───────────────────────────────── */}
       {realDates.length > 0 && (
-        <div className="flex flex-col gap-4 w-full border-t border-white/5 pt-6">
-          <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">
+        <div className="flex w-full flex-col gap-4 border-t border-neutral-200 pt-6">
+          <p className="text-sm font-bold uppercase tracking-wider text-neutral-700">
             Chọn Suất Chiếu &amp; Phòng Chiếu
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -90,15 +90,15 @@ const ShowtimeSelector = ({
                   onClick={() => onSelectSlot(index)}
                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-linear-to-r from-[#ff436e] to-[#e0325a] border-[#ff436e] text-white shadow-[0_0_20px_rgba(255,67,110,0.4)] scale-105'
-                      : 'border-white/10 bg-white/5 text-gray-300 hover:border-white/30'
+                      ? 'bg-(--client-primary) border-(--client-primary) text-white shadow-sm'
+                      : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-red-300 hover:bg-red-50'
                   }`}
                 >
                   <span className="text-lg font-black tracking-wider">{formatTime(slot.time)}</span>
                   <span className="text-[10px] uppercase opacity-80 mt-1 font-bold">
                     {slot.PhongChieu?.TenPhong || 'Phòng chiếu'}
                   </span>
-                  <span className="text-xs font-semibold text-green-400 mt-0.5">
+                  <span className={`mt-0.5 text-xs font-semibold ${isSelected ? 'text-red-100' : 'text-emerald-600'}`}>
                     {formatVND(slot.GiaVeGoc)}
                   </span>
                 </button>
@@ -110,29 +110,27 @@ const ShowtimeSelector = ({
 
       {realDates.length === 0 && (
         <div className="w-full text-center py-4">
-          <p className="text-gray-400 italic text-sm">Hiện chưa có suất chiếu cho phim này.</p>
+          <p className="text-sm italic text-neutral-500">Hiện chưa có suất chiếu cho phim này.</p>
         </div>
       )}
 
       {realDates.length > 0 && (
-        <p className="text-xs text-gray-500 italic mt-1">
+        <p className="mt-1 text-xs italic text-neutral-500">
           * Giá vé gốc hiển thị trên suất chiếu. Giá ghế cuối cùng đã bao gồm phụ thu loại ghế, phòng chiếu và ngày chiếu.
         </p>
       )}
 
       {/* ── Book button ─────────────────────────────────── */}
-      <div className="w-full flex justify-end border-t border-white/5 pt-6">
+      <div className="flex w-full justify-end border-t border-neutral-200 pt-6">
         <button
           disabled={!hasShowtimes}
           onClick={onBook}
-          className={`w-full md:w-auto bg-[#ff436e] hover:bg-[#e0325a] text-white font-extrabold px-12 py-4 rounded-2xl transition-all text-base tracking-wider active:scale-98 whitespace-nowrap cursor-pointer ${
-            !hasShowtimes ? 'opacity-40 cursor-not-allowed shadow-none' : 'shadow-[0_0_30px_rgba(255,67,110,0.4)]'
-          }`}
+          className="client-primary-button w-full px-12 py-4 text-base md:w-auto"
         >
           {hasShowtimes ? 'ĐẶT VÉ NGAY' : 'CHƯA CÓ SUẤT CHIẾU'}
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 

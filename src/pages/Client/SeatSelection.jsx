@@ -230,7 +230,9 @@ const SeatSelection = ({
                           isAisle = customRow.cols.includes(cIndex) || customRow.cols.includes(cIndex + 1);
                         }
                       }
-                    } catch (e) {}
+                    } catch {
+                      // Invalid legacy seat-map metadata falls back to the physical seats list.
+                    }
                   }
 
                   // Aisle gap if no seat is configured in this grid slot or it is defined as an aisle
@@ -247,29 +249,29 @@ const SeatSelection = ({
                   const isCouple = seat.TenLoaiGhe.toUpperCase().includes("ĐÔI") || seat.TenLoaiGhe.toUpperCase().includes("COUPLE");
 
                   // Seat icon styling classes matching staff design
-                  let iconClass = "text-[#232B3A]";
-                  let strokeClass = "stroke-slate-700/40";
-                  let textClass = "text-slate-400 group-hover:text-white";
+                  let iconClass = "text-neutral-200";
+                  let strokeClass = "stroke-neutral-400";
+                  let textClass = "text-neutral-700 group-hover:text-neutral-950";
 
                   if (isVIP) {
-                    iconClass = "text-[#18112C]";
-                    strokeClass = "stroke-purple-500/70";
-                    textClass = "text-purple-400 group-hover:text-purple-200";
+                    iconClass = "text-amber-200";
+                    strokeClass = "stroke-amber-500";
+                    textClass = "text-amber-900";
                   }
                   if (isCouple) {
-                    iconClass = "text-[#281123]";
-                    strokeClass = "stroke-pink-500/60";
-                    textClass = "text-pink-400 group-hover:text-pink-200";
+                    iconClass = "text-pink-200";
+                    strokeClass = "stroke-pink-500";
+                    textClass = "text-pink-900";
                   }
                   if (isSelected) {
-                    iconClass = "text-[#ff436e] filter drop-shadow-[0_0_8px_rgba(255,67,110,0.5)]";
-                    strokeClass = "stroke-[#ff436e]";
+                    iconClass = "text-[#d71920]";
+                    strokeClass = "stroke-[#d71920]";
                     textClass = "text-white font-black";
                   }
                   if (isSold) {
-                    iconClass = "text-[#0E131F] opacity-30";
-                    strokeClass = "stroke-slate-900/60 opacity-30";
-                    textClass = "text-slate-700 font-medium opacity-30";
+                    iconClass = "text-neutral-300 opacity-60";
+                    strokeClass = "stroke-neutral-400 opacity-60";
+                    textClass = "text-neutral-500 font-medium opacity-60";
                   }
                   if (isHeld) {
                     iconClass = "text-[#2A160F] opacity-40";
@@ -313,21 +315,21 @@ const SeatSelection = ({
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-12 items-start animate-in fade-in duration-500">
+    <div className="grid min-h-screen animate-in grid-cols-1 items-start gap-8 fade-in duration-500 lg:grid-cols-[280px_1fr]">
       
       {/* SIDEBAR TRÁI */}
-      <div className="glass-effect rounded-3xl p-6 flex flex-col gap-6 border border-white/5 w-full text-left">
+      <aside className="flex w-full flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-6 text-left shadow-sm">
         <div>
           <button 
             onClick={onBack}
-            className="text-sm font-semibold text-gray-400 hover:text-white mb-4 flex items-center gap-1 transition-colors cursor-pointer"
+            className="mb-4 flex cursor-pointer items-center gap-1 text-sm font-semibold text-neutral-500 transition-colors hover:text-neutral-950"
           >
             <ChevronLeft size={16}/> Quay lại chi tiết
           </button>
           
           <SeatHoldIndicator />
 
-          <h3 className="text-gray-400 font-bold text-xs uppercase tracking-wider mb-4">Khung Giờ Trống</h3>
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Khung giờ trống</h3>
         </div>
         
         <div className="flex flex-col gap-3">
@@ -341,8 +343,8 @@ const SeatSelection = ({
                 }} 
                 className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                   isSelected 
-                    ? 'bg-linear-to-r from-[#ff436e] to-[#e0325a] text-white shadow-[0_0_20px_rgba(255,67,110,0.4)]' 
-                    : 'bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10'
+                    ? 'bg-(--client-primary) text-white shadow-sm' 
+                    : 'border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-red-200 hover:bg-red-50'
                 }`}
               >
                 <Clock size={16} />
@@ -351,11 +353,11 @@ const SeatSelection = ({
             );
           })}
         </div>
-      </div>
+      </aside>
 
       {/* PHÒNG CHIẾU CHÍNH */}
       <div className="w-full flex flex-col items-center gap-8">
-        <h2 className="text-2xl font-bold text-white tracking-wide uppercase">Chọn Ghế Ngồi</h2>
+        <h2 className="text-2xl font-extrabold tracking-tight text-neutral-950">Chọn ghế ngồi</h2>
         
         {/* Screen indicator (curved screen frame) */}
         <div className="w-full max-w-2xl flex items-center justify-between shrink-0 select-none px-4 mt-2">
@@ -364,10 +366,10 @@ const SeatSelection = ({
           </span>
 
           <div className="w-64 h-16 relative flex items-center justify-center mx-4">
-            <div className="absolute inset-0 bg-[#ff436e]/5 rounded blur-md"></div>
-            <div className="w-full h-full border border-[#ff436e]/30 rounded bg-[#131A2A]/40 flex items-center justify-center shadow-[inset_0_0_15px_rgba(255,67,110,0.1)] relative">
-              <div className="absolute top-1 inset-x-4 h-1 border-t border-[#ff436e]/60 rounded-[100%] shadow-[0_-2px_6px_rgba(255,67,110,0.4)]"></div>
-              <svg className="w-7 h-7 text-[#ff436e]/80 mt-1 filter drop-shadow-[0_0_6px_rgba(255,67,110,0.4)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <div className="absolute inset-0 rounded bg-red-50 blur-md"></div>
+            <div className="relative flex h-full w-full items-center justify-center rounded border border-red-200 bg-white shadow-sm">
+              <div className="absolute inset-x-4 top-1 h-1 rounded-[100%] border-t-2 border-(--client-primary)"></div>
+              <svg className="mt-1 h-7 w-7 text-(--client-primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="13" rx="2" />
                 <path d="M12 16v5M9 21h6M9 8l5 3.5L9 15V8z" />
               </svg>
@@ -380,9 +382,9 @@ const SeatSelection = ({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mb-2 shrink-0 select-none max-w-2xl bg-white/5 py-4 px-6 rounded-2xl border border-white/5">
+        <div className="mb-2 flex max-w-2xl shrink-0 select-none flex-wrap items-center justify-center gap-6 rounded-xl border border-neutral-200 bg-white px-6 py-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <SeatIcon className="w-6 h-6 text-[#232B3A]" strokeClassName="stroke-slate-700/40" />
+            <SeatIcon className="h-6 w-6 text-neutral-200" strokeClassName="stroke-neutral-400" />
             <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">CÒN TRỐNG</span>
           </div>
           <div className="flex items-center gap-2">
@@ -421,7 +423,7 @@ const SeatSelection = ({
 
         {/* SUẤT CHIẾU & SỐ TIỀN ĐỘNG */}
         {selectedSeats.length > 0 && (
-          <div className="w-full max-w-2xl bg-white/5 border border-white/5 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-left text-sm animate-in slide-in-from-bottom-4 duration-300">
+          <div className="grid w-full max-w-2xl animate-in grid-cols-1 items-center gap-4 rounded-xl border border-neutral-200 bg-white p-5 text-left text-sm shadow-sm duration-300 slide-in-from-bottom-4 md:grid-cols-3">
             <div className="flex items-center gap-3 border-b md:border-b-0 md:border-r border-white/5 pb-3 md:pb-0 md:pr-4">
               <div className="w-10 h-10 bg-[#ff436e]/10 rounded-xl flex items-center justify-center text-[#ff436e]"><Clock size={18} /></div>
               <div>

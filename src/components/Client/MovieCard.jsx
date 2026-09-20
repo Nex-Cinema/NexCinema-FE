@@ -7,15 +7,15 @@ const MovieCard = ({ movie, actionLabel = 'Đặt vé', onPlayTrailer }) => {
   const releaseYear = movie.NgayKhoiChieu ? new Date(movie.NgayKhoiChieu).getFullYear() : null;
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-white/8 bg-(--client-surface) transition duration-300 hover:-translate-y-1 hover:border-(--client-primary)/50">
+    <article className="group overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-red-200 hover:shadow-xl">
       <Link to={`/movie/${movie.MaPhim}`} className="relative block aspect-2/3 overflow-hidden">
         <img src={movie.HinhAnh || visuals.poster} alt={`Poster ${movie.TenPhim}`} className="size-full object-cover transition duration-500 group-hover:scale-105" onError={(event) => { event.currentTarget.src = visuals.poster; }} />
         <span className="absolute left-3 top-3 rounded-md bg-(--client-primary) px-2 py-1 text-xs font-bold text-white">{movie.GioiHanTuoi || 'P'}</span>
-        <div className="absolute inset-0 bg-linear-to-t from-(--client-bg) via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
       </Link>
       <div className="p-4">
-        <Link to={`/movie/${movie.MaPhim}`} className="line-clamp-1 text-base font-bold text-white transition hover:text-(--client-secondary)">{movie.TenPhim}</Link>
-        <div className="mt-2 flex gap-3 text-xs text-slate-400">
+        <Link to={`/movie/${movie.MaPhim}`} className="line-clamp-1 text-base font-bold text-neutral-950 transition hover:text-(--client-primary)">{movie.TenPhim}</Link>
+        <div className="mt-2 flex gap-3 text-xs text-neutral-500">
           {releaseYear && <span className="flex items-center gap-1"><CalendarDays size={13} />{releaseYear}</span>}
           {movie.ThoiLuong > 0 && <span className="flex items-center gap-1"><Clock size={13} />{movie.ThoiLuong} phút</span>}
         </div>

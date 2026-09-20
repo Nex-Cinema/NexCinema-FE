@@ -2,6 +2,7 @@ import SeatSelection from '../SeatSelection';
 import Payment from '../Payment';
 import TicketConfirmation from '../TicketConfirmation';
 import { formatTime } from './ShowtimeSelector';
+import BookingStepper from '../../../components/Client/BookingStepper';
 
 /**
  * BookingFlow
@@ -72,8 +73,9 @@ const BookingFlow = ({
 
   if (stage === 'payment') {
     return (
-      <Payment
-        movie={movie}
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8">
+        <BookingStepper current={3} />
+        <Payment movie={movie}
         selectedDateId={selectedDateId}
         currentSlot={currentSlot}
         selectedSeats={confirmedSeats}
@@ -84,13 +86,15 @@ const BookingFlow = ({
         heldSeatIds={heldSeatIds}
         onBack={onBackFromPayment}
         onPaymentSuccess={onPaymentSuccess}
-      />
+        />
+      </div>
     );
   }
 
   // stage === 'seat'
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-20">
+    <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8">
+      <BookingStepper current={2} />
       <SeatSelection
         availableSlots={availableSlots}
         selectedSlotIndex={selectedSlotIndex}

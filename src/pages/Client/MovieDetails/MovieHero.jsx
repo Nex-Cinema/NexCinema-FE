@@ -14,9 +14,9 @@ const MovieHero = ({
   onStartBooking,
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-12 items-start">
+    <section className="grid grid-cols-1 items-start gap-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-8 lg:grid-cols-[280px_1fr]">
       {/* Poster */}
-      <div className="w-full max-w-90 mx-auto lg:mx-0 aspect-2/3 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.6)] border border-white/10">
+      <div className="mx-auto aspect-2/3 w-full max-w-70 overflow-hidden rounded-xl shadow-lg lg:mx-0">
         <img
           src={movie.poster_path}
           alt={movie.title}
@@ -30,14 +30,14 @@ const MovieHero = ({
 
       {/* Info + actions */}
       <div className="flex flex-col gap-6 text-left">
-        <span className="text-rose-500 font-bold tracking-widest uppercase text-sm">BẢN ĐẸP 2D</span>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-none uppercase">
+        <span className="text-sm font-bold uppercase tracking-widest text-(--client-primary)">Đang chiếu tại NexCinema</span>
+        <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-neutral-950 md:text-5xl">
           {movie.title}
         </h1>
 
         {/* Rating */}
-        <div className="flex items-center gap-2 text-[#ff436e] font-semibold text-base">
-          <Star size={18} fill="#ff436e" />
+        <div className="flex items-center gap-2 text-amber-500 font-semibold text-base">
+          <Star size={18} fill="currentColor" />
           <span>
             {ratingSummary.DiemTrungBinh > 0
               ? `${ratingSummary.DiemTrungBinh} / 5 điểm`
@@ -47,26 +47,26 @@ const MovieHero = ({
         </div>
 
         {/* Description */}
-        <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-3xl">
+        <p className="max-w-3xl text-base leading-7 text-neutral-600 md:text-lg">
           {movie.NoiDung || 'Chưa có mô tả nội dung cho phim này.'}
         </p>
 
         {/* Director / Cast */}
-        <div className="text-gray-400 font-medium text-sm flex flex-col gap-1.5 border-t border-white/5 pt-4 mt-2">
+        <div className="mt-2 flex flex-col gap-1.5 border-t border-neutral-200 pt-4 text-sm font-medium text-neutral-600">
           <p>
-            <span className="text-gray-500 font-bold uppercase tracking-wider text-xs mr-2">Đạo diễn:</span>
-            <span className="text-white hover:text-(--btn-neon) transition-colors cursor-pointer">
+            <span className="mr-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Đạo diễn:</span>
+            <span className="text-neutral-950">
               {movie.DaoDien || 'Chưa cập nhật'}
             </span>
           </p>
           <p className="line-clamp-2">
-            <span className="text-gray-500 font-bold uppercase tracking-wider text-xs mr-2">Diễn viên:</span>
-            <span className="text-white">{movie.DienVien || 'Chưa cập nhật'}</span>
+            <span className="mr-2 text-xs font-bold uppercase tracking-wider text-neutral-500">Diễn viên:</span>
+            <span className="text-neutral-950">{movie.DienVien || 'Chưa cập nhật'}</span>
           </p>
         </div>
 
         {/* Runtime / Genre / Release */}
-        <div className="text-gray-300 font-medium text-sm md:text-base flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-neutral-600 md:text-base">
           <span>{movie.runtime} phút</span>
           <span>•</span>
           <span>{movie.TheLoai}</span>
@@ -78,24 +78,23 @@ const MovieHero = ({
         <div className="flex items-center gap-4 mt-4">
           <button
             onClick={onShowTrailer}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/10 px-6 py-3 rounded-xl font-bold transition-all text-sm uppercase cursor-pointer"
+            className="client-secondary-button"
           >
             <Play size={16} fill="white" /> Xem Trailer
           </button>
           <button
             onClick={onStartBooking}
             disabled={!hasShowtimes}
-            className={`bg-[#ff436e] hover:bg-[#e0325a] text-white font-bold px-8 py-3 rounded-xl transition-all text-sm uppercase cursor-pointer ${!hasShowtimes ? 'opacity-40 cursor-not-allowed shadow-none' : 'shadow-[0_0_25px_rgba(255,67,110,0.4)]'
-              }`}
+            className="client-primary-button px-8"
           >
             {hasShowtimes ? 'Mua Vé Ngay' : 'Chưa có suất chiếu'}
           </button>
-          <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-white/10 transition-colors">
+          <button className="client-icon-button" aria-label="Lưu phim yêu thích">
             <Heart size={20} />
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

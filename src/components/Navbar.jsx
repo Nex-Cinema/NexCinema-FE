@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Film, LogOut, Menu, Search, Ticket, User, X } from 'lucide-react';
+import { LogOut, Menu, Search, Ticket, User, X } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosClient from '../api/axiosClient';
 import useMovieSearch from '../hooks/customer/useMovieSearch';
 import { getMovieVisuals } from '../utils/visualHelper';
+import Brand from './Client/Brand';
 
 const navItems = [
   { to: '/movies/now-showing', label: 'Đang chiếu' },
@@ -15,17 +16,6 @@ const clearSession = () => {
   ['accessToken', 'refreshToken', 'userRole', 'userName', 'userCode', 'userInfo']
     .forEach((key) => localStorage.removeItem(key));
 };
-
-const Brand = () => (
-  <Link to="/" className="flex shrink-0 items-center gap-2" aria-label="NexCinema - Trang chủ">
-    <span className="grid size-10 place-items-center rounded-xl bg-(--client-primary) text-white shadow-lg shadow-red-950/30">
-      <Film size={22} />
-    </span>
-    <span className="text-xl font-extrabold tracking-tight text-white">
-      NEX<span className="text-(--client-primary)">CINEMA</span>
-    </span>
-  </Link>
-);
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -75,9 +65,9 @@ const Navbar = () => {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-(--client-bg)/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
-        <Brand />
+    <header className="sticky inset-x-0 top-0 z-50 border-b border-(--client-border) bg-white/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-18 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
+        <Brand compact />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Điều hướng chính">
           {navItems.map((item) => (
@@ -89,20 +79,20 @@ const Navbar = () => {
         </nav>
 
         <div ref={searchRef} className="relative ml-auto hidden md:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
           <input value={query} onChange={(event) => setQuery(event.target.value)} onFocus={() => setIsSearchOpen(true)} placeholder="Tìm phim..." aria-label="Tìm kiếm phim" className="client-search" />
           {isSearchOpen && query.trim().length >= 2 && (
             <div className="client-search-results">
-              {isSearching && <p className="p-4 text-sm text-slate-400">Đang tìm phim...</p>}
-              {!isSearching && results.length === 0 && <p className="p-4 text-sm text-slate-400">Không tìm thấy phim phù hợp.</p>}
+              {isSearching && <p className="p-4 text-sm text-neutral-500">Đang tìm phim...</p>}
+              {!isSearching && results.length === 0 && <p className="p-4 text-sm text-neutral-500">Không tìm thấy phim phù hợp.</p>}
               {!isSearching && results.map((movie) => {
                 const visuals = getMovieVisuals(movie);
                 return (
                   <button key={movie.MaPhim} type="button" onClick={() => selectMovie(movie.MaPhim)} className="client-search-result">
                     <img src={movie.HinhAnh || visuals.thumbnail} alt="" className="h-14 w-10 rounded-md object-cover" />
                     <span className="min-w-0 text-left">
-                      <strong className="block truncate text-sm text-white">{movie.TenPhim}</strong>
-                      <span className="block truncate text-xs text-slate-400">{movie.TheLoai || 'Điện ảnh'}</span>
+                      <strong className="block truncate text-sm text-neutral-950">{movie.TenPhim}</strong>
+                      <span className="block truncate text-xs text-neutral-500">{movie.TheLoai || 'Điện ảnh'}</span>
                     </span>
                   </button>
                 );
@@ -126,7 +116,7 @@ const Navbar = () => {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-white/8 bg-(--client-surface) px-4 py-4 lg:hidden">
+        <div className="border-t border-(--client-border) bg-white px-4 py-4 lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
             {navItems.map((item) => <NavLink key={item.to} to={item.to} onClick={() => setIsMenuOpen(false)} className="client-nav-link">{item.label}</NavLink>)}
             <button type="button" onClick={goToShowtimes} className="client-nav-link text-left">Lịch chiếu</button>

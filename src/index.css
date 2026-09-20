@@ -14,111 +14,104 @@
     --btn-neon: #FFB000;       
     --btn-neon-hover: #E59A00; 
 
-    /* Client design system — Cinematic Luxury */
-    --client-bg: #080b12;
-    --client-surface: #111722;
-    --client-surface-soft: #182131;
-    --client-text: #f8fafc;
-    --client-muted: #94a3b8;
-    --client-primary: #e11d2e;
-    --client-primary-hover: #be123c;
-    --client-secondary: #f5b942;
+    /* Client design system — Stitch Modern Crimson Cinema */
+    --client-bg: #f2f2f2;
+    --client-surface: #ffffff;
+    --client-surface-soft: #f8f8f8;
+    --client-text: #171717;
+    --client-muted: #666666;
+    --client-border: #e5e7eb;
+    --client-primary: #d71920;
+    --client-primary-hover: #ae0011;
+    --client-secondary: #d71920;
   }
 
   body {
-    background-color: var(--navy-deep);
-    /* Dual ambient light disperser (violet in top-left, cinematic gold in top-right) */
-    background-image: radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.12) 0px, transparent 50%),
-                      radial-gradient(at 100% 0%, rgba(255, 176, 0, 0.08) 0px, transparent 50%),
-                      radial-gradient(at 50% 100%, rgba(11, 16, 32, 1) 0px, transparent 50%);
-    background-attachment: fixed;
-    color: var(--white-light);
+    background: var(--client-bg);
+    color: var(--client-text);
     @apply antialiased;
-    font-family: 'Montserrat', 'Inter', sans-serif;
+    font-family: 'Be Vietnam Pro', sans-serif;
   }
 }
 
 @layer components {
   .client-nav-link {
-    @apply rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/6 hover:text-white;
+    @apply rounded-lg px-3 py-2 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950;
   }
 
   .client-nav-link.is-active {
-    color: var(--client-secondary);
-    background: color-mix(in srgb, var(--client-secondary) 10%, transparent);
+    color: var(--client-primary);
+    background: #fff1f2;
   }
 
   .client-search {
-    @apply w-48 rounded-full border border-white/10 bg-white/6 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:w-64 focus:border-white/25 focus:bg-white/10;
+    @apply w-48 rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 pl-10 pr-4 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:w-64 focus:border-red-300 focus:bg-white focus:ring-3 focus:ring-red-100;
   }
 
   .client-search-results {
-    @apply absolute right-0 top-full mt-3 max-h-96 w-80 overflow-y-auto rounded-2xl border border-white/10 bg-[#111722]/98 p-2 shadow-2xl;
+    @apply absolute right-0 top-full mt-3 max-h-96 w-80 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-2 shadow-xl;
   }
 
   .client-search-result {
-    @apply flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/6;
+    @apply flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-neutral-100;
   }
 
   .client-primary-button {
-    @apply inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#e11d2e] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-950/20 transition hover:bg-[#be123c] active:scale-[0.98];
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#d71920] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#ae0011] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .client-secondary-button {
-    @apply inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-bold text-white transition hover:border-white/30 hover:bg-white/12 active:scale-[0.98];
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-bold text-neutral-800 transition hover:border-neutral-400 hover:bg-neutral-50 active:scale-[0.98];
   }
 
   .client-icon-button {
-    @apply inline-flex size-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/6 text-slate-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white;
+    @apply inline-flex size-10 items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-950;
   }
 
   .client-section {
-    @apply mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8;
+    @apply mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8;
   }
 
   .client-eyebrow {
-    color: var(--client-secondary);
+    color: var(--client-primary);
     @apply mb-2 text-xs font-bold uppercase tracking-[0.22em];
   }
 
   .client-section-title {
-    @apply text-2xl font-extrabold tracking-tight text-white sm:text-3xl;
+    @apply text-2xl font-extrabold tracking-tight text-neutral-950 sm:text-3xl;
   }
 
   .client-empty-state {
-    @apply rounded-2xl border border-dashed border-white/10 px-6 py-12 text-center text-sm text-slate-400;
+    @apply rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-12 text-center text-sm text-neutral-500;
   }
 
   .client-page-state {
-    @apply flex min-h-screen flex-col items-center justify-center gap-5 px-4 pt-20 text-center text-slate-300;
+    @apply flex min-h-[70vh] flex-col items-center justify-center gap-5 px-4 text-center text-neutral-500;
   }
 
   .client-loader {
-    @apply size-11 animate-spin rounded-full border-2 border-white/10 border-t-[#e11d2e];
+    @apply size-11 animate-spin rounded-full border-2 border-neutral-200 border-t-[#d71920];
   }
 
   .showtime-chip {
-    @apply inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white transition hover:border-[#e11d2e] hover:bg-[#e11d2e]/10;
+    @apply inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-bold text-neutral-900 transition hover:border-[#d71920] hover:bg-red-50 hover:text-[#d71920];
   }
 
   .showtime-chip span {
-    @apply text-xs font-medium text-slate-400;
+    @apply text-xs font-medium text-neutral-500;
   }
 
   .client-footer-title {
-    @apply mb-4 text-sm font-bold uppercase tracking-wider text-white;
+    @apply mb-4 text-sm font-bold uppercase tracking-wider text-neutral-950;
   }
 
   .client-footer-link {
-    @apply transition hover:text-white;
+    @apply transition hover:text-[#d71920];
   }
 
   /* Premium gold glowing button with smooth gradients */
   .btn-bright {
-    @apply px-7 py-3 bg-gradient-to-r from-[var(--btn-neon)] to-[#E59A00] hover:from-[var(--btn-neon-hover)] hover:to-[#CC8800]
-           text-slate-900 font-bold rounded-full transition-all duration-300
-           active:scale-95 shadow-[0_0_20px_rgba(255,176,0,0.15)] 
-           hover:shadow-[0_0_30px_rgba(255,176,0,0.35)] uppercase text-xs tracking-wider;
+    @apply rounded-lg bg-[#d71920] px-7 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all duration-300 hover:bg-[#ae0011] active:scale-95;
   }
 
   /* Cinematic Card: Deep slate background, thin border that glows gold on hover */
@@ -130,10 +123,15 @@
 
   /* Luxury Dark Glass effect */
   .glass-effect {
-    @apply bg-[#131A2A]/80 backdrop-blur-xl border border-white/5 
-           hover:bg-[#131A2A]/90 transition-all duration-300;
+    @apply border border-neutral-200 bg-white shadow-xl transition-all duration-300;
   }
 }
+
+.glass-effect .text-white { color: #171717; }
+.glass-effect input,
+.glass-effect select { border-color: #e5e7eb; background: #fafafa; color: #171717; }
+.glass-effect input:focus,
+.glass-effect select:focus { border-color: #d71920; background: #fff; }
 
 @layer utilities {
   .text-glow {
@@ -162,10 +160,10 @@
   .slide-in-from-left-10 { animation-name: slide-in-from-left; }
 }
 
-/* Custom scrollbar — cinema dark theme */
+/* Quiet neutral scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: #d4d4d4 transparent;
 }
 
 ::-webkit-scrollbar {
@@ -178,13 +176,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #d4d4d4;
   border-radius: 999px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: #a3a3a3;
 }
 
 /* Hide scrollbar completely where needed */
