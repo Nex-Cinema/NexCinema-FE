@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 const ClientLayout = () => (
   <div className="min-h-screen bg-(--client-bg) text-(--client-text)">
     <Navbar />
-    <main>
+    <main className="pt-20">
       <Outlet />
     </main>
     <Footer />

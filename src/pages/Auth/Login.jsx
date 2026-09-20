@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Film, User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
 
@@ -62,85 +62,25 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Khối Glassmorphism Form */}
-      <div className="w-full max-w-md glass-effect p-8 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-500">
-        
-        {/* Header Form */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black tracking-tight text-white mb-2 uppercase italic">
-            Chào Mừng <span className="text-glow text-(--btn-neon)">Trở Lại</span>
-          </h2>
-          <p className="text-sm text-gray-400">Vui lòng đăng nhập để tiếp tục đặt vé</p>
-        </div>
-
-        {/* Form Nhập Liệu */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5 text-left">
-          
-          {/* Ô Nhập Tên Đăng Nhập */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Tên đăng nhập</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                required
-                placeholder="Tên đăng nhập"
-                value={formData.username}
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
-                disabled={isLoading}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all disabled:opacity-50"
-              />
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Ô Nhập Mật Khẩu */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center px-1">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Mật khẩu</label>
-              <Link to="/forgot-password" className="text-xs text-(--btn-neon) hover:underline">Quên mật khẩu?</Link>
-            </div>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                disabled={isLoading}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-11 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all disabled:opacity-50"
-              />
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              
-              {/* Nút Ẩn/Hiện Mật Khẩu */}
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Nút Đăng Nhập */}
-          <button type="submit" disabled={isLoading} className="btn-bright mt-4 w-full flex items-center justify-center gap-2 cursor-pointer py-3.5 rounded-xl normal-case text-base tracking-normal disabled:opacity-50">
-            <span>{isLoading ? "Đang xử lý..." : "Đăng Nhập"}</span>
-            <ArrowRight size={18} />
-          </button>
-        </form>
-
-        {/* Footer Chuyển Đổi Sang Đăng Ký */}
-        <div className="mt-8 text-center border-t border-white/5 pt-5 text-sm text-gray-400">
-          Bạn chưa có tài khoản?{' '}
-          <Link to="/register" className="text-(--btn-neon) font-bold hover:underline">
-            Đăng ký ngay
-          </Link>
-        </div>
-
+    <section className="w-full max-w-[720px] rounded-2xl bg-white px-6 py-10 shadow-sm ring-1 ring-black/5 sm:px-18 sm:py-12">
+      <div className="text-center">
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#f5f3f3] text-(--client-primary)"><Film size={29} fill="currentColor" /></span>
+        <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-neutral-950">Đăng nhập</h1>
+        <p className="mt-2 text-sm text-neutral-500">Chào mừng bạn trở lại với trải nghiệm điện ảnh NexCinema</p>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit} className="mt-10 space-y-5 text-left">
+        <label className="block space-y-2 text-sm font-semibold text-neutral-900">Tên đăng nhập <span className="text-(--client-primary)">*</span>
+          <span className="relative block"><User className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-neutral-500" /><input type="text" required placeholder="Nhập tên đăng nhập" value={formData.username} onChange={(event) => setFormData({ ...formData, username: event.target.value })} disabled={isLoading} className="h-13 w-full rounded-xl bg-[#f5f3f3] pl-12 pr-4 font-normal text-neutral-950 outline-none ring-1 ring-transparent focus:bg-white focus:ring-(--client-primary)" /></span>
+        </label>
+        <label className="block space-y-2 text-sm font-semibold text-neutral-900">Mật khẩu
+          <span className="relative block"><Lock className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-neutral-500" /><input type={showPassword ? 'text' : 'password'} required placeholder="Nhập mật khẩu của bạn" value={formData.password} onChange={(event) => setFormData({ ...formData, password: event.target.value })} disabled={isLoading} className="h-13 w-full rounded-xl bg-[#f5f3f3] pl-12 pr-12 font-normal text-neutral-950 outline-none ring-1 ring-transparent focus:bg-white focus:ring-(--client-primary)" /><button type="button" onClick={() => setShowPassword((shown) => !shown)} className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500" aria-label="Ẩn hoặc hiện mật khẩu">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button></span>
+        </label>
+        <div className="flex items-center justify-between text-sm"><label className="flex items-center gap-2 text-neutral-500"><input type="checkbox" className="size-4 accent-(--client-primary)" />Ghi nhớ đăng nhập</label><Link to="/forgot-password" className="font-semibold text-(--client-primary) hover:underline">Quên mật khẩu?</Link></div>
+        <button type="submit" disabled={isLoading} className="client-primary-button h-13 w-full text-base">{isLoading ? 'Đang xử lý...' : 'Đăng nhập'}<ArrowRight size={19} /></button>
+      </form>
+      <p className="mt-8 text-center text-sm text-neutral-500">Chưa có tài khoản? <Link to="/register" className="font-semibold text-(--client-primary) hover:underline">Đăng ký ngay</Link></p>
+    </section>
   );
 };
 

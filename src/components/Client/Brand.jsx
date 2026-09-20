@@ -6,8 +6,8 @@ const Brand = ({ compact = false }) => (
     <span className={`${compact ? 'size-8 rounded-lg' : 'size-10 rounded-xl'} grid place-items-center bg-(--client-primary) text-white`}>
       <Film size={compact ? 17 : 21} strokeWidth={2.2} />
     </span>
-    <span className={`${compact ? 'text-lg' : 'text-xl'} font-extrabold tracking-[-0.04em] text-(--client-text)`}>
-      NEX<span className="text-(--client-primary)">CINEMA</span>
+    <span className={`${compact ? 'text-lg' : 'text-xl'} font-bold tracking-[-0.04em] text-(--client-primary)`}>
+      NexCinema
     </span>
   </Link>
 );

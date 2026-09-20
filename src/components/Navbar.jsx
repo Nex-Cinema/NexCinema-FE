@@ -8,8 +8,8 @@ import { getMovieVisuals } from '../utils/visualHelper';
 import Brand from './Client/Brand';
 
 const navItems = [
-  { to: '/movies/now-showing', label: 'Đang chiếu' },
-  { to: '/movies/coming-soon', label: 'Sắp chiếu' },
+  { to: '/movies/now-showing', label: 'Phim đang chiếu' },
+  { to: '/movies/coming-soon', label: 'Phim sắp chiếu' },
 ];
 
 const clearSession = () => {
@@ -65,8 +65,8 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky inset-x-0 top-0 z-50 border-b border-(--client-border) bg-white/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-18 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
+    <header className="fixed inset-x-0 top-0 z-50 bg-white/95 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
         <Brand compact />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Điều hướng chính">

@@ -11,11 +11,11 @@
     --white-light: #F8FAFC;    /* High contrast text */
     
     /* Cinematic Accent: Luxury Gold / Amber */
-    --btn-neon: #FFB000;       
-    --btn-neon-hover: #E59A00; 
+    --btn-neon: #d71920;
+    --btn-neon-hover: #ae0011;
 
     /* Client design system — Stitch Modern Crimson Cinema */
-    --client-bg: #f2f2f2;
+    --client-bg: #f5f3f3;
     --client-surface: #ffffff;
     --client-surface-soft: #f8f8f8;
     --client-text: #171717;
@@ -128,6 +128,7 @@
 }
 
 .glass-effect .text-white { color: #171717; }
+.glass-effect h2 { color: #171717; font-style: normal; text-transform: none; }
 .glass-effect input,
 .glass-effect select { border-color: #e5e7eb; background: #fafafa; color: #171717; }
 .glass-effect input:focus,

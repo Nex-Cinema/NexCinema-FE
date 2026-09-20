@@ -3,6 +3,7 @@ import HomeHero from '../../components/Client/HomeHero';
 import MovieSection from '../../components/Client/MovieSection';
 import TodayShowtimes from '../../components/Client/TodayShowtimes';
 import TrailerModal from '../../components/Client/TrailerModal';
+import QuickBookingDock from '../../components/Client/QuickBookingDock';
 import useHomeContent from '../../hooks/customer/useHomeContent';
 import { getYoutubeEmbedUrl } from '../../utils/video';
 
@@ -23,6 +24,7 @@ const Home = () => {
   return (
     <>
       <HomeHero movie={nowShowing[0] || comingSoon[0]} onPlayTrailer={playTrailer} />
+      <QuickBookingDock movies={nowShowing} showtimes={showtimes} />
       <MovieSection title="Phim đang chiếu" eyebrow="Chọn phim, chọn ghế" movies={nowShowing} viewAllTo="/movies/now-showing" actionLabel="Đặt vé" onPlayTrailer={playTrailer} />
       <TodayShowtimes showtimes={showtimes} />
       <MovieSection title="Phim sắp chiếu" eyebrow="Sắp ra mắt" movies={comingSoon} viewAllTo="/movies/coming-soon" actionLabel="Tìm hiểu" onPlayTrailer={playTrailer} />
