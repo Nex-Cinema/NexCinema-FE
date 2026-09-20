@@ -354,7 +354,7 @@ const PayOSModal = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
@@ -362,7 +362,7 @@ const PayOSModal = ({
       />
       
       {/* Container Modal Glassmorphism */}
-      <div className="relative z-[10000] w-full max-w-lg bg-zinc-900/90 border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col gap-6 shadow-2xl overflow-y-auto max-h-[90vh] text-left text-white backdrop-blur-md animate-in zoom-in-95 duration-300">
+      <div className="relative z-[10000] flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col gap-6 overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-zinc-900/95 p-5 text-left text-white shadow-2xl animate-in zoom-in-95 duration-300 sm:p-7">
         
         {/* Nút Đóng Modal */}
         {(modalState === 'pending' || modalState === 'failed') && (

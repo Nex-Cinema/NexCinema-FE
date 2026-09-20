@@ -10,7 +10,7 @@ const AuthLayout = () => (
         <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-neutral-500 transition hover:text-neutral-950"><ArrowLeft size={18} />Quay lại Trang chủ</Link>
       </div>
     </header>
-    <main className="flex flex-1 items-center justify-center px-4 py-10"><Outlet /></main>
+    <main className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-4 py-6 lg:items-center"><Outlet /></main>
     <footer className="border-t border-(--client-border) bg-white px-4 py-5 text-sm text-(--client-muted)">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
         <span>© 2026 NexCinema Vietnam. Tất cả quyền được bảo lưu.</span>

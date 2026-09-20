@@ -41,28 +41,28 @@ const ReviewModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-100 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="relative w-full max-w-lg bg-[#18101f] border border-white/10 rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(255,67,110,0.15)] flex flex-col gap-6 animate-in zoom-in-95 duration-200 text-left">
+    <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col gap-6 overflow-y-auto overscroll-contain rounded-2xl border border-neutral-200 bg-white p-6 text-left text-neutral-950 shadow-2xl animate-in zoom-in-95 duration-200 md:p-8">
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-red-600 rounded-full text-gray-400 hover:text-white transition-colors cursor-pointer group"
+          className="absolute right-4 top-4 rounded-full bg-neutral-100 p-2 text-neutral-500 transition-colors hover:bg-red-600 hover:text-white cursor-pointer group"
         >
           <X size={18} className="group-hover:scale-110 transition-transform" />
         </button>
 
         {/* Title */}
         <div>
-          <span className="text-[#ff436e] font-bold text-xs uppercase tracking-wider">Viết Đánh Giá Phim</span>
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight mt-1 line-clamp-1">
+          <span className="text-(--client-primary) font-bold text-xs uppercase tracking-wider">Viết đánh giá phim</span>
+          <h3 className="mt-1 line-clamp-1 text-xl font-black tracking-tight text-neutral-950 md:text-2xl">
             {movieTitle}
           </h3>
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           {/* Star rating */}
-          <div className="flex flex-col gap-2 items-center justify-center py-4 bg-white/3 border border-white/5 rounded-2xl">
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Chọn số sao đánh giá</p>
+          <div className="flex flex-col gap-2 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 py-4">
+            <p className="text-neutral-500 text-xs font-bold uppercase tracking-wider">Chọn số sao đánh giá</p>
             <div className="flex items-center gap-2 mt-2">
               {[1, 2, 3, 4, 5].map((starNum) => {
                 const isHighlighted = hoverRating >= starNum || (!hoverRating && rating >= starNum);
@@ -97,7 +97,7 @@ const ReviewModal = ({
               onChange={(e) => onSetComment(e.target.value)}
               maxLength={255}
               placeholder="Chia sẻ cảm nghĩ của bạn về bộ phim này... (Không bắt buộc, tối đa 255 ký tự)"
-              className="w-full min-h-[120px] bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm focus:outline-hidden focus:border-[#ff436e] focus:ring-1 focus:ring-[#ff436e] transition-all resize-none leading-relaxed placeholder-gray-500"
+              className="min-h-[120px] w-full resize-none rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm leading-relaxed text-neutral-950 transition-all placeholder:text-neutral-400 focus:border-(--client-primary) focus:outline-hidden focus:ring-1 focus:ring-(--client-primary)"
             />
             <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
               <span>Tránh nội dung Spoil hoặc vi phạm tiêu chuẩn cộng đồng.</span>
@@ -113,14 +113,14 @@ const ReviewModal = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white font-bold transition-all text-sm uppercase cursor-pointer"
+              className="rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-bold text-neutral-600 transition-all hover:bg-neutral-100 cursor-pointer"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#ff436e] to-[#e0325a] hover:from-[#e0325a] hover:to-[#c22048] text-white font-bold transition-all text-sm uppercase cursor-pointer flex items-center gap-2 justify-center shadow-[0_0_20px_rgba(255,67,110,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="client-primary-button px-8 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

@@ -17,8 +17,8 @@ const TrailerModal = ({ embedUrl, onClose }) => {
   if (!embedUrl) return null;
 
   return (
-    <div className="fixed inset-0 z-100 grid place-items-center bg-black/90 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Trailer phim">
-      <div className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+    <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-black/90 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Trailer phim">
+      <div className="relative aspect-video max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
         <button type="button" onClick={onClose} className="client-icon-button absolute right-3 top-3 z-10 bg-black/70" aria-label="Đóng trailer"><X size={20} /></button>
         <iframe className="size-full" src={embedUrl} title="Trailer phim" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
       </div>

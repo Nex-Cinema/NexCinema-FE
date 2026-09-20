@@ -15,8 +15,8 @@ const ChangePasswordModal = ({
     formData.newPassword !== formData.confirmPassword;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 p-4">
-      <div className="bg-[#131A2A] border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#131A2A] p-6 shadow-2xl sm:p-8">
         <button
           onClick={onClose}
           className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors cursor-pointer"

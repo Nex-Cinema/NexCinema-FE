@@ -26,8 +26,8 @@ const ConfirmDialog = ({
   }
 
   const dialogContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 p-4" role="dialog" aria-modal="true">
-      <div className="bg-[#131A2A] border border-white/[0.08] rounded-2xl p-8 max-w-sm w-full shadow-2xl relative z-[10000] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true">
+      <div className="relative z-[10000] max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-2xl border border-white/[0.08] bg-[#131A2A] p-6 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-8">
         <button
           onClick={onCancel}
           disabled={isLoading}

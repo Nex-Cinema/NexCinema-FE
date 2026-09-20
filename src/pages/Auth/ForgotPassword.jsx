@@ -150,9 +150,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="flex w-full items-center justify-center">
       {/* Khối Glassmorphism Form */}
-      <div className="w-full max-w-md glass-effect p-8 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-500">
+      <div className="glass-effect max-h-[calc(100dvh-11rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl border border-white/10 p-6 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-500 sm:p-8">
         
         {/* Nút quay lại ở góc trên bên trái form */}
         <div className="text-left mb-4">

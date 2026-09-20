@@ -1,248 +1,84 @@
 import { useState } from 'react';
+import { ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-// Bỏ icon IdCard không dùng tới nữa
-import { User, Calendar, Phone, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
+import axiosClient from '../../api/axiosClient';
+
+const inputClass = 'h-11 w-full rounded-lg bg-[#f5f3f3] pl-10 pr-3 text-sm text-neutral-950 outline-none ring-1 ring-transparent focus:bg-white focus:ring-(--client-primary)';
+
+const Field = ({ label, icon: Icon, children }) => (
+  <label className="block space-y-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+    {label} <span className="text-(--client-primary)">*</span>
+    <span className="relative block"><Icon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />{children}</span>
+  </label>
+);
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    dob: '',
-    gender: '', // <-- 1. THÊM TRƯỜNG GIỚI TÍNH VÀO STATE
-    phone: '',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', dob: '', gender: '', phone: '', username: '', email: '', password: '', confirmPassword: '' });
+  const update = (field) => (event) => setFormData((current) => ({ ...current, [field]: event.target.value }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không trùng khớp!");
-      return;
-    }
-    
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (formData.password !== formData.confirmPassword) return toast.error('Mật khẩu xác nhận không trùng khớp!');
     setIsLoading(true);
     try {
-      let gioiTinh = null;
-      if (formData.gender === "Nam") {
-        gioiTinh = true;
-      } else if (formData.gender === "Nữ") {
-        gioiTinh = false;
-      }
-
-      const response = await axiosClient.post("/auth/register", {
+      const response = await axiosClient.post('/auth/register', {
         TenDangNhap: formData.username,
         MatKhau: formData.password,
         XacNhanMatKhau: formData.confirmPassword,
         HoTen: formData.name,
         Email: formData.email,
         SoDienThoai: formData.phone,
-        GioiTinh: gioiTinh,
+        GioiTinh: formData.gender === 'Nam' ? true : formData.gender === 'Nữ' ? false : null,
         NgaySinh: formData.dob || undefined,
       });
-
-      const tokens = response?.tokens;
-      const taiKhoan = response?.taiKhoan;
-
-      if (tokens && tokens.accessToken && tokens.refreshToken && taiKhoan) {
-        localStorage.setItem("accessToken", tokens.accessToken);
-        localStorage.setItem("refreshToken", tokens.refreshToken);
-        localStorage.setItem("userRole", taiKhoan.VaiTro);
-        localStorage.setItem("userName", taiKhoan.HoTen);
-        localStorage.setItem("userCode", taiKhoan.TenDangNhap);
-        localStorage.setItem("userInfo", JSON.stringify(taiKhoan));
-
-        toast.success("Đăng ký tài khoản và đăng nhập thành công!");
-        navigate("/");
+      const { tokens, taiKhoan } = response || {};
+      if (tokens?.accessToken && tokens?.refreshToken && taiKhoan) {
+        localStorage.setItem('accessToken', tokens.accessToken);
+        localStorage.setItem('refreshToken', tokens.refreshToken);
+        localStorage.setItem('userRole', taiKhoan.VaiTro);
+        localStorage.setItem('userName', taiKhoan.HoTen);
+        localStorage.setItem('userCode', taiKhoan.TenDangNhap);
+        localStorage.setItem('userInfo', JSON.stringify(taiKhoan));
+        toast.success('Đăng ký và đăng nhập thành công!');
+        navigate('/');
       } else {
-        toast.success("Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
-        navigate("/login");
+        toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
+        navigate('/login');
       }
-    } catch (err) {
-      console.error("Register error:", err);
-      const msg = err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng thử lại.";
-      toast.error(msg);
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || 'Đăng ký thất bại.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Khối Glassmorphism Form */}
-      <div className="w-full max-w-lg glass-effect p-8 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in fade-in zoom-in-95 duration-500 my-8">
-        
-        {/* Header Form */}
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-black tracking-tight text-white mb-2 uppercase italic">
-            Tạo <span className="text-glow text-(--btn-neon)">Tài Khoản</span>
-          </h2>
-          <p className="text-sm text-gray-400">Đăng ký để trải nghiệm dịch vụ đặt vé tốt nhất</p>
+    <section className="flex max-h-[calc(100dvh-11rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+      <header className="shrink-0 border-b border-neutral-100 px-6 py-5 text-center sm:px-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-neutral-950">Tạo <span className="text-(--client-primary)">tài khoản</span></h1>
+        <p className="mt-1 text-sm text-neutral-500">Đăng ký để trải nghiệm dịch vụ đặt vé tốt nhất</p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-10">
+        <div className="grid gap-x-5 gap-y-4 md:grid-cols-2">
+          <Field label="Họ và tên" icon={User}><input required value={formData.name} onChange={update('name')} placeholder="Họ và tên" className={inputClass} /></Field>
+          <Field label="Ngày sinh" icon={Calendar}><input required type="date" value={formData.dob} onChange={update('dob')} className={inputClass} /></Field>
+          <Field label="Giới tính" icon={User}><select required value={formData.gender} onChange={update('gender')} className={`${inputClass} cursor-pointer`}><option value="">Chọn giới tính</option><option>Nam</option><option>Nữ</option><option>Khác</option></select></Field>
+          <Field label="Số điện thoại" icon={Phone}><input required type="tel" value={formData.phone} onChange={update('phone')} placeholder="Số điện thoại" className={inputClass} /></Field>
+          <Field label="Tên đăng nhập" icon={User}><input required value={formData.username} onChange={update('username')} placeholder="Tên đăng nhập" className={inputClass} /></Field>
+          <Field label="Email" icon={Mail}><input required type="email" value={formData.email} onChange={update('email')} placeholder="name@example.com" className={inputClass} /></Field>
+          <Field label="Mật khẩu" icon={Lock}><input required type={showPassword ? 'text' : 'password'} value={formData.password} onChange={update('password')} placeholder="Tối thiểu 6 ký tự" className={`${inputClass} pr-10`} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400" aria-label="Ẩn hoặc hiện mật khẩu">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></Field>
+          <Field label="Xác nhận mật khẩu" icon={Lock}><input required type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={update('confirmPassword')} placeholder="Nhập lại mật khẩu" className={inputClass} /></Field>
         </div>
+        <button type="submit" disabled={isLoading} className="client-primary-button mt-5 h-11 w-full">{isLoading ? 'Đang xử lý...' : 'Đăng ký ngay'}<ArrowRight size={18} /></button>
+      </form>
 
-        {/* Form Nhập Liệu */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 text-left">
-          
-          {/* 1. Ô Nhập Họ và Tên */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Họ và tên *</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                required
-                placeholder="Họ và tên"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* 2. Ô Nhập Ngày Sinh */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Ngày sinh *</label>
-            <div className="relative">
-              <input 
-                type="date" 
-                required
-                value={formData.dob}
-                onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all dark:scheme-dark"
-              />
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* --- 3. Ô CHỌN GIỚI TÍNH (MỚI THÊM) --- */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Giới tính *</label>
-            <div className="relative">
-              <select
-                required
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all cursor-pointer"
-              >
-                <option value="" disabled className="bg-[#020617] text-gray-400">Chọn giới tính</option>
-                <option value="Nam" className="bg-[#020617] text-white">Nam</option>
-                <option value="Nữ" className="bg-[#020617] text-white">Nữ</option>
-                <option value="Khác" className="bg-[#020617] text-white">Khác</option>
-              </select>
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* 4. Ô Nhập Số Điện Thoại */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Số điện thoại *</label>
-            <div className="relative">
-              <input 
-                type="tel" 
-                required
-                placeholder="Số điện thoại"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* 5. Ô Nhập Tên Đăng Nhập */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Tên đăng nhập *</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                required
-                placeholder="Tên đăng nhập"
-                value={formData.username}
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* 6. Ô Nhập Email */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Email *</label>
-            <div className="relative">
-              <input 
-                type="email" 
-                required
-                placeholder="Điền email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* 7. Ô Nhập Mật Khẩu */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Mật khẩu *</label>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required
-                placeholder="Mật khẩu"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-11 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* 8. Ô Nhập Xác Thực Mật Khẩu */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 pl-1">Xác thực mật khẩu *</label>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required
-                placeholder="Xác thực mật khẩu"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-11 text-sm text-white focus:outline-none focus:ring-2 focus:ring-(--btn-neon) focus:bg-white/10 transition-all"
-              />
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Nút Đăng Ký */}
-          <button type="submit" disabled={isLoading} className="btn-bright mt-4 w-full flex items-center justify-center gap-2 cursor-pointer py-3.5 rounded-xl normal-case text-base tracking-normal disabled:opacity-50">
-            <span>{isLoading ? "Đang xử lý..." : "Đăng Ký Ngay"}</span>
-            <ArrowRight size={18} />
-          </button>
-        </form>
-
-        {/* Footer Chuyển Đổi Sang Đăng Nhập */}
-        <div className="mt-6 text-center border-t border-white/5 pt-4 text-sm text-gray-400">
-          Bạn đã có tài khoản?{' '}
-          <Link to="/login" className="text-(--btn-neon) font-bold hover:underline">
-            Đăng nhập
-          </Link>
-        </div>
-
-      </div>
-    </div>
+      <footer className="shrink-0 border-t border-neutral-100 px-6 py-4 text-center text-sm text-neutral-500">Đã có tài khoản? <Link to="/login" className="font-semibold text-(--client-primary) hover:underline">Đăng nhập</Link></footer>
+    </section>
   );
 };
 
