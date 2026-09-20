@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { showWarning } from '../../../utils/toastHelper';
@@ -13,7 +13,7 @@ import MovieHero from './MovieHero';
 import ShowtimeSelector from './ShowtimeSelector';
 import ReviewSection from './ReviewSection';
 import ReviewModal from './ReviewModal';
-import TrailerModal from './TrailerModal';
+import TrailerModal from '../../../components/Client/TrailerModal';
 import BookingFlow from './BookingFlow';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -89,10 +89,6 @@ const MovieDetails = () => {
 
   // ── Trailer state ─────────────────────────────────────────────────────────
   const [trailerUrl, setTrailerUrl] = useState(null);
-  useEffect(() => {
-    document.body.style.overflow = trailerUrl ? 'hidden' : 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [trailerUrl]);
 
   // ── Booking handlers ──────────────────────────────────────────────────────
   const handleStartBooking = () => {
@@ -236,7 +232,7 @@ const MovieDetails = () => {
       />
 
       {/* Modals */}
-      <TrailerModal trailerUrl={trailerUrl} onClose={() => setTrailerUrl(null)} />
+      <TrailerModal embedUrl={trailerUrl} onClose={() => setTrailerUrl(null)} />
 
       <ReviewModal
         isOpen={isReviewOpen}

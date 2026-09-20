@@ -1,6 +1,7 @@
 import { CalendarDays, Clock, Play, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getMovieVisuals } from '../../utils/visualHelper';
+import MovieImage from './MovieImage';
 
 const HomeHero = ({ movie, onPlayTrailer }) => {
   if (!movie) {
@@ -17,7 +18,7 @@ const HomeHero = ({ movie, onPlayTrailer }) => {
 
   return (
     <section className="relative -mt-20 flex min-h-[660px] items-end overflow-hidden px-4 pb-24 pt-20 sm:px-6 lg:px-8">
-      <img src={visuals.backdrop} alt="" className="absolute inset-0 size-full object-cover" />
+      <MovieImage movie={movie} src={visuals.backdrop} variant="backdrop" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/55 to-black/15" />
       <div className="absolute inset-0 bg-linear-to-t from-black/75 via-transparent to-black/20" />
       <div className="relative mx-auto w-full max-w-7xl">

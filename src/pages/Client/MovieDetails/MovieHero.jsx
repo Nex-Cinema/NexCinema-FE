@@ -1,5 +1,5 @@
 import { Play, Heart, Star } from 'lucide-react';
-import { getMovieVisuals } from '../../../utils/visualHelper';
+import MovieImage from '../../../components/Client/MovieImage';
 
 /**
  * MovieHero — left poster + right title/meta/actions block.
@@ -17,14 +17,11 @@ const MovieHero = ({
     <section className="grid grid-cols-1 items-start gap-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-8 lg:grid-cols-[280px_1fr]">
       {/* Poster */}
       <div className="mx-auto aspect-2/3 w-full max-w-70 overflow-hidden rounded-xl shadow-lg lg:mx-0">
-        <img
+        <MovieImage
+          movie={rawMovie}
           src={movie.poster_path}
           alt={movie.title}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = getMovieVisuals(rawMovie).poster;
-          }}
         />
       </div>
 

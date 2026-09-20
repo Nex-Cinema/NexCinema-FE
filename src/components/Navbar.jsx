@@ -6,6 +6,7 @@ import axiosClient from '../api/axiosClient';
 import useMovieSearch from '../hooks/customer/useMovieSearch';
 import { getMovieVisuals } from '../utils/visualHelper';
 import Brand from './Client/Brand';
+import MovieImage from './Client/MovieImage';
 
 const navItems = [
   { to: '/movies/now-showing', label: 'Phim đang chiếu' },
@@ -89,7 +90,7 @@ const Navbar = () => {
                 const visuals = getMovieVisuals(movie);
                 return (
                   <button key={movie.MaPhim} type="button" onClick={() => selectMovie(movie.MaPhim)} className="client-search-result">
-                    <img src={movie.HinhAnh || visuals.thumbnail} alt="" className="h-14 w-10 rounded-md object-cover" />
+                    <MovieImage movie={movie} src={movie.HinhAnh || visuals.thumbnail} variant="thumbnail" alt={`Poster ${movie.TenPhim}`} className="h-14 w-10 shrink-0 rounded-md object-cover" />
                     <span className="min-w-0 text-left">
                       <strong className="block truncate text-sm text-neutral-950">{movie.TenPhim}</strong>
                       <span className="block truncate text-xs text-neutral-500">{movie.TheLoai || 'Điện ảnh'}</span>
