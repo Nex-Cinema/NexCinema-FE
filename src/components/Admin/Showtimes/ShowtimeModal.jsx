@@ -1,143 +1,123 @@
+import { AlertCircle, Save } from 'lucide-react';
+import AdminButton from '../Common/AdminButton';
+import FormField from '../Common/FormField';
 import Modal from '../Common/Modal';
-import { AlertCircle, DollarSign } from 'lucide-react';
+
+const FORM_ID = 'admin-showtime-form';
 
 const ShowtimeModal = ({
-  isOpen, onClose,
-  editingShowtime, formData, conflict, submitting,
-  movies, rooms, dayTypes,
-  onFormChange, onSubmit,
-}) => (
-  <Modal
-    isOpen={isOpen}
-    onClose={onClose}
-    title={editingShowtime
-      ? `Cập nhật suất chiếu ${editingShowtime.MaSuatChieu}`
-      : 'Thêm suất chiếu mới'}
-  >
-    <form onSubmit={onSubmit} className="space-y-6">
-      {/* Phim */}
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Chọn phim</label>
-        <select
-          className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-          value={formData.MaPhim}
-          onChange={e => onFormChange('MaPhim', e.target.value)}
-        >
-          {movies.map(m => (
-            <option key={m.MaPhim} value={m.MaPhim}>
-              {m.TenPhim} ({m.ThoiLuong} phút)
-            </option>
-          ))}
-        </select>
-      </div>
+  isOpen,
+  onClose,
+  editingShowtime,
+  formData,
+  conflict,
+  submitting,
+  movies,
+  rooms,
+  dayTypes,
+  onFormChange,
+  onSubmit,
+}) => {
+  const selectedMovie = movies.find((movie) => movie.MaPhim === formData.MaPhim);
+  const selectedRoom = rooms.find((room) => room.MaPhongChieu === formData.MaPhongChieu);
+  const modalDescription = [selectedMovie?.TenPhim, selectedRoom?.TenPhong].filter(Boolean).join(' · ') || 'Thiết lập phim, phòng chiếu và khung giờ.';
 
-      {/* Phòng + Loại ngày */}
-      <div className="grid grid-cols-2 gap-6">
-        {[
-          { label: 'Phòng chiếu', field: 'MaPhongChieu', options: rooms.map(r => ({ value: r.MaPhongChieu, label: r.TenPhong })) },
-          { label: 'Loại ngày', field: 'MaLoaiNgay', options: dayTypes.map(d => ({ value: d.MaLoaiNgay, label: d.TenLoaiNgay })) },
-        ].map(({ label, field, options }) => (
-          <div key={field} className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{label}</label>
-            <select
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-              value={formData[field]}
-              onChange={e => onFormChange(field, e.target.value)}
-            >
-              {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+  const footer = (
+    <>
+      <span className={`admin-modal-footer-note ${conflict ? 'admin-modal-footer-note--danger' : ''}`}>
+        {conflict ? 'Cần xử lý xung đột lịch trước khi lưu' : 'Giờ kết thúc được tính tự động theo thời lượng phim'}
+      </span>
+      <div>
+        <AdminButton variant="ghost" onClick={onClose} disabled={submitting}>Hủy</AdminButton>
+        <AdminButton type="submit" form={FORM_ID} icon={Save} disabled={Boolean(conflict) || submitting}>
+          {submitting ? 'Đang lưu…' : editingShowtime ? 'Lưu thay đổi' : 'Thêm suất chiếu'}
+        </AdminButton>
+      </div>
+    </>
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editingShowtime ? 'Cập nhật suất chiếu' : 'Thêm suất chiếu mới'}
+      description={modalDescription}
+      size="medium"
+      bodyClassName="admin-showtime-modal-body"
+      footer={footer}
+    >
+      <form id={FORM_ID} onSubmit={onSubmit} className="admin-showtime-form">
+        <fieldset disabled={submitting}>
+          <section className="admin-showtime-form-section">
+            <div className="admin-movie-section-heading"><span>01</span><h4>Phim & phòng chiếu</h4><p>Chọn nội dung và không gian chiếu phù hợp.</p></div>
+            <div className="admin-form-grid">
+              <FormField label="Phim" required className="sm:col-span-2">
+                <select required value={formData.MaPhim} onChange={(event) => onFormChange('MaPhim', event.target.value)}>
+                  {movies.length === 0 && <option value="">Chưa có phim khả dụng</option>}
+                  {movies.map((movie) => <option key={movie.MaPhim} value={movie.MaPhim}>{movie.TenPhim} · {movie.ThoiLuong} phút</option>)}
+                </select>
+              </FormField>
+              <FormField label="Phòng chiếu" required>
+                <select required value={formData.MaPhongChieu} onChange={(event) => onFormChange('MaPhongChieu', event.target.value)}>
+                  {rooms.length === 0 && <option value="">Chưa có phòng khả dụng</option>}
+                  {rooms.map((room) => <option key={room.MaPhongChieu} value={room.MaPhongChieu}>{room.TenPhong}</option>)}
+                </select>
+              </FormField>
+              <FormField label="Loại ngày" required>
+                <select required value={formData.MaLoaiNgay} onChange={(event) => onFormChange('MaLoaiNgay', event.target.value)}>
+                  {dayTypes.length === 0 && <option value="">Chưa có loại ngày</option>}
+                  {dayTypes.map((dayType) => <option key={dayType.MaLoaiNgay} value={dayType.MaLoaiNgay}>{dayType.TenLoaiNgay}</option>)}
+                </select>
+              </FormField>
+            </div>
+          </section>
+
+          <section className="admin-showtime-form-section">
+            <div className="admin-movie-section-heading"><span>02</span><h4>Ngày & khung giờ</h4><p>Hệ thống tự kiểm tra lịch trùng theo phòng chiếu.</p></div>
+            <div className="admin-showtime-time-grid">
+              <FormField label="Ngày chiếu" required>
+                <input type="date" required value={formData.NgayChieu} onChange={(event) => onFormChange('NgayChieu', event.target.value)} />
+              </FormField>
+              <FormField label="Giờ bắt đầu" required>
+                <input type="time" required value={formData.GioChieu} onChange={(event) => onFormChange('GioChieu', event.target.value)} />
+              </FormField>
+              <FormField label="Giờ kết thúc" helperText="Tự động tính">
+                <input type="time" readOnly value={formData.GioKetThuc} />
+              </FormField>
+            </div>
+            {conflict && (
+              <div className="admin-form-alert admin-form-alert--showtime" role="alert">
+                <AlertCircle size={18} strokeWidth={1.7} />
+                <div><strong>Xung đột lịch chiếu</strong><p>{conflict}</p></div>
+              </div>
+            )}
+          </section>
+
+          <section className="admin-showtime-form-section">
+            <div className="admin-movie-section-heading"><span>03</span><h4>Giá vé & trạng thái</h4></div>
+            <div className="admin-form-grid">
+              <FormField label="Giá vé cơ bản" required helperText="Đơn vị: VNĐ">
+                <div className="admin-input-affix"><span>₫</span><input type="number" min="0" step="1000" required value={formData.GiaVeCoBan} onChange={(event) => onFormChange('GiaVeCoBan', event.target.value)} /></div>
+              </FormField>
+              <FormField label="Trạng thái vận hành" required>
+                <select value={formData.KhaDung} onChange={(event) => onFormChange('KhaDung', Number(event.target.value))}>
+                  <option value={1}>Đang mở bán</option>
+                  <option value={0}>Tạm khóa</option>
+                </select>
+              </FormField>
+            </div>
+          </section>
+        </fieldset>
+
+        {editingShowtime && (
+          <div className="admin-movie-audit">
+            <span>Ngày tạo <strong>{editingShowtime.NgayTao || 'Chưa có dữ liệu'}</strong></span>
+            <span>Cập nhật gần nhất <strong>{editingShowtime.NgayCapNhat || 'Chưa cập nhật'}</strong></span>
           </div>
-        ))}
-      </div>
-
-      {/* Ngày + Giờ bắt đầu + Giờ kết thúc */}
-      <div className="grid grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Ngày chiếu</label>
-          <input type="date" required
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white font-mono font-bold"
-            value={formData.NgayChieu}
-            onChange={e => onFormChange('NgayChieu', e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Giờ chiếu</label>
-          <input type="time" required
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white font-mono font-bold"
-            value={formData.GioChieu}
-            onChange={e => onFormChange('GioChieu', e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest opacity-60">Giờ kết thúc</label>
-          <input type="time" readOnly
-            className="w-full bg-white/[0.02] border border-white/5 rounded-xl py-3 px-4 text-sm text-slate-500 font-mono font-bold"
-            value={formData.GioKetThuc}
-          />
-        </div>
-      </div>
-
-      {/* Giá vé + Khả dụng */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Giá vé cơ bản (VND)</label>
-          <div className="relative">
-            <input type="number" min="0" required
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white font-mono font-bold placeholder:text-slate-500"
-              value={formData.GiaVeCoBan}
-              onChange={e => onFormChange('GiaVeCoBan', e.target.value)}
-            />
-            <DollarSign size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Khả dụng</label>
-          <select
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer"
-            value={formData.KhaDung}
-            onChange={e => onFormChange('KhaDung', parseInt(e.target.value, 10))}
-          >
-            <option value={1}>1 (Khả dụng)</option>
-            <option value={0}>0 (Khóa)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Timestamps (edit mode) */}
-      {editingShowtime && (
-        <div className="grid grid-cols-2 gap-6 text-[10px] text-slate-500 font-mono bg-white/[0.01] p-3 rounded-lg border border-white/5">
-          <div>Ngày tạo: {editingShowtime.NgayTao || '--:--'}</div>
-          <div>Ngày cập nhật: {editingShowtime.NgayCapNhat || 'Chưa cập nhật'}</div>
-        </div>
-      )}
-
-      {/* Conflict warning */}
-      {conflict && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex gap-3 text-red-400">
-          <AlertCircle size={20} className="shrink-0" />
-          <p className="text-xs font-bold">⚠️ {conflict}</p>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex gap-4 pt-4 border-t border-white/5">
-        <button type="button" onClick={onClose}
-          className="flex-grow py-3 rounded-xl font-bold border border-white/5 hover:border-white/10 hover:bg-white/5 text-xs uppercase tracking-widest text-slate-400 cursor-pointer active:scale-95 transition-all"
-        >
-          Hủy
-        </button>
-        <button type="submit" disabled={!!conflict || submitting}
-          className={`flex-grow py-3 rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer transition-all shadow-lg active:scale-95 ${
-            conflict || submitting
-              ? 'bg-slate-800 text-slate-600 cursor-not-allowed shadow-none'
-              : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-red-500/20'
-          }`}
-        >
-          {submitting ? 'Đang lưu...' : 'Lưu suất chiếu'}
-        </button>
-      </div>
-    </form>
-  </Modal>
-);
+        )}
+      </form>
+    </Modal>
+  );
+};
 
 export default ShowtimeModal;
