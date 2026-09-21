@@ -6,6 +6,7 @@ import { AdminErrorState, AdminLoadingSkeleton } from '../../components/Admin/Co
 import MovieModal from '../../components/Admin/Movies/MovieModal';
 import movieService from '../../services/admin/movieService';
 import { showSuccess } from '../../utils/toastHelper';
+import { sanitizeRichText } from '../../utils/richText';
 
 const emptyMovie = { TenPhim: '', ThoiLuong: 120, TheLoai: '', NgayKhoiChieu: '', NgayKetThuc: '', DaoDien: '', DienVien: '', GioiHanTuoi: 'P', NoiDung: '', Trailer: '', HinhAnh: '', KhaDung: 1 };
 
@@ -46,8 +47,9 @@ function MovieEditorForm({ id }) {
     setSaving(true);
     setErrors({});
     try {
-      if (id) await movieService.updateMovie(id, form);
-      else await movieService.addMovie(form);
+      const payload = { ...form, NoiDung: sanitizeRichText(form.NoiDung) };
+      if (id) await movieService.updateMovie(id, payload);
+      else await movieService.addMovie(payload);
       showSuccess(id ? 'Đã cập nhật phim.' : 'Đã thêm phim.');
       navigate('/admin/movies');
     } catch (error) {

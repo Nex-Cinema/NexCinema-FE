@@ -2,6 +2,7 @@ import { CalendarDays, Clock, Play, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getMovieVisuals } from '../../utils/visualHelper';
 import MovieImage from './MovieImage';
+import { richTextToPlainText } from '../../utils/richText';
 
 const HomeHero = ({ movie, onPlayTrailer }) => {
   if (!movie) {
@@ -15,6 +16,7 @@ const HomeHero = ({ movie, onPlayTrailer }) => {
   const visuals = getMovieVisuals(movie);
   const genres = movie.genres?.map((genre) => genre.name).slice(0, 3).join(' • ') || movie.TheLoai;
   const releaseYear = movie.NgayKhoiChieu ? new Date(movie.NgayKhoiChieu).getFullYear() : null;
+  const overview = richTextToPlainText(movie.NoiDung);
 
   return (
     <section className="relative -mt-20 flex min-h-[660px] items-end overflow-hidden px-4 pb-24 pt-20 sm:px-6 lg:px-8">
@@ -29,7 +31,7 @@ const HomeHero = ({ movie, onPlayTrailer }) => {
           {releaseYear && <span className="flex items-center gap-1"><CalendarDays size={16} />{releaseYear}</span>}
           {movie.ThoiLuong > 0 && <span className="flex items-center gap-1"><Clock size={16} />{movie.ThoiLuong} phút</span>}
         </div>
-        <p className="mt-5 max-w-2xl line-clamp-3 text-base leading-7 text-slate-300">{movie.NoiDung || 'Khám phá bộ phim và chọn suất chiếu phù hợp với bạn.'}</p>
+        <p className="mt-5 max-w-2xl line-clamp-3 text-base leading-7 text-slate-300">{overview || 'Khám phá bộ phim và chọn suất chiếu phù hợp với bạn.'}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link to={`/movie/${movie.MaPhim}`} className="client-primary-button"><Ticket size={18} />Đặt vé ngay</Link>
           <button type="button" onClick={() => onPlayTrailer(visuals.trailer)} className="client-secondary-button"><Play size={18} />Xem trailer</button>

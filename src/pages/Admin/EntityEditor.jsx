@@ -7,6 +7,7 @@ import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import FormField from '../../components/Admin/Common/FormField';
 import StickyFormActions from '../../components/Admin/Common/StickyFormActions';
 import ImageUploader from '../../components/Admin/Common/ImageUploader';
+import RichTextEditor from '../../components/Admin/Common/RichTextEditor';
 import { adminEditorConfigs } from '../../constants/adminEditorConfigs';
 import { showSuccess } from '../../utils/toastHelper';
 import { slugify } from '../../utils/slugify';
@@ -130,10 +131,7 @@ const EntityEditor = ({ kind }) => {
                       {field.type === 'image' ? (
                         <ImageUploader value={values[field.name]} aspectRatio={field.aspectRatio} onChange={(value) => handleChange(field, value)} />
                       ) : field.type === 'richtext' ? (
-                        <div className="admin-rich-editor">
-                          <div className="admin-rich-toolbar" aria-label="Công cụ định dạng"><button type="button">H2</button><button type="button"><strong>B</strong></button><button type="button"><em>I</em></button><button type="button">• Danh sách</button><button type="button">Liên kết</button></div>
-                          <textarea value={values[field.name]} onChange={(event) => handleChange(field, event.target.value)} />
-                        </div>
+                        <RichTextEditor name={field.name} value={values[field.name]} onChange={(event) => handleChange(field, event.target.value)} />
                       ) : field.type === 'textarea' ? (
                         <textarea value={values[field.name]} onChange={(event) => handleChange(field, event.target.value)} />
                       ) : field.type === 'select' ? (

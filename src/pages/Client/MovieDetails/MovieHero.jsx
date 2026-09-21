@@ -1,5 +1,6 @@
 import { Play, Heart, Star } from 'lucide-react';
 import MovieImage from '../../../components/Client/MovieImage';
+import { sanitizeRichText } from '../../../utils/richText';
 
 /**
  * MovieHero — left poster + right title/meta/actions block.
@@ -13,6 +14,8 @@ const MovieHero = ({
   onShowTrailer,
   onStartBooking,
 }) => {
+  const description = sanitizeRichText(movie.NoiDung || 'Chưa có mô tả nội dung cho phim này.');
+
   return (
     <section className="grid grid-cols-1 items-start gap-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-8 lg:grid-cols-[280px_1fr]">
       {/* Poster */}
@@ -44,9 +47,7 @@ const MovieHero = ({
         </div>
 
         {/* Description */}
-        <p className="max-w-3xl text-base leading-7 text-neutral-600 md:text-lg">
-          {movie.NoiDung || 'Chưa có mô tả nội dung cho phim này.'}
-        </p>
+        <div className="client-rich-text max-w-3xl text-base leading-7 text-neutral-600 md:text-lg" dangerouslySetInnerHTML={{ __html: description }} />
 
         {/* Director / Cast */}
         <div className="mt-2 flex flex-col gap-1.5 border-t border-neutral-200 pt-4 text-sm font-medium text-neutral-600">

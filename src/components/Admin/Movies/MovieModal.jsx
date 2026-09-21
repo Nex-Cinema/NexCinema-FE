@@ -1,139 +1,142 @@
+import { useState } from 'react';
+import { AlertCircle, Film, Save } from 'lucide-react';
+import AdminButton from '../Common/AdminButton';
+import FormField from '../Common/FormField';
 import Modal from '../Common/Modal';
-import { AlertCircle, Film } from 'lucide-react';
+import RichTextEditor from '../Common/RichTextEditor';
 
-const MovieModal = ({ isOpen, onClose, editingMovie, formData, errors, onChange, onSubmit, isSubmitting = false }) => (
-  <Modal isOpen={isOpen} onClose={onClose} title={editingMovie ? 'Cập nhật phim' : 'Thêm phim mới'}>
-    <form onSubmit={onSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-      {errors?.submit && (
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-4 rounded-xl flex items-center gap-2">
-          <AlertCircle size={16} className="shrink-0" /> <span>{errors.submit}</span>
-        </div>
+const FORM_ID = 'admin-movie-form';
+
+const PosterPreview = ({ src, title }) => {
+  const [failedSrc, setFailedSrc] = useState('');
+  const canShowImage = Boolean(src) && failedSrc !== src;
+
+  return (
+    <div className="admin-movie-poster" data-empty={!canShowImage}>
+      {canShowImage ? (
+        <img src={src} alt={`Poster ${title || 'phim'}`} onError={() => setFailedSrc(src)} />
+      ) : (
+        <div><Film size={30} strokeWidth={1.5} /><strong>Chưa có poster</strong><span>Dán URL ảnh để xem trước</span></div>
       )}
+    </div>
+  );
+};
 
-      <fieldset disabled={isSubmitting} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Poster + KhaDung */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Ảnh Poster (HinhAnh)</label>
-            <div className="aspect-[2/3] w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative">
-              {formData.HinhAnh ? (
-                <img src={formData.HinhAnh} className="w-full h-full object-cover" alt="Preview" />
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 gap-2">
-                  <Film size={32} /><span className="text-xs font-bold">Chưa có ảnh poster</span>
-                </div>
-              )}
-            </div>
-            <input type="text" name="HinhAnh" placeholder="Nhập link URL hình ảnh poster..."
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-xs text-white placeholder:text-slate-500"
-              value={formData.HinhAnh} onChange={onChange} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Khả dụng (KhaDung)</label>
-            <select name="KhaDung" value={formData.KhaDung} onChange={onChange}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer">
-              <option value={1}>1 (Khả dụng)</option>
-              <option value={0}>0 (Chưa khả dụng)</option>
-            </select>
-          </div>
-        </div>
+const MovieModal = ({ isOpen, onClose, editingMovie, formData, errors, onChange, onSubmit, isSubmitting = false }) => {
+  const title = editingMovie ? 'Cập nhật phim' : 'Thêm phim mới';
+  const richTextChange = (event) => onChange({ target: { name: 'NoiDung', value: event.target.value } });
 
-        {/* Right: Info fields */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Tên phim */}
-            <div className="md:col-span-2 space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tên phim (TenPhim)</label>
-              <input type="text" name="TenPhim" required placeholder="VD: Lật Mặt 7"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm font-bold text-white placeholder:text-slate-500"
-                value={formData.TenPhim} onChange={onChange} />
-            </div>
-            {/* Thời lượng */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thời lượng (phút)</label>
-              <input type="number" name="ThoiLuong" required min="1" placeholder="120"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white placeholder:text-slate-500"
-                value={formData.ThoiLuong} onChange={onChange} />
-            </div>
-            {/* Thể loại */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thể loại</label>
-              <input type="text" name="TheLoai" required placeholder="Hành động, Tâm lý"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white placeholder:text-slate-500"
-                value={formData.TheLoai} onChange={onChange} />
-            </div>
-            {/* Giới hạn tuổi */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Giới hạn độ tuổi</label>
-              <select name="GioiHanTuoi" value={formData.GioiHanTuoi} onChange={onChange}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200 font-bold [&>option]:bg-[#0a0d14] cursor-pointer">
-                {['P', 'C13', 'C16', 'C18'].map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
-              </select>
-            </div>
-            {/* Trailer */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Trailer</label>
-              <input type="text" name="Trailer" required placeholder="https://youtube.com/..."
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white placeholder:text-slate-500"
-                value={formData.Trailer} onChange={onChange} />
-            </div>
-            {/* Ngày khởi chiếu */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ngày khởi chiếu</label>
-              <input type="date" name="NgayKhoiChieu" required
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200"
-                value={formData.NgayKhoiChieu} onChange={onChange} />
-            </div>
-            {/* Ngày kết thúc */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ngày kết thúc chiếu</label>
-              <input type="date" name="NgayKetThuc"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-slate-200"
-                value={formData.NgayKetThuc} onChange={onChange} />
-            </div>
-            {/* Đạo diễn */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Đạo diễn</label>
-              <input type="text" name="DaoDien" placeholder="Lý Hải"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white placeholder:text-slate-500"
-                value={formData.DaoDien} onChange={onChange} />
-            </div>
-            {/* Diễn viên */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Diễn viên</label>
-              <input type="text" name="DienVien" placeholder="Trương Minh Cường, Đinh Y Nhung"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm text-white placeholder:text-slate-500"
-                value={formData.DienVien} onChange={onChange} />
-            </div>
-          </div>
-
-          {/* Nội dung */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mô tả nội dung</label>
-            <textarea name="NoiDung" rows={4} placeholder="Tóm tắt cốt truyện..."
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-sm resize-none text-white placeholder:text-slate-500"
-              value={formData.NoiDung} onChange={onChange} />
-          </div>
-        </div>
-      </fieldset>
-
-      {editingMovie && (
-        <div className="grid grid-cols-2 gap-6 text-[10px] text-slate-500 font-mono bg-white/[0.01] p-3 rounded-lg border border-white/5">
-          <div>Ngày tạo: {editingMovie.NgayTao || '--:--'}</div>
-          <div>Ngày cập nhật: {editingMovie.NgayCapNhat || 'Chưa cập nhật'}</div>
-        </div>
-      )}
-
-      <div className="flex gap-4 pt-4 border-t border-white/5">
-        <button type="button" onClick={onClose} className="flex-grow py-3 px-6 rounded-xl font-bold text-slate-400 hover:bg-white/5 border border-white/5 hover:border-white/10 active:scale-95 uppercase tracking-widest text-xs cursor-pointer">Hủy</button>
-        <button type="submit" disabled={isSubmitting} className="flex-grow py-3 px-6 rounded-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 transition-all shadow-lg shadow-red-500/20 active:scale-95 uppercase tracking-widest text-xs cursor-pointer text-white disabled:opacity-50">
-          {isSubmitting ? 'Đang lưu...' : editingMovie ? 'Cập nhật' : 'Lưu phim'}
-        </button>
+  const footer = (
+    <>
+      <span className="admin-modal-footer-note">Các trường có dấu * là bắt buộc</span>
+      <div>
+        <AdminButton variant="ghost" onClick={onClose} disabled={isSubmitting}>Hủy</AdminButton>
+        <AdminButton type="submit" form={FORM_ID} icon={Save} disabled={isSubmitting}>
+          {isSubmitting ? 'Đang lưu…' : editingMovie ? 'Lưu thay đổi' : 'Thêm phim'}
+        </AdminButton>
       </div>
-    </form>
-  </Modal>
-);
+    </>
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      description="Hoàn thiện thông tin hiển thị và lịch phát hành của phim."
+      size="wide"
+      bodyClassName="admin-movie-modal-body"
+      footer={footer}
+    >
+      <form id={FORM_ID} onSubmit={onSubmit} className="admin-movie-form">
+        {errors?.submit && (
+          <div className="admin-form-alert" role="alert">
+            <AlertCircle size={17} strokeWidth={1.7} />
+            <span>{errors.submit}</span>
+          </div>
+        )}
+
+        <fieldset disabled={isSubmitting} className="admin-movie-modal-grid">
+          <aside className="admin-movie-media-panel">
+            <div className="admin-movie-section-heading">
+              <span>Hình ảnh</span>
+              <h4>Poster phim</h4>
+              <p>Tỷ lệ 2:3, ưu tiên ảnh JPG hoặc WEBP rõ nét.</p>
+            </div>
+            <PosterPreview src={formData.HinhAnh} title={formData.TenPhim} />
+            <FormField label="URL poster" helperText="Ảnh sẽ được kiểm tra ngay khi đường dẫn thay đổi.">
+              <input type="url" name="HinhAnh" placeholder="https://.../poster.jpg" value={formData.HinhAnh} onChange={onChange} />
+            </FormField>
+            <FormField label="Trạng thái hiển thị" required>
+              <select name="KhaDung" value={formData.KhaDung} onChange={onChange}>
+                <option value={1}>Đang hiển thị</option>
+                <option value={0}>Tạm ẩn</option>
+              </select>
+            </FormField>
+          </aside>
+
+          <div className="admin-movie-details">
+            <section className="admin-movie-form-section">
+              <div className="admin-movie-section-heading"><span>01</span><h4>Thông tin cơ bản</h4></div>
+              <div className="admin-form-grid">
+                <FormField label="Tên phim" required className="sm:col-span-2">
+                  <input type="text" name="TenPhim" required placeholder="Ví dụ: Dune: Part Two" value={formData.TenPhim} onChange={onChange} />
+                </FormField>
+                <FormField label="Thời lượng" required helperText="Đơn vị: phút">
+                  <input type="number" name="ThoiLuong" required min="1" placeholder="120" value={formData.ThoiLuong} onChange={onChange} />
+                </FormField>
+                <FormField label="Giới hạn độ tuổi" required>
+                  <select name="GioiHanTuoi" value={formData.GioiHanTuoi} onChange={onChange}>
+                    {['P', 'C13', 'C16', 'C18'].map((rating) => <option key={rating} value={rating}>{rating}</option>)}
+                  </select>
+                </FormField>
+                <FormField label="Thể loại" required className="sm:col-span-2">
+                  <input type="text" name="TheLoai" required placeholder="Hành động, Khoa học viễn tưởng" value={formData.TheLoai} onChange={onChange} />
+                </FormField>
+              </div>
+            </section>
+
+            <section className="admin-movie-form-section">
+              <div className="admin-movie-section-heading"><span>02</span><h4>Phát hành & truyền thông</h4></div>
+              <div className="admin-form-grid">
+                <FormField label="Ngày khởi chiếu" required>
+                  <input type="date" name="NgayKhoiChieu" required value={formData.NgayKhoiChieu} onChange={onChange} />
+                </FormField>
+                <FormField label="Ngày kết thúc chiếu">
+                  <input type="date" name="NgayKetThuc" value={formData.NgayKetThuc} onChange={onChange} />
+                </FormField>
+                <FormField label="Trailer YouTube" required helperText="Chấp nhận URL YouTube hoặc youtu.be." className="sm:col-span-2">
+                  <input type="url" name="Trailer" required placeholder="https://youtube.com/watch?v=..." value={formData.Trailer} onChange={onChange} />
+                </FormField>
+              </div>
+            </section>
+
+            <section className="admin-movie-form-section">
+              <div className="admin-movie-section-heading"><span>03</span><h4>Đội ngũ sản xuất</h4></div>
+              <div className="admin-form-grid">
+                <FormField label="Đạo diễn"><input type="text" name="DaoDien" placeholder="Tên đạo diễn" value={formData.DaoDien} onChange={onChange} /></FormField>
+                <FormField label="Diễn viên"><input type="text" name="DienVien" placeholder="Các diễn viên, cách nhau bởi dấu phẩy" value={formData.DienVien} onChange={onChange} /></FormField>
+              </div>
+            </section>
+
+            <section className="admin-movie-form-section">
+              <div className="admin-movie-section-heading"><span>04</span><h4>Mô tả nội dung</h4><p>Định dạng vừa đủ để nội dung dễ đọc trên trang chi tiết phim.</p></div>
+              <FormField label="Nội dung phim">
+                <RichTextEditor name="NoiDung" value={formData.NoiDung} onChange={richTextChange} disabled={isSubmitting} placeholder="Tóm tắt cốt truyện…" />
+              </FormField>
+            </section>
+
+            {editingMovie && (
+              <div className="admin-movie-audit">
+                <span>Ngày tạo <strong>{editingMovie.NgayTao || 'Chưa có dữ liệu'}</strong></span>
+                <span>Cập nhật gần nhất <strong>{editingMovie.NgayCapNhat || 'Chưa cập nhật'}</strong></span>
+              </div>
+            )}
+          </div>
+        </fieldset>
+      </form>
+    </Modal>
+  );
+};
 
 export default MovieModal;
