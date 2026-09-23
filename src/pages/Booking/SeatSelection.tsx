@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants';
-import {
-  Clock,
-  Ticket,
-  ArrowRight,
-  ArrowLeft,
-  Info,
-} from 'lucide-react';
+import { Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import BookingProgressBar from '@/features/booking/components/BookingProgressBar';
-import SeatLegend from '@/features/booking/components/SeatLegend';
 import ShowtimePill from '@/components/shared/ShowtimePill';
-import AgeBadge from '@/components/shared/AgeBadge';
-import Modal from '@/components/ui/Modal';
+import SeatMapGrid from '@/features/booking/components/SeatMapGrid';
+import BookingSummarySidebar from '@/features/booking/components/BookingSummarySidebar';
+import AgeGateModal from '@/features/booking/components/AgeGateModal';
 
 import { useSeatSelection } from '@/features/booking/hooks/useSeatSelection';
 import { saveBookingDraft } from '@/features/booking/utils/bookingSession';
@@ -29,11 +23,11 @@ import { Seat, ShowtimePill as ShowtimePillType } from '@/features/booking/types
 const SHOWTIME_PILLS: ShowtimePillType[] = [
   { id: 'st-10:45', time: '10:45', seatsLeft: 0, isSoldOut: true },
   { id: 'st-11:30', time: '11:30', isCurrent: true, seatsLeft: 42 },
-  { id: 'st-13:00', time: '13:00', seatsLeft: 6 }, // Low stock (< 10)
+  { id: 'st-13:00', time: '13:00', seatsLeft: 6 },
   { id: 'st-13:45', time: '13:45', seatsLeft: 76 },
   { id: 'st-15:15', time: '15:15', seatsLeft: 0, isSoldOut: true },
   { id: 'st-16:00', time: '16:00', seatsLeft: 18 },
-  { id: 'st-17:30', time: '17:30', seatsLeft: 4 }, // Low stock (< 10)
+  { id: 'st-17:30', time: '17:30', seatsLeft: 4 },
   { id: 'st-18:15', time: '18:15', seatsLeft: 52 },
   { id: 'st-19:45', time: '19:45', seatsLeft: 64 },
   { id: 'st-20:30', time: '20:30', seatsLeft: 30 },
@@ -123,7 +117,7 @@ export const SeatSelection: React.FC = () => {
       return `${base} bg-orange-100 text-orange-500 cursor-not-allowed border border-orange-300 opacity-70`;
     }
     if (seat.status === 'SELECTED') {
-      return `${base} bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40`;
+      return `${base} bg-[#d71920] text-[#ffffff] scale-105 shadow-md ring-2 ring-[#d71920]/40`;
     }
     if (seat.type === 'VIP') {
       return `${base} bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-400 font-bold`;
@@ -170,293 +164,35 @@ export const SeatSelection: React.FC = () => {
             </div>
 
             {/* SEAT MAP DISPLAY CARD */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-[#e4e2e2] flex flex-col items-center">
-              {/* Screen Frame */}
-              <div className="w-full max-w-xl mx-auto mb-8 flex flex-col items-center">
-                <div className="w-full h-8 border-t-2 border-[#d71920] rounded-t-[50%] bg-gradient-to-b from-[#d71920]/10 to-transparent flex items-center justify-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#d71920]">
-                    MÀN HÌNH CHIẾU / SCREEN
-                  </span>
-                </div>
-              </div>
-
-              {/* Seat Grid */}
-              <div className="w-full overflow-x-auto pb-4 flex justify-center scrollbar-none">
-                <div className="flex flex-col gap-2 min-w-[580px]">
-                  {rows.map((row) => (
-                    <div key={row} className="flex items-center justify-center gap-2">
-                      {/* Row Label Left */}
-                      <span className="w-6 text-center font-bold text-xs text-[#5f5e5e]">
-                        {row}
-                      </span>
-
-                      {/* Seats in Row */}
-                      <div className="flex items-center gap-1.5">
-                        {row === 'K' ? (
-                          /* ── COUPLE ROW (Row K: 6 double seats) ────────── */
-                          [1, 3, 5, 7, 9, 11].map((c1) => {
-                            const c2 = c1 + 1;
-                            const isAisleBefore = [3, 11].includes(c1);
-                            const seat1 = seatMap['K']?.find((s) => s.col === c1);
-                            const seat2 = seatMap['K']?.find((s) => s.col === c2);
-                            const isSold = seat1?.status === 'SOLD' || seat2?.status === 'SOLD';
-                            const isHeld = seat1?.status === 'HELD' || seat2?.status === 'HELD';
-                            const isSelected =
-                              seat1?.status === 'SELECTED' || seat2?.status === 'SELECTED';
-
-                            const coupleClass = isSold
-                              ? 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed border border-slate-300'
-                              : isHeld
-                              ? 'bg-orange-100 text-orange-500 cursor-not-allowed border border-orange-300 opacity-70'
-                              : isSelected
-                              ? 'bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40'
-                              : 'bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-400 font-bold';
-
-                            return (
-                              <React.Fragment key={`K${c1}-${c2}`}>
-                                {isAisleBefore && <div className="w-4" />}
-                                <button
-                                  type="button"
-                                  onClick={() => seat1 && handleToggleSeat(seat1)}
-                                  disabled={isSold || isHeld}
-                                  className={`w-[4.6rem] h-8 rounded-t-lg flex items-center justify-center text-[11px] font-bold transition-all shadow-2xs ${coupleClass}`}
-                                  title={
-                                    isSold
-                                      ? `Ghế đôi K${c1}-K${c2} — Đã bán`
-                                      : isHeld
-                                      ? `Ghế đôi K${c1}-K${c2} — Đang được giữ`
-                                      : `Ghế đôi K${c1}-K${c2} - 220.000 đ/cặp`
-                                  }
-                                >
-                                  {isSold ? '✕' : isHeld ? '⏳' : `K${c1}-${c2}`}
-                                </button>
-                              </React.Fragment>
-                            );
-                          })
-                        ) : (
-                          /* ── STANDARD & VIP ROWS (A-I) ─────────────────── */
-                          seatMap[row]?.map((seat) => {
-                            const isAisleBefore = [3, 11].includes(seat.col);
-                            return (
-                              <React.Fragment key={seat.id}>
-                                {isAisleBefore && <div className="w-4" />}
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleSeat(seat)}
-                                  disabled={seat.status === 'SOLD' || seat.status === 'HELD'}
-                                  className={`w-8 h-8 rounded-t-lg ${getSeatButtonClass(seat)}`}
-                                  title={
-                                    seat.status === 'SOLD'
-                                      ? `${seat.id} — Đã bán`
-                                      : seat.status === 'HELD'
-                                      ? `${seat.id} — Đang được giữ bởi người khác`
-                                      : `${seat.id} (${
-                                          seat.type === 'VIP' ? 'Ghế VIP' : 'Ghế tiêu chuẩn'
-                                        }) - ${seat.price.toLocaleString('vi-VN')} đ`
-                                  }
-                                >
-                                  {seat.status === 'SOLD'
-                                    ? '✕'
-                                    : seat.status === 'HELD'
-                                    ? '⏳'
-                                    : seat.col}
-                                </button>
-                              </React.Fragment>
-                            );
-                          })
-                        )}
-                      </div>
-
-                      {/* Row Label Right */}
-                      <span className="w-6 text-center font-bold text-xs text-[#5f5e5e]">
-                        {row}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Extracted Seat Legend Component */}
-              <SeatLegend />
-
-              {/* Max Selection Notice */}
-              <div className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-[#f5f3f3] rounded-lg text-xs text-[#5f5e5e]">
-                <Info className="w-4 h-4 text-[#d71920]" />
-                <span>Tối đa được chọn {MAX_SEATS_PER_BOOKING} ghế trong một lần đặt vé</span>
-              </div>
-            </div>
+            <SeatMapGrid
+              rows={rows}
+              seatMap={seatMap}
+              onToggleSeat={handleToggleSeat}
+              getSeatButtonClass={getSeatButtonClass}
+              maxSeatsPerBooking={MAX_SEATS_PER_BOOKING}
+            />
           </div>
 
           {/* RIGHT COLUMN: BOOKING SUMMARY SIDEBAR (~30% = 4 cols) */}
-          <aside className="lg:col-span-4 sticky top-24 flex flex-col gap-4">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden relative border border-[#e4e2e2]">
-              {/* Top Red Accent Bar */}
-              <div className="h-1.5 w-full bg-[#d71920]" />
-
-              <div className="p-6 flex flex-col gap-5">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-base text-[#1b1c1c] uppercase tracking-wide">
-                    Thông tin đặt vé
-                  </h2>
-                  <span className="text-[10px] text-[#5f5e5e] font-medium border border-dashed border-gray-300 px-2 py-0.5 rounded-full">
-                    Bước 2 / 4
-                  </span>
-                </div>
-
-                {/* Movie Brief Card */}
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-[#f5f3f3]">
-                  <img
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQR0Gi36A8a1Os8Ifgk9xdTOtDMMoW8YRGGTU1qPt1v9_clKv9IMrOIay1VJSqgzx47kYDwJ7UEEfAN9qSTPp2X583ldDayNuzyHujKw8pVa5IYL8tn5I32tVk4XD-xd0TXujchAhkNG2HDBvCptorUeiMFrYhx-rHYpTp_Z8eIM0qGx4gn5g0thOZYtbGfDhRz0LAs5eWVWLaNpbO_ahVbbNowPy7vSeApnHijdEkPaHhfUc0WDCnDw"
-                    alt="Dune 2"
-                    className="w-14 h-20 rounded object-cover flex-shrink-0 shadow-xs"
-                  />
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-1 mb-1">
-                      <AgeBadge rating={MOVIE_AGE_RATING} />
-                      <span className="px-1.5 py-0.5 rounded bg-[#e4e2e2] text-[#1b1c1c] font-semibold text-[10px]">
-                        2D IMAX Phụ Đề
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-sm text-[#1b1c1c] line-clamp-2 leading-snug">
-                      Dune: Hành Tinh Cát - Phần 2
-                    </h3>
-                    <p className="text-[11px] text-[#5f5e5e] mt-1">Khoa học viễn tưởng, Phiêu lưu</p>
-                  </div>
-                </div>
-
-                {/* Cinema & Showtime Info */}
-                <div className="space-y-2 text-xs text-[#5f5e5e]">
-                  <div className="flex items-start gap-2">
-                    <Ticket className="w-4 h-4 text-[#d71920] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-[#1b1c1c]">NexCinema Complex Lê Duẩn</p>
-                      <p className="text-[11px]">Phòng chiếu IMAX Laser</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-[#d71920] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-[#1b1c1c]">
-                        {currentShowtimeTime} - Thứ Ba, 29/10/2024
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Selected Seats Itemized */}
-                <div className="pt-3 border-t border-[#e4e2e2]">
-                  {selectedSeatIds.length > 0 ? (
-                    <div className="flex items-center justify-between text-xs">
-                      <div>
-                        <span className="font-bold text-[#1b1c1c]">
-                          {selectedSeatIds.length}x Ghế ({selectedSeatIds.join(', ')})
-                        </span>
-                        <p className="text-[11px] text-[#5f5e5e]">Vị trí ghế đã chọn</p>
-                      </div>
-                      <span className="font-bold text-sm text-[#1b1c1c]">
-                        {totalAmount.toLocaleString('vi-VN')} đ
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-[#5f5e5e] italic">Chưa chọn ghế nào</p>
-                  )}
-                </div>
-
-                {/* Divider */}
-                <div className="w-full h-px bg-[#e4e2e2]" />
-
-                {/* Price Total */}
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm text-[#5f5e5e] font-semibold">Tổng cộng:</span>
-                  <span className="text-2xl font-black text-[#d71920]">
-                    {totalAmount.toLocaleString('vi-VN')} đ
-                  </span>
-                </div>
-
-                {/* ── CTA Button ── */}
-                <button
-                  onClick={handleContinueToPayment}
-                  disabled={selectedSeatIds.length === 0}
-                  className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                    selectedSeatIds.length > 0
-                      ? 'bg-[#d71920] hover:bg-[#ae0011] text-white shadow-md active:scale-[0.98] cursor-pointer'
-                      : 'bg-[#e4e2e2] text-[#5f5e5e] cursor-not-allowed'
-                  }`}
-                >
-                  <span>TIẾP TỤC THANH TOÁN</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                {/* Back to Showtime Link */}
-                <Link
-                  to={ROUTES.BOOKING.CHECKOUT}
-                  className="text-center text-xs font-semibold text-[#5f5e5e] hover:text-[#d71920] transition-colors flex items-center justify-center gap-1"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Quay lại chọn suất chiếu</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Hold Notice Banner */}
-            <div className="bg-[#f5f3f3] rounded-xl p-4 flex items-center gap-3 border border-[#e4e2e2]">
-              <Info className="w-5 h-5 text-[#d71920] shrink-0" />
-              <div className="text-xs">
-                <p className="font-bold text-[#1b1c1c]">Giữ ghế theo thời gian thực</p>
-                <p className="text-[#5f5e5e]">
-                  Hệ thống tự động bảo lưu ghế 10 phút sau khi bạn xác nhận chọn ghế
-                </p>
-              </div>
-            </div>
-          </aside>
+          <BookingSummarySidebar
+            movieTitle={MOVIE_TITLE}
+            movieAgeRating={MOVIE_AGE_RATING}
+            currentShowtimeTime={currentShowtimeTime}
+            selectedSeatIds={selectedSeatIds}
+            totalAmount={totalAmount}
+            onContinueToPayment={handleContinueToPayment}
+          />
         </div>
       </div>
 
       {/* ── ISSUE-16: AGE GATE CONFIRMATION MODAL ─────────────────────────────── */}
-      <Modal
+      <AgeGateModal
         isOpen={isAgeGateOpen}
         onClose={() => setIsAgeGateOpen(false)}
-        maxWidthClass="max-w-sm"
-      >
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <AgeBadge rating={MOVIE_AGE_RATING} className="text-2xl px-4 py-2 rounded-xl" />
-          </div>
-
-          <h3 className="text-base font-bold text-[#1b1c1c]">Xác nhận độ tuổi</h3>
-          <p className="text-xs text-[#5f5e5e] mt-2 leading-relaxed">
-            Phim <span className="font-bold text-[#1b1c1c]">"{MOVIE_TITLE}"</span> được xếp hạng{' '}
-            <span className="font-black text-[#d71920]">{MOVIE_AGE_RATING}</span>.
-            {MOVIE_AGE_RATING === 'C18'
-              ? ' Chỉ dành cho khán giả từ 18 tuổi trở lên.'
-              : MOVIE_AGE_RATING === 'C16'
-              ? ' Chỉ dành cho khán giả từ 16 tuổi trở lên.'
-              : ' Chỉ dành cho khán giả từ 13 tuổi trở lên.'}
-          </p>
-          <p className="text-[11px] text-gray-400 mt-2 italic">
-            Nhân viên rạp có thể yêu cầu xuất trình CCCD / Căn cước / Hộ chiếu tại cổng soát vé.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mt-5">
-            <button
-              onClick={() => setIsAgeGateOpen(false)}
-              className="py-2.5 rounded-xl bg-[#f5f3f3] hover:bg-gray-200 text-[#1b1c1c] font-bold text-xs transition-colors cursor-pointer"
-            >
-              Hủy
-            </button>
-            <button
-              onClick={() => {
-                setIsAgeGateOpen(false);
-                proceedToPayment();
-              }}
-              className="py-2.5 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
-            >
-              Tôi đủ tuổi, tiếp tục
-            </button>
-          </div>
-        </div>
-      </Modal>
+        movieTitle={MOVIE_TITLE}
+        movieAgeRating={MOVIE_AGE_RATING}
+        onConfirm={proceedToPayment}
+      />
     </div>
   );
 };
