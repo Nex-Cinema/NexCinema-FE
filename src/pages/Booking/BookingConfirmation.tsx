@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
-import BookingProgressBar from '../../components/common/BookingProgressBar';
+import BookingProgressBar from '@/features/booking/components/BookingProgressBar';
 import {
   getBookingConfirmation,
   clearBookingDraft,

@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const getAisles = (cols: number) => {
   if (cols <= 6) return [];

@@ -1,4 +1,4 @@
-import axiosPublic from './axiosPublic';
+import axiosPublic from '@/core/api/axiosPublic';
 import {
   ForgotPasswordPayload,
   VerifyOtpPayload,

@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const formatTime = (t: any) => {
   if (!t) return '00:00:00';

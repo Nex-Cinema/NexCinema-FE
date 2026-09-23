@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMovieDetail, getMovieReviews, getMovieShowtimes, createReview } from '@/apis/movieApi';
-import { getMovieVisuals } from '@/utils/visualHelper';
+import { getMovieDetail, getMovieReviews, getMovieShowtimes, createReview } from '../services/movieApi';
+import { getMovieVisuals } from '../utils/visualHelper';
 import toast from 'react-hot-toast';
 
 /**
@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
  *
  * @param maPhim – movie ID from route params
  */
-const useMovieDetail = (maPhim: string) => {
+export const useMovieDetail = (maPhim: string) => {
   const navigate = useNavigate();
 
   const [rawMovie, setRawMovie] = useState<any>(null);

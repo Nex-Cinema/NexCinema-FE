@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const transactionService = {
   getTransactions: async () => {

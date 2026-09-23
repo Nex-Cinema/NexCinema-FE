@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import MovieCard from '@/components/common/MovieCard';
+import MovieCard from '@/components/shared/MovieCard';
 import { Movie } from '@/types/movie.type';
 
 const NOW_SHOWING_MOVIES: Movie[] = [

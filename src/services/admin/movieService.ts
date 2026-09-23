@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const mapMovie = (m: any) => ({
   MaPhim: m.MaPhim,

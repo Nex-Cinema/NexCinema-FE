@@ -1,4 +1,4 @@
-import axiosPublic from '@/apis/axiosPublic';
+import axiosPublic from '@/core/api/axiosPublic';
 
 // ============================================================
 // Helper: map Phim record từ backend sang format frontend dùng

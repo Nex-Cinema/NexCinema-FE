@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const mapUserToStaff = (u: any) => ({
   MaNhanVien: u.NhanVien?.MaNhanVien || u.MaTaiKhoan,

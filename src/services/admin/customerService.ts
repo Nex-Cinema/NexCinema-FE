@@ -1,4 +1,4 @@
-import axiosClient from '@/apis/axiosClient';
+import axiosClient from '@/core/api/axiosClient';
 
 const mapCustomer = (u: any) => ({
   MaKhachHang: u.KhachHang?.MaKhachHang || u.MaTaiKhoan,

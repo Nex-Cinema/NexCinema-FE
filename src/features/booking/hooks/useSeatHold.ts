@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { cancelHeldSeats } from '@/apis/bookingApi';
+import { cancelHeldSeats } from '../services/bookingApi';
 import { SEAT_HOLD_DURATION_S } from '../constants/bookingConstants';
 
 /**

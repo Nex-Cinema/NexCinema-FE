@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import BookingProgressBar from '../../../components/common/BookingProgressBar';
+import BookingProgressBar from '@/features/booking/components/BookingProgressBar';
 
 import {
   getBookingDraft,
