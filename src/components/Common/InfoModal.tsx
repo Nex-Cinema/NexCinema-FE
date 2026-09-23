@@ -2,7 +2,16 @@ import React from 'react';
 import { ShieldCheck, Ticket, Info, FileText } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 
-export type ModalType = 'PRICE_RULES' | 'CINEMA_INTRO' | 'TERMS' | 'PRIVACY' | null;
+export type ModalType =
+  | 'PRICE_RULES'
+  | 'CINEMA_INTRO'
+  | 'TERMS'
+  | 'PRIVACY'
+  | 'SUPPORT_POLICY'
+  | 'AGE_RATING'
+  | 'TECH_EXP'
+  | 'TERMS_PRIVACY'
+  | null;
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -91,34 +100,66 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, modalType
         );
 
       case 'TERMS':
+      case 'TERMS_PRIVACY':
         return (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-[#d71920] font-bold text-lg border-b pb-2">
               <FileText className="w-5 h-5" />
-              <span>Điều Khoản Sử Dụng Dịch Vụ</span>
+              <span>Điều Khoản Sử Dụng Dịch Vụ & Bảo Mật</span>
             </div>
             <div className="text-xs text-[#5f5e5e] space-y-2 leading-relaxed max-h-60 overflow-y-auto pr-2">
               <p className="font-bold text-[#1b1c1c]">1. Đặt vé trực tuyến</p>
               <p>Khách hàng vui lòng kiểm tra kĩ thông tin phim, suất chiếu, phòng chiếu và số ghế trước khi thực hiện thanh toán online qua VNPay hoặc PayOS.</p>
               <p className="font-bold text-[#1b1c1c]">2. Hoàn hủy & Đổi vé</p>
               <p>Vé xem phim đã thanh toán thành công trực tuyến không hỗ trợ đổi hoặc hoàn tiền dưới mọi hình thức, trừ trường hợp xuất phát từ sự cố kỹ thuật rạp.</p>
-              <p className="font-bold text-[#1b1c1c]">3. Quy định tại phòng chiếu</p>
-              <p>Khách hàng không mang đồ ăn/thức uống ngoài vào rạp. Vui lòng xuất trình giấy tờ tùy thân kiểm tra độ tuổi khi xem phim nhãn C13, C16, C18.</p>
+              <p className="font-bold text-[#1b1c1c]">3. Quy định bảo mật thông tin</p>
+              <p>NexCinema cam kết bảo mật tuyệt đối thông tin cá nhân của khách hàng bao gồm Họ tên, Số điện thoại, Email và Lịch sử giao dịch đặt vé.</p>
             </div>
           </div>
         );
 
       case 'PRIVACY':
+      case 'SUPPORT_POLICY':
         return (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-[#d71920] font-bold text-lg border-b pb-2">
               <ShieldCheck className="w-5 h-5" />
-              <span>Chính Sách Bảo Mật Thông Tin</span>
+              <span>Chính Sách Bảo Mật & Bảo Vệ Dữ Liệu</span>
             </div>
             <div className="text-xs text-[#5f5e5e] space-y-2 leading-relaxed max-h-60 overflow-y-auto pr-2">
               <p>NexCinema cam kết bảo mật tuyệt đối thông tin cá nhân của khách hàng bao gồm Họ tên, Số điện thoại, Email và Lịch sử giao dịch đặt vé.</p>
               <p>Thông tin thanh toán qua thẻ ngân hàng hoặc ví điện tử được xử lý mã hóa bảo mật bởi các đối tác cổng thanh toán VNPay và PayOS.</p>
             </div>
+          </div>
+        );
+
+      case 'AGE_RATING':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-[#d71920] font-bold text-lg border-b pb-2">
+              <ShieldCheck className="w-5 h-5" />
+              <span>Quy Định Phân Loại Nhãn Độ Tuổi</span>
+            </div>
+            <div className="bg-[#f5f3f3] p-3 rounded-lg text-xs space-y-2 text-[#5f5e5e]">
+              <p>• <strong>P:</strong> Phim phổ biến, phù hợp mọi lứa tuổi.</p>
+              <p>• <strong>K:</strong> Phim dành cho người xem dưới 13 tuổi với điều kiện xem cùng cha mẹ hoặc người giám hộ.</p>
+              <p>• <strong>C13:</strong> Cấm khán giả dưới 13 tuổi.</p>
+              <p>• <strong>C16:</strong> Cấm khán giả dưới 16 tuổi.</p>
+              <p>• <strong>C18:</strong> Cấm khán giả dưới 18 tuổi.</p>
+            </div>
+          </div>
+        );
+
+      case 'TECH_EXP':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-[#d71920] font-bold text-lg border-b pb-2">
+              <Info className="w-5 h-5" />
+              <span>Trải Nghiệm Công Nghệ IMAX & Atmos</span>
+            </div>
+            <p className="text-xs text-[#5f5e5e] leading-relaxed">
+              Trải nghiệm điện ảnh đỉnh cao với phòng chiếu IMAX Laser hình ảnh sắc nét gấp 4K và dàn âm thanh đa chiều 64 loa Dolby Atmos sống động từng khoảng khoảnh.
+            </p>
           </div>
         );
 

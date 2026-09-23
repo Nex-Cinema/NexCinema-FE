@@ -1,7 +1,7 @@
 import React from 'react';
 import { Movie } from '@/types/movie.type';
 
-export type AgeRating = Movie['ageRating'] | 'P' | 'K' | 'C13' | 'C16' | 'C18';
+export type AgeRating = Movie['ageRating'] | 'P' | 'K' | 'C13' | 'C16' | 'C18' | (string & {});
 
 export interface AgeBadgeProps {
   rating: AgeRating;

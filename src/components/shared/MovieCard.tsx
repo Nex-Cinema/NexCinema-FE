@@ -18,7 +18,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) =
 
   const handleBooking = (e: React.MouseEvent) => {
     e.preventDefault();
-    const targetUrl = `${ROUTES.MOVIES.DETAIL(movie.id)}#lich-chieu-section`;
+    const targetUrl = `${ROUTES.MOVIES.DETAIL(String(movie.id))}#lich-chieu-section`;
     if (!requireAuth(undefined, targetUrl)) {
       return;
     }
@@ -33,7 +33,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) =
     <div className="group bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col border border-gray-100">
       {/* POSTER & OVERLAY BADGES */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
-        <Link to={ROUTES.MOVIES.DETAIL(movie.id)}>
+        <Link to={ROUTES.MOVIES.DETAIL(String(movie.id))}>
           <MoviePoster
             src={movie.poster}
             alt={movie.title}
@@ -75,7 +75,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) =
             </button>
           ) : (
             <Link
-              to={ROUTES.MOVIES.DETAIL(movie.id)}
+              to={ROUTES.MOVIES.DETAIL(String(movie.id))}
               className="px-4 py-2.5 rounded-lg bg-[#d71920] hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
             >
               <Ticket className="w-4 h-4" /> Xem chi tiết
@@ -93,7 +93,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onBookingClick }) =
               <Star className="w-3.5 h-3.5 fill-amber-400 stroke-none" /> {movie.rating}
             </span>
           </div>
-          <Link to={ROUTES.MOVIES.DETAIL(movie.id)}>
+          <Link to={ROUTES.MOVIES.DETAIL(String(movie.id))}>
             <h3 className="font-bold text-sm text-gray-900 line-clamp-1 group-hover:text-[#d71920] transition-colors">
               {movie.title}
             </h3>

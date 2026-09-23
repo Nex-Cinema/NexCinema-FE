@@ -36,6 +36,10 @@ export interface NewsItem {
   title: string;
   category: string;
   date: string;
-  thumbnail: string;
+  thumbnail?: string;
+  imageUrl?: string;
+  readTime?: string;
   excerpt: string;
 }
+
+export type NewsArticle = NewsItem;

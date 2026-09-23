@@ -103,8 +103,11 @@ export const useMovieDetail = (maPhim: string) => {
     setIsReviewSubmitting(true);
     const toastId = toast.loading('Đang gửi đánh giá...');
     try {
-      const payload: Record<string, any> = { MaPhim: rawMovie?.MaPhim || maPhim, SoSao: Number(rating) };
-      if (comment.trim()) payload.BinhLuan = comment.trim();
+      const payload = {
+        MaPhim: rawMovie?.MaPhim || maPhim,
+        SoSao: Number(rating),
+        ...(comment.trim() ? { BinhLuan: comment.trim() } : {}),
+      };
       await createReview(payload);
       toast.success('Đánh giá phim thành công!');
       setIsReviewOpen(false);
