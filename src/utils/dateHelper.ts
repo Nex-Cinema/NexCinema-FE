@@ -1,5 +1,12 @@
-export const generateWeek = (offset = 0) => {
-  const week = [];
+export interface WeekDay {
+  dateString: string;
+  dayName: string;
+  displayDate: string;
+  year: number;
+}
+
+export const generateWeek = (offset = 0): WeekDay[] => {
+  const week: WeekDay[] = [];
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() + offset * 7);
 

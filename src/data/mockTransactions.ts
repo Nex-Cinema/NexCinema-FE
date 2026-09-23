@@ -1,4 +1,14 @@
-export const TRANSACTIONS = [
+export interface TransactionMockItem {
+  id: string;
+  date: string;
+  time: string;
+  type: string;
+  amount: number;
+  status: string;
+  method: string;
+}
+
+export const TRANSACTIONS: TransactionMockItem[] = [
   {
     id: "PDV-8A2B3C4D",
     date: "17/05/2026",

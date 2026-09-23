@@ -1,7 +1,7 @@
 /**
  * Normalize Vietnamese text for accent-insensitive and case-insensitive search
  */
-export const normalizeText = (str) => {
+export const normalizeText = (str?: string | null): string => {
   if (!str) return '';
   return str
     .toLowerCase()

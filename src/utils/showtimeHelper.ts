@@ -1,14 +1,30 @@
+export interface BookingShowtimeRecord {
+  Phim?: {
+    NgayChieu?: string;
+    GioChieu?: string;
+  };
+  ChiTietDatVes?: Array<{
+    SuatChieu?: {
+      NgayChieu?: string;
+      GioChieu?: string;
+    };
+  }>;
+  [key: string]: unknown;
+}
+
 /**
  * Parse a backend booking/history record and return a Date for the showtime start.
  * Handles both summary records (booking.Phim.NgayChieu/GioChieu) and
  * detail records (booking.ChiTietDatVes[0].SuatChieu.*).
  * Returns null if data is missing or unparseable.
  */
-export const getShowtimeStartFromBooking = (booking) => {
+export const getShowtimeStartFromBooking = (
+  booking?: BookingShowtimeRecord | null
+): Date | null => {
   if (!booking) return null;
 
-  let ngayChieu = null;
-  let gioChieu = null;
+  let ngayChieu: string | undefined | null = null;
+  let gioChieu: string | undefined | null = null;
 
   if (booking.Phim) {
     ngayChieu = booking.Phim.NgayChieu;
@@ -47,7 +63,7 @@ export const getShowtimeStartFromBooking = (booking) => {
         second = parseInt(parts[2], 10) || 0;
       }
     } else {
-      const dTime = new Date(gioChieu);
+      const dTime = new Date(gioChieu as unknown as string);
       if (!isNaN(dTime.getTime())) {
         hour = dTime.getUTCHours();
         minute = dTime.getUTCMinutes();

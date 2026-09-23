@@ -1,4 +1,39 @@
-export const UPCOMING_SHOWS = [
+export interface UpcomingShow {
+  movie: {
+    id: string;
+    title: string;
+    genre: string;
+    duration: number;
+    poster: string;
+  };
+  showtime: {
+    id: string;
+    time: string;
+    room: string;
+    basePrice: number;
+    roomSurcharge: number;
+    daySurcharge: number;
+  };
+  booked: number;
+  total: number;
+}
+
+export interface ShiftStats {
+  revenue: number;
+  ticketsSold: number;
+  ticketsChecked: number;
+  shiftName: string;
+}
+
+export interface RecentTransaction {
+  id: string;
+  time: string;
+  type: string;
+  amount: number;
+  status: string;
+}
+
+export const UPCOMING_SHOWS: UpcomingShow[] = [
   {
     movie: {
       id: "M1",
@@ -58,14 +93,14 @@ export const UPCOMING_SHOWS = [
   },
 ];
 
-export const SHIFT_STATS = {
+export const SHIFT_STATS: ShiftStats = {
   revenue: 3450000,
   ticketsSold: 42,
   ticketsChecked: 28,
   shiftName: "Ca Sáng (08:00 - 16:00)",
 };
 
-export const RECENT_TRANSACTIONS = [
+export const RECENT_TRANSACTIONS: RecentTransaction[] = [
   {
     id: "PDV-8A2B3C4D",
     time: "11:42",

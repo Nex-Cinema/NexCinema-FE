@@ -1,5 +1,16 @@
-export const exportToCSV = (data, filename) => {
-  // 1. Tạo Header cho file CSV
+export interface ExportableTransactionRecord {
+  id: string | number;
+  date: string;
+  time: string;
+  type: string;
+  amount: number | string;
+  method: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+export const exportToCSV = (data: ExportableTransactionRecord[], filename: string): void => {
+  // 1. Header for CSV file
   const headers = [
     "Mã Giao Dịch",
     "Ngày",
@@ -10,7 +21,7 @@ export const exportToCSV = (data, filename) => {
     "Trạng Thái",
   ];
 
-  // 2. Map dữ liệu thành các dòng (rows)
+  // 2. Map records into rows
   const rows = data.map((tx) => [
     tx.id,
     tx.date,
@@ -21,16 +32,16 @@ export const exportToCSV = (data, filename) => {
     tx.status,
   ]);
 
-  // 3. Ghép Header và Rows lại, ngăn cách bằng dấu phẩy
+  // 3. Combine header and rows into CSV string
   const csvArray = [headers, ...rows];
   const csvString = csvArray.map((e) => e.join(",")).join("\n");
 
-  // 4. Thêm BOM (\uFEFF) để Excel không bị lỗi font tiếng Việt
+  // 4. Add BOM (\uFEFF) for UTF-8 compatibility in Excel
   const blob = new Blob(["\uFEFF" + csvString], {
     type: "text/csv;charset=utf-8;",
   });
 
-  // 5. Kích hoạt trình duyệt tải file về
+  // 5. Trigger download
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);

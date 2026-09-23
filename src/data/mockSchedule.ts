@@ -1,4 +1,17 @@
-export const SHIFT_TEMPLATES = [
+export interface ShiftTemplate {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  maxStaff: number;
+}
+
+export interface ShiftDetailRecord {
+  registeredCount: number;
+  isMyShift: boolean;
+}
+
+export const SHIFT_TEMPLATES: ShiftTemplate[] = [
   {
     id: "CA_SANG",
     name: "Ca Sáng",
@@ -15,7 +28,7 @@ export const SHIFT_TEMPLATES = [
   },
 ];
 
-export const INITIAL_SHIFT_DETAILS = {
+export const INITIAL_SHIFT_DETAILS: Record<string, ShiftDetailRecord> = {
   "2026-05-14_CA_SANG": { registeredCount: 5, isMyShift: false },
   "2026-05-14_CA_CHIEU": { registeredCount: 3, isMyShift: true },
   "2026-05-15_CA_SANG": { registeredCount: 2, isMyShift: false },

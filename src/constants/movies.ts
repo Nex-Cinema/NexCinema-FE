@@ -1,10 +1,27 @@
-export const MOVIES_MOCK = [
+export interface MovieMockItem {
+  MaPhim: string;
+  TenPhim: string;
+  HinhAnh: string;
+  Rating: number;
+  Tags: string;
+  NoiDung: string;
+  ThoiLuong: number;
+  TheLoai: string;
+  NgayKhoiChieu: string;
+  NgayKetThuc: string;
+  DaoDien: string;
+  DienVien: string;
+  GioiHanTuoi: string;
+  KhaDung: number;
+}
+
+export const MOVIES_MOCK: MovieMockItem[] = [
   { 
     MaPhim: "phim-001", 
     TenPhim: "Lật Mặt 7: Một Điều Ước", 
     HinhAnh: "https://image.api.playready.com.vn/api/v2/image/6628b031b268010026e6d338", 
-    Rating: 9.8, // Custom field for UI
-    Tags: "2D | T16", // Custom field for UI
+    Rating: 9.8,
+    Tags: "2D | T16",
     NoiDung: "Câu chuyện về tình cảm gia đình đầy xúc động của bà Hai và các con.",
     ThoiLuong: 112,
     TheLoai: "Hành động, Tâm lý",

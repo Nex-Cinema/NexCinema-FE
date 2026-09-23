@@ -1,4 +1,4 @@
-export const formatVND = (amount) => {
+export const formatVND = (amount?: number | null): string => {
   if (amount === undefined || amount === null || isNaN(amount)) {
     return '0 ₫';
   }
@@ -12,7 +12,7 @@ export const formatVND = (amount) => {
  * Format a Date object or ISO string to "HH:mm - DD/MM/YYYY"
  * Works with Date objects (from getShowtimeStartFromBooking) or plain ISO strings.
  */
-export const formatDateTime = (value) => {
+export const formatDateTime = (value?: string | Date | null): string => {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
   if (isNaN(date.getTime())) return "";

@@ -3,7 +3,7 @@
  * Used across client checkout, payment pages, and admin dashboards.
  */
 
-export const PAYMENT_METHOD_LABELS = {
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   TIEN_MAT: "Tiền mặt",
   CHUYEN_KHOAN: "Chuyển khoản",
   VNPAY: "VNPay",
@@ -15,10 +15,8 @@ export const PAYMENT_METHOD_LABELS = {
 /**
  * Normalizes any payment method string variation to the standard uppercase frontend enum:
  * 'PAYOS' | 'VNPAY' | 'MOMO' | 'TIEN_MAT' | 'CHUYEN_KHOAN' | 'CARD'
- * 
- * Handles database field values and historical naming inconsistencies.
  */
-export const normalizePaymentMethod = (method) => {
+export const normalizePaymentMethod = (method?: string | null): string => {
   if (!method) return '';
   const m = method.toUpperCase().trim();
   if (m.includes('PAYOS')) return 'PAYOS';
@@ -33,7 +31,8 @@ export const normalizePaymentMethod = (method) => {
 /**
  * Gets the localized display label for a payment method.
  */
-export const getPaymentMethodLabel = (method) => {
+export const getPaymentMethodLabel = (method?: string | null): string => {
+  if (!method) return '';
   const normalized = normalizePaymentMethod(method);
   return PAYMENT_METHOD_LABELS[normalized] || method;
 };

@@ -4,7 +4,12 @@
  * DO NOT change these mappings — they mirror backend enum values.
  */
 
-export const getBookingStatusLabel = (status) => {
+export interface StatusLabelResult {
+  text: string;
+  css: string;
+}
+
+export const getBookingStatusLabel = (status?: string | null): StatusLabelResult => {
   switch (status) {
     case 'CHO_THANH_TOAN':
       return { text: 'Chờ thanh toán', css: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' };
@@ -15,11 +20,11 @@ export const getBookingStatusLabel = (status) => {
     case 'HET_HAN':
       return { text: 'Hết hạn thanh toán', css: 'bg-rose-500/10 text-rose-400 border border-rose-500/20' };
     default:
-      return { text: status, css: 'bg-white/5 text-gray-400 border border-white/5' };
+      return { text: status || '', css: 'bg-white/5 text-gray-400 border border-white/5' };
   }
 };
 
-export const getTransactionStatusLabel = (status) => {
+export const getTransactionStatusLabel = (status?: string | null): StatusLabelResult => {
   switch (status) {
     case 'CHO_XU_LY':
       return { text: 'Chờ xử lý', css: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' };
@@ -30,11 +35,11 @@ export const getTransactionStatusLabel = (status) => {
     case 'DA_HOAN_TIEN':
       return { text: 'Đã hoàn tiền', css: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' };
     default:
-      return { text: status, css: 'bg-white/5 text-gray-400 border border-white/5' };
+      return { text: status || '', css: 'bg-white/5 text-gray-400 border border-white/5' };
   }
 };
 
-export const getRefundStatusLabel = (status) => {
+export const getRefundStatusLabel = (status?: string | null): StatusLabelResult => {
   switch (status) {
     case 'CHO_XU_LY':
       return { text: 'Chờ hoàn tiền', css: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' };
@@ -43,6 +48,6 @@ export const getRefundStatusLabel = (status) => {
     case 'TU_CHOI':
       return { text: 'Từ chối hoàn tiền', css: 'bg-rose-500/10 text-rose-400 border border-rose-500/20' };
     default:
-      return { text: status, css: 'bg-white/5 text-gray-400 border border-white/5' };
+      return { text: status || '', css: 'bg-white/5 text-gray-400 border border-white/5' };
   }
 };
