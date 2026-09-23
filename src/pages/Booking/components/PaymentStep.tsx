@@ -16,6 +16,12 @@ import toast from 'react-hot-toast';
 
 import BookingProgressBar from '../../../components/common/BookingProgressBar';
 
+import {
+  getBookingDraft,
+  clearBookingDraft,
+  saveBookingConfirmation,
+} from '@/features/booking/utils/bookingSession';
+
 export type PaymentStatus = 'IDLE' | 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED';
 
 export const PaymentStep: React.FC = () => {
@@ -25,15 +31,8 @@ export const PaymentStep: React.FC = () => {
   const [holdTimeLeft, setHoldTimeLeft] = useState(600);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('IDLE');
 
-  // Retrieve draft from Step 2
-  const bookingDraft = React.useMemo(() => {
-    try {
-      const saved = sessionStorage.getItem('booking_draft');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  }, []);
+  // Retrieve draft from Step 2 using bookingSession service
+  const bookingDraft = React.useMemo(() => getBookingDraft(), []);
 
   // Restore hold timer from Step 2
   useEffect(() => {
@@ -53,7 +52,7 @@ export const PaymentStep: React.FC = () => {
         if (prev <= 1) {
           clearInterval(interval);
           // ISSUE-07 FIX: Release held seats and redirect immediately on expiry
-          sessionStorage.removeItem('booking_draft');
+          clearBookingDraft();
           toast.error(
             '⏰ Hết thời gian giữ ghế! Vui lòng chọn ghế lại.',
             { duration: 5000 }
@@ -89,8 +88,8 @@ export const PaymentStep: React.FC = () => {
         setTimeout(() => {
           toast.dismiss('payment');
           setPaymentStatus('SUCCESS');
-          // Save confirmation data
-          const confirmData = {
+          // Save confirmation data using domain session helper
+          saveBookingConfirmation({
             orderCode: `NEX-${Math.floor(100000 + Math.random() * 900000)}`,
             movieTitle: bookingDraft?.movieTitle || 'Dune: Hành Tinh Cát - Phần 2',
             formatText: bookingDraft?.formatText || '2D IMAX Laser',
@@ -102,9 +101,7 @@ export const PaymentStep: React.FC = () => {
             paymentStatus: 'ĐÃ THANH TOÁN',
             totalAmount: bookingDraft?.totalAmount || 220000,
             createdDate: new Date().toLocaleDateString('vi-VN'),
-          };
-          sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
-          localStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
+          });
           toast.success('Thanh toán VNPay thành công!');
           navigate(ROUTES.BOOKING.CONFIRMATION);
         }, 2000);
@@ -115,7 +112,7 @@ export const PaymentStep: React.FC = () => {
           toast.dismiss('payment');
           toast.success('Quét QR thành công! Đang xác nhận giao dịch...');
           setPaymentStatus('SUCCESS');
-          const confirmData = {
+          saveBookingConfirmation({
             orderCode: `NEX-${Math.floor(100000 + Math.random() * 900000)}`,
             movieTitle: bookingDraft?.movieTitle || 'Dune: Hành Tinh Cát - Phần 2',
             formatText: bookingDraft?.formatText || '2D IMAX Laser',
@@ -127,9 +124,7 @@ export const PaymentStep: React.FC = () => {
             paymentStatus: 'ĐÃ THANH TOÁN',
             totalAmount: bookingDraft?.totalAmount || 220000,
             createdDate: new Date().toLocaleDateString('vi-VN'),
-          };
-          sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
-          localStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
+          });
           navigate(ROUTES.BOOKING.CONFIRMATION);
         }, 3000);
       }
@@ -139,7 +134,7 @@ export const PaymentStep: React.FC = () => {
   // BR#22: Back from payment → release held seats (mock)
   const handleBackFromPayment = () => {
     toast.success('Đã hủy giữ ghế. Quay lại chọn ghế.');
-    sessionStorage.removeItem('booking_draft');
+    clearBookingDraft();
     navigate(ROUTES.BOOKING.CHECKOUT);
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ROUTES } from '@/constants';
 import {
@@ -12,25 +12,16 @@ import toast from 'react-hot-toast';
 
 import BookingProgressBar from '../../components/common/BookingProgressBar';
 
-// ── Types ─────────────────────────────────────────────────────────
-interface Seat {
-  id: string; // e.g., "A1", "J4"
-  row: string; // e.g., "A", "J"
-  col: number; // e.g., 1, 4
-  type: 'STANDARD' | 'VIP' | 'COUPLE';
-  price: number;
-  status: 'AVAILABLE' | 'SELECTED' | 'SOLD' | 'HELD';
-}
+import { useSeatSelection } from '@/features/booking/hooks/useSeatSelection';
+import { saveBookingDraft } from '@/features/booking/utils/bookingSession';
+import {
+  MAX_SEATS_PER_BOOKING,
+  SEAT_HOLD_DURATION_S,
+  AGE_RESTRICTED_RATINGS,
+} from '@/features/booking/constants/bookingConstants';
+import { Seat, ShowtimePill } from '@/features/booking/types/booking.type';
 
 // ── Mock Data ─────────────────────────────────────────────────────
-interface ShowtimePill {
-  id: string;
-  time: string;
-  isCurrent?: boolean;
-  seatsLeft?: number;
-  isSoldOut?: boolean;
-}
-
 const SHOWTIME_PILLS: ShowtimePill[] = [
   { id: 'st-10:45', time: '10:45', seatsLeft: 0, isSoldOut: true },
   { id: 'st-11:30', time: '11:30', isCurrent: true, seatsLeft: 42 },
@@ -44,20 +35,26 @@ const SHOWTIME_PILLS: ShowtimePill[] = [
   { id: 'st-20:30', time: '20:30', seatsLeft: 30 },
 ];
 
-const MAX_SEATS_PER_BOOKING = 8;
-const SEAT_HOLD_DURATION_S = 600; // 10 minutes
-
 export const SeatSelection: React.FC = () => {
   const { showtimeId } = useParams<{ showtimeId: string }>();
   const navigate = useNavigate();
 
-  // ── States ────────────────────────────────────────────────────────
+  // ── Domain & UI States ────────────────────────────────────────────
   const [currentShowtimeId, setCurrentShowtimeId] = useState(showtimeId || 'st-11:30');
   const [currentShowtimeTime, setCurrentShowtimeTime] = useState('11:30');
-  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
-  // ISSUE-16: Age gate state
   const [isAgeGateOpen, setIsAgeGateOpen] = useState(false);
-  // Mock movie for this showtime (in production this comes from API via showtimeId)
+
+  // Extract seat selection domain logic
+  const {
+    selectedSeatIds,
+    setSelectedSeatIds,
+    totalAmount,
+    seatMap,
+    rows,
+    handleToggleSeat,
+  } = useSeatSelection();
+
+  // Mock movie info
   const MOVIE_AGE_RATING = 'C16'; // C16 — Dune 2
   const MOVIE_TITLE = 'Dune: Hành Tinh Cát - Phần 2';
 
@@ -65,144 +62,6 @@ export const SeatSelection: React.FC = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentShowtimeId]);
-
-  // BR#6: Cleanup on unmount — release held seats if needed
-  useEffect(() => {
-    return () => {
-      // In production, call cancelHeldSeats(maSuatChieu, seatIds) here if needed
-    };
-  }, []);
-
-  // ── Generate Seat Map ─────────────────────────────────────────────
-  // Rows A-I: single seats, Row K: couple seats
-  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K'];
-
-  const generateSeats = useCallback((): Record<string, Seat[]> => {
-    const map: Record<string, Seat[]> = {};
-    // Mock: sold seats
-    const soldSeats = ['C4', 'C5', 'E8', 'F2', 'F3', 'K7', 'K8'];
-    // BR#8: Mock held seats (being held by another user)
-    const heldSeats = ['D6', 'D7', 'H5'];
-
-    rows.forEach((row) => {
-      map[row] = [];
-      const isCoupleRow = row === 'K';
-      const isVipRow = ['G', 'H', 'I'].includes(row);
-      const price = isCoupleRow ? 110000 : isVipRow ? 110000 : 50000;
-      const type: 'STANDARD' | 'VIP' | 'COUPLE' = isCoupleRow
-        ? 'COUPLE'
-        : isVipRow
-        ? 'VIP'
-        : 'STANDARD';
-
-      for (let col = 1; col <= 12; col++) {
-        const id = `${row}${col}`;
-        const isSold = soldSeats.includes(id);
-        const isHeld = heldSeats.includes(id);
-        const isSelected = selectedSeatIds.includes(id);
-
-        let status: Seat['status'] = 'AVAILABLE';
-        if (isSold) status = 'SOLD';
-        else if (isHeld) status = 'HELD';
-        else if (isSelected) status = 'SELECTED';
-
-        map[row].push({ id, row, col, type, price, status });
-      }
-    });
-    return map;
-  }, [selectedSeatIds]);
-
-  const seatMap = generateSeats();
-
-  // ── ISSUE-13 FIX: Single Seat Gap Rule ───────────────────────────
-  // Returns number of isolated single AVAILABLE seats for a given set of proposed selected IDs
-  const countIsolatedSeats = useCallback(
-    (proposedIds: string[]): number => {
-      let count = 0;
-      const rowLetters = rows.filter((r) => r !== 'K'); // Couple row exempt
-      for (const row of rowLetters) {
-        const rowSeats = (seatMap[row] || []).filter((s) => s.type !== 'COUPLE');
-        for (let i = 0; i < rowSeats.length; i++) {
-          const s = rowSeats[i];
-          const isOccupied =
-            s.status === 'SOLD' || s.status === 'HELD' || proposedIds.includes(s.id);
-          // Only check seats that are vacant in proposed state
-          if (!isOccupied) {
-            const leftBlocked =
-              i === 0 ||
-              rowSeats[i - 1].status === 'SOLD' ||
-              rowSeats[i - 1].status === 'HELD' ||
-              proposedIds.includes(rowSeats[i - 1].id);
-            const rightBlocked =
-              i === rowSeats.length - 1 ||
-              rowSeats[i + 1].status === 'SOLD' ||
-              rowSeats[i + 1].status === 'HELD' ||
-              proposedIds.includes(rowSeats[i + 1].id);
-            if (leftBlocked && rightBlocked) count++;
-          }
-        }
-      }
-      return count;
-    },
-    [rows, seatMap]
-  );
-
-  // ── Actions ───────────────────────────────────────────────────────
-  const handleToggleSeat = (seat: Seat) => {
-    // BR#7 & BR#8: Cannot click sold or held seats
-    if (seat.status === 'SOLD' || seat.status === 'HELD') return;
-
-    if (seat.type === 'COUPLE') {
-      // BR#11: Couple seats select 2 adjacent seats
-      const colNum = seat.col;
-      const partnerCol = colNum % 2 === 1 ? colNum + 1 : colNum - 1;
-      const id1 = `${seat.row}${Math.min(colNum, partnerCol)}`;
-      const id2 = `${seat.row}${Math.max(colNum, partnerCol)}`;
-
-      const isPairSelected = selectedSeatIds.includes(id1) && selectedSeatIds.includes(id2);
-
-      if (isPairSelected) {
-        // Deselecting — no gap check needed
-        setSelectedSeatIds((prev) => prev.filter((id) => id !== id1 && id !== id2));
-      } else {
-        // BR#3: Max 8 seats
-        if (selectedSeatIds.length + 2 > MAX_SEATS_PER_BOOKING) {
-          toast.error(`Tối đa chỉ được chọn ${MAX_SEATS_PER_BOOKING} ghế trong một lần đặt vé!`);
-          return;
-        }
-        setSelectedSeatIds((prev) => Array.from(new Set([...prev, id1, id2])));
-      }
-    } else {
-      // Standard or VIP single seat
-      const currentIsolated = countIsolatedSeats(selectedSeatIds);
-
-      if (selectedSeatIds.includes(seat.id)) {
-        // Deselecting: check if removal CREATES a new isolated seat
-        const afterRemoval = selectedSeatIds.filter((id) => id !== seat.id);
-        if (countIsolatedSeats(afterRemoval) > currentIsolated) {
-          toast.error('Không thể bỏ chọn ghế này vì sẽ tạo ra 1 ghế trống đơn lẻ!');
-          return;
-        }
-        setSelectedSeatIds(afterRemoval);
-      } else {
-        // BR#3: Max 8 seats
-        if (selectedSeatIds.length >= MAX_SEATS_PER_BOOKING) {
-          toast.error(`Tối đa chỉ được chọn ${MAX_SEATS_PER_BOOKING} ghế trong một lần đặt vé!`);
-          return;
-        }
-        // ISSUE-13: Gap Rule — check if adding seat CREATES a new isolated seat
-        const proposed = [...selectedSeatIds, seat.id];
-        if (countIsolatedSeats(proposed) > currentIsolated) {
-          toast.error(
-            'Không thể chọn ghế này vì sẽ để trống 1 ghế đơn lẻ giữa các ghế đã chọn/đã bán. Vui lòng chọn ghế liền kề!',
-            { duration: 4000 }
-          );
-          return;
-        }
-        setSelectedSeatIds((prev) => [...prev, seat.id]);
-      }
-    }
-  };
 
   // BR#2: Switch showtime directly from Seat Selection screen → reset seats
   const handleChangeShowtime = (slotId: string, slotTime: string, isSoldOut?: boolean) => {
@@ -217,47 +76,34 @@ export const SeatSelection: React.FC = () => {
     toast.success(`Đã đổi sang suất chiếu ${slotTime}`);
   };
 
-  // Total price calculation
-  const totalAmount = selectedSeatIds.reduce((sum, seatId) => {
-    const row = seatId.charAt(0);
-    const isVipOrCouple = ['G', 'H', 'I', 'K'].includes(row);
-    return sum + (isVipOrCouple ? 110000 : 50000);
-  }, 0);
-
   // ISSUE-16: Age gate check — trigger modal for rated films before payment
-  const AGE_RESTRICTED = ['C13', 'C16', 'C18'];
-
   const handleContinueToPayment = () => {
     if (selectedSeatIds.length === 0) {
       toast.error('Vui lòng chọn ít nhất 1 ghế hợp lệ!');
       return;
     }
-    // Show age gate for restricted films before proceeding
-    if (AGE_RESTRICTED.includes(MOVIE_AGE_RATING)) {
+    if ((AGE_RESTRICTED_RATINGS as readonly string[]).includes(MOVIE_AGE_RATING)) {
       setIsAgeGateOpen(true);
       return;
     }
     proceedToPayment();
   };
 
-  // Actual navigation after age confirmed or not required
+  // Save booking draft using domain session service & navigate
   const proceedToPayment = () => {
-    sessionStorage.setItem(
-      'booking_draft',
-      JSON.stringify({
-        movieId: 'dune2',
-        movieTitle: MOVIE_TITLE,
-        showtimeId: currentShowtimeId,
-        showtimeTime: currentShowtimeTime,
-        showtimeDate: 'Thứ Ba, 29/10/2024',
-        roomName: 'Phòng chiếu IMAX Laser',
-        formatText: '2D IMAX Phụ Đề',
-        seats: selectedSeatIds,
-        totalAmount,
-        holdTimeLeft: SEAT_HOLD_DURATION_S,
-        holdStartedAt: Date.now(),
-      })
-    );
+    saveBookingDraft({
+      movieId: 'dune2',
+      movieTitle: MOVIE_TITLE,
+      showtimeId: currentShowtimeId,
+      showtimeTime: currentShowtimeTime,
+      showtimeDate: 'Thứ Ba, 29/10/2024',
+      roomName: 'Phòng chiếu IMAX Laser',
+      formatText: '2D IMAX Phụ Đề',
+      seats: selectedSeatIds,
+      totalAmount,
+      holdTimeLeft: SEAT_HOLD_DURATION_S,
+      holdStartedAt: Date.now(),
+    });
     toast.success('Đã chọn ghế thành công! Chuyển sang bước thanh toán...');
     navigate(ROUTES.BOOKING.PAYMENT);
   };
@@ -270,20 +116,17 @@ export const SeatSelection: React.FC = () => {
       return `${base} bg-[#e2e8f0] text-slate-400 cursor-not-allowed border border-slate-300`;
     }
     if (seat.status === 'HELD') {
-      // BR#8: Held by another user — visually distinct from sold
       return `${base} bg-orange-100 text-orange-500 cursor-not-allowed border border-orange-300 opacity-70`;
     }
     if (seat.status === 'SELECTED') {
       return `${base} bg-[#d71920] text-white scale-105 shadow-md ring-2 ring-[#d71920]/40`;
     }
-    // Available states by type
     if (seat.type === 'VIP') {
       return `${base} bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-400 font-bold`;
     }
     if (seat.type === 'COUPLE') {
       return `${base} bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-400 font-bold`;
     }
-    // STANDARD
     return `${base} bg-[#f1f5f9] hover:bg-[#e2e8f0] text-slate-700 border border-slate-300`;
   };
 
@@ -372,8 +215,8 @@ export const SeatSelection: React.FC = () => {
                           [1, 3, 5, 7, 9, 11].map((c1) => {
                             const c2 = c1 + 1;
                             const isAisleBefore = [3, 11].includes(c1);
-                            const seat1 = seatMap['K'].find((s) => s.col === c1);
-                            const seat2 = seatMap['K'].find((s) => s.col === c2);
+                            const seat1 = seatMap['K']?.find((s) => s.col === c1);
+                            const seat2 = seatMap['K']?.find((s) => s.col === c2);
                             const isSold = seat1?.status === 'SOLD' || seat2?.status === 'SOLD';
                             const isHeld = seat1?.status === 'HELD' || seat2?.status === 'HELD';
                             const isSelected =
@@ -410,7 +253,7 @@ export const SeatSelection: React.FC = () => {
                           })
                         ) : (
                           /* ── STANDARD & VIP ROWS (A-I) ─────────────────── */
-                          seatMap[row].map((seat) => {
+                          seatMap[row]?.map((seat) => {
                             const isAisleBefore = [3, 11].includes(seat.col);
                             return (
                               <React.Fragment key={seat.id}>

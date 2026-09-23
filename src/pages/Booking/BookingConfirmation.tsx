@@ -12,48 +12,34 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 
 import BookingProgressBar from '../../components/common/BookingProgressBar';
-
-interface ConfirmationData {
-  orderCode: string;
-  movieTitle: string;
-  formatText: string;
-  cinemaName: string;
-  roomName: string;
-  showtime: string;
-  seats: string[];
-  paymentMethod: string;
-  paymentStatus: string;
-  totalAmount: number;
-  createdDate: string;
-}
+import {
+  getBookingConfirmation,
+  clearBookingDraft,
+} from '@/features/booking/utils/bookingSession';
+import { BookingConfirmationData } from '@/features/booking/types/booking.type';
 
 export const BookingConfirmation: React.FC = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // BR#16: Read booking confirmation data from sessionStorage or localStorage (dynamic, not hardcoded)
-  const bookingData: ConfirmationData = useMemo(() => {
-    try {
-      const saved = sessionStorage.getItem('booking_confirmation') || localStorage.getItem('booking_confirmation');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          orderCode: parsed.orderCode || 'NEX-000000',
-          movieTitle: parsed.movieTitle || 'N/A',
-          formatText: parsed.formatText || 'N/A',
-          cinemaName: parsed.cinemaName || 'NexCinema Complex',
-          roomName: parsed.roomName || 'N/A',
-          showtime: parsed.showtime || 'N/A',
-          seats: parsed.seats || [],
-          paymentMethod: parsed.paymentMethod || 'N/A',
-          paymentStatus: parsed.paymentStatus || 'ĐÃ THANH TOÁN',
-          totalAmount: parsed.totalAmount || 0,
-          createdDate: parsed.createdDate || new Date().toLocaleDateString('vi-VN'),
-        };
-      }
-    } catch {
-      // fallback to default
+  // BR#16: Read booking confirmation data using domain session service
+  const bookingData: BookingConfirmationData = useMemo(() => {
+    const saved = getBookingConfirmation();
+    if (saved) {
+      return {
+        orderCode: saved.orderCode || 'NEX-000000',
+        movieTitle: saved.movieTitle || 'N/A',
+        formatText: saved.formatText || 'N/A',
+        cinemaName: saved.cinemaName || 'NexCinema Complex',
+        roomName: saved.roomName || 'N/A',
+        showtime: saved.showtime || 'N/A',
+        seats: saved.seats || [],
+        paymentMethod: saved.paymentMethod || 'N/A',
+        paymentStatus: saved.paymentStatus || 'ĐÃ THANH TOÁN',
+        totalAmount: saved.totalAmount || 0,
+        createdDate: saved.createdDate || new Date().toLocaleDateString('vi-VN'),
+      };
     }
     // Fallback mock data if no session data
     return {
@@ -73,7 +59,7 @@ export const BookingConfirmation: React.FC = () => {
 
   // ISSUE-18 FIX: Clean up booking draft on mount, but KEEP confirmation data so back/forward navigation works
   useEffect(() => {
-    sessionStorage.removeItem('booking_draft');
+    clearBookingDraft();
   }, []);
 
   return (
