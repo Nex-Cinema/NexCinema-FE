@@ -8,6 +8,13 @@ import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import AdminButton from '../../components/Admin/Common/AdminButton';
 import { CinemaSeat, SeatLegend } from '../../components/Seats/SeatVisuals';
 
+const getAdminSeatClassName = (typeName = '') => {
+  const normalized = typeName.toUpperCase();
+  if (normalized.includes('VIP')) return 'admin-seat--vip';
+  if (normalized.includes('ĐÔI') || normalized.includes('COUPLE') || normalized.includes('SWEETBOX')) return 'admin-seat--sweetbox';
+  return 'admin-seat--standard';
+};
+
 const SeatMaps = () => {
   const { roomId } = useParams();
   const [room, setRoom] = useState(null);
@@ -242,14 +249,16 @@ const SeatMaps = () => {
                     <div key={seat.MaChiTietSoDo} className="w-9 h-9 shrink-0"></div>
                   );
                 }
+                const typeName = getSeatTypeName(seat.MaLoaiGhe);
                 return (
                   <CinemaSeat
                     key={seat.MaChiTietSoDo}
                     label={`${seat.Hang}${seat.Cot}`}
-                    typeName={getSeatTypeName(seat.MaLoaiGhe)}
+                    typeName={typeName}
                     state={seat.KhaDung === 0 ? 'locked' : 'available'}
                     selected={selectedSeats.includes(seat.MaChiTietSoDo)}
                     compact
+                    className={seat.KhaDung === 0 ? 'admin-seat--locked' : getAdminSeatClassName(typeName)}
                     onClick={(event) => handleSeatClick(seat.MaChiTietSoDo, event)}
                   />
                 );

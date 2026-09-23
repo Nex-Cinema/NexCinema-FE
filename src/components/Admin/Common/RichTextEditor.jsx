@@ -1,4 +1,4 @@
-import Editor, {
+import WysiwygEditor, {
   BtnBold,
   BtnBulletList,
   BtnClearFormatting,
@@ -10,6 +10,8 @@ import Editor, {
   BtnUndo,
   Toolbar,
 } from 'react-simple-wysiwyg';
+
+const Editor = WysiwygEditor.default ?? WysiwygEditor;
 
 const RichTextEditor = ({ id, name, value = '', onChange, placeholder = 'Nhập nội dung...', disabled = false }) => (
   <Editor

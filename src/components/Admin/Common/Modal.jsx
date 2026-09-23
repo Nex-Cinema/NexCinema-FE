@@ -16,9 +16,9 @@ const Modal = ({ isOpen, onClose, title, description, children, footer, size = '
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || typeof document === 'undefined') return null;
+  if (!isOpen) return null;
 
-  return createPortal(
+  const content = (
     <div className="admin-modal-layer" role="dialog" aria-modal="true" aria-label={title}>
       <button type="button" className="admin-modal-backdrop" onClick={onClose} aria-label="Đóng hộp thoại" />
       <div className="admin-modal-panel" data-size={size}>
@@ -40,9 +40,10 @@ const Modal = ({ isOpen, onClose, title, description, children, footer, size = '
         <div className={`admin-modal-body ${bodyClassName}`}>{children}</div>
         {footer && <div className="admin-modal-footer">{footer}</div>}
       </div>
-    </div>,
-    document.body,
+    </div>
   );
+
+  return typeof document === 'undefined' ? content : createPortal(content, document.body);
 };
 
 export default Modal;
