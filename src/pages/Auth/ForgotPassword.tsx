@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, KeyRound, ArrowLeft, Send, CheckCircle2, ShieldCheck, PhoneCall } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ROUTES } from '@/constants/routes';
 
 export const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -28,11 +29,11 @@ export const ForgotPassword: React.FC = () => {
       {/* ── HEADER ── */}
       <header className="w-full bg-white/80 backdrop-blur-xl shadow-xs border-b border-[#e4e2e2]">
         <div className="h-16 max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 transition-transform active:scale-95">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2 transition-transform active:scale-95">
             <span className="font-extrabold text-2xl tracking-tight text-[#ae0011]">NexCinema</span>
           </Link>
           <Link
-            to="/"
+            to={ROUTES.HOME}
             className="flex items-center gap-1.5 text-[#5f5e5e] hover:text-[#ae0011] transition-colors text-sm font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -91,7 +92,7 @@ export const ForgotPassword: React.FC = () => {
 
                 <div className="flex flex-col items-center gap-3 pt-2 border-t border-[#e4e2e2]">
                   <Link
-                    to="/login"
+                    to={ROUTES.AUTH.LOGIN}
                     className="text-xs font-semibold text-[#5f5e5e] hover:text-[#ae0011] transition-colors flex items-center gap-1"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
@@ -130,7 +131,7 @@ export const ForgotPassword: React.FC = () => {
 
                 <div className="w-full flex flex-col gap-2.5 mt-2">
                   <Link
-                    to="/login"
+                    to={ROUTES.AUTH.LOGIN}
                     className="w-full h-11 bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <span>Đăng nhập ngay</span>

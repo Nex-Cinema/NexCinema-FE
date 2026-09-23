@@ -11,14 +11,14 @@ import Register from '@/pages/Auth/Register';
 import ForgotPassword from '@/pages/Auth/ForgotPassword';
 import ResetPassword from '@/pages/Auth/ResetPassword';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
-
 import ClientProfile from '@/pages/Customer/ClientProfile';
+import { ROUTES } from '@/constants/routes';
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route
-        path="/"
+        path={ROUTES.HOME}
         element={
           <MainLayout>
             <Home />
@@ -26,7 +26,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/movie/:id"
+        path={ROUTES.MOVIES.DETAIL()}
         element={
           <MainLayout>
             <MovieDetails />
@@ -34,7 +34,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/movies/now-showing"
+        path={ROUTES.MOVIES.NOW_SHOWING}
         element={
           <MainLayout>
             <Home />
@@ -42,7 +42,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/movies/coming-soon"
+        path={ROUTES.MOVIES.COMING_SOON}
         element={
           <MainLayout>
             <Home />
@@ -52,7 +52,7 @@ export const AppRoutes: React.FC = () => {
 
       {/* ── CUSTOMER PROFILE ROUTE (PROTECTED) ─────────────────────── */}
       <Route
-        path="/profile"
+        path={ROUTES.CUSTOMER.PROFILE}
         element={
           <ProtectedRoute>
             <MainLayout>
@@ -63,14 +63,14 @@ export const AppRoutes: React.FC = () => {
       />
 
       {/* ── AUTHENTICATION ROUTES ──────────────────────────────────── */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path={ROUTES.AUTH.LOGIN} element={<Login />} />
+      <Route path={ROUTES.AUTH.REGISTER} element={<Register />} />
+      <Route path={ROUTES.AUTH.FORGOT_PASSWORD} element={<ForgotPassword />} />
+      <Route path={ROUTES.AUTH.RESET_PASSWORD} element={<ResetPassword />} />
 
       {/* ── BOOKING CHECKOUT FLOW ROUTES (PROTECTED) ──────────────── */}
       <Route
-        path="/checkout"
+        path={ROUTES.BOOKING.CHECKOUT}
         element={
           <ProtectedRoute>
             <MainLayout>
@@ -80,7 +80,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/checkout/payment"
+        path={ROUTES.BOOKING.PAYMENT}
         element={
           <ProtectedRoute>
             <MainLayout>
@@ -90,7 +90,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/booking/:showtimeId"
+        path={ROUTES.BOOKING.SEAT_SELECTION()}
         element={
           <ProtectedRoute>
             <MainLayout>
@@ -100,7 +100,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/booking/confirmation"
+        path={ROUTES.BOOKING.CONFIRMATION}
         element={
           <ProtectedRoute>
             <MainLayout>
@@ -110,7 +110,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path={ROUTES.NOT_FOUND} element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>
   );
 };

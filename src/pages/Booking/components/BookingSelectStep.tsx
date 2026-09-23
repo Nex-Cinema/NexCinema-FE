@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import {
   ChevronDown,
   ArrowRight,
@@ -89,7 +90,7 @@ export const BookingSelectStep: React.FC = () => {
       '21:00': 'st-20:30',
     };
     const targetShowtimeId = showtimeIdMap[selectedTime] || 'st-11:30';
-    navigate(`/booking/${targetShowtimeId}`);
+    navigate(ROUTES.BOOKING.SEAT_SELECTION(targetShowtimeId));
   };
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 import {
   Play,
@@ -239,7 +240,7 @@ export const MovieDetails: React.FC = () => {
       toast.error('Vui lòng chọn 1 suất chiếu trước!');
       return;
     }
-    navigate(`/booking/${selectedShowtime.slotId}`);
+    navigate(ROUTES.BOOKING.SEAT_SELECTION(selectedShowtime.slotId));
   };
 
   const handleShareMovie = () => {
@@ -254,12 +255,12 @@ export const MovieDetails: React.FC = () => {
       {/* ── BREADCRUMB ────────────────────────────────────────────── */}
       <div className="w-full bg-white shadow-sm border-b border-[#e4e2e2]">
         <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-2.5 flex items-center gap-1.5 text-xs text-[#5f5e5e]">
-          <Link to="/" className="hover:text-[#d71920] transition-colors flex items-center gap-1">
+          <Link to={ROUTES.HOME} className="hover:text-[#d71920] transition-colors flex items-center gap-1">
             <Home className="w-4 h-4" />
             <span>Trang chủ</span>
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-[#5f5e5e]" />
-          <Link to="/movies/now-showing" className="hover:text-[#d71920] transition-colors">
+          <Link to={ROUTES.MOVIES.NOW_SHOWING} className="hover:text-[#d71920] transition-colors">
             Phim đang chiếu
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-[#5f5e5e]" />
@@ -626,7 +627,7 @@ export const MovieDetails: React.FC = () => {
                   {sidebarMovies.map((item) => (
                     <div
                       key={item.id}
-                      onClick={() => navigate(`/movie/${item.id}`)}
+                      onClick={() => navigate(ROUTES.MOVIES.DETAIL(item.id))}
                       className="group flex flex-col gap-2 cursor-pointer"
                     >
                       <div className="relative overflow-hidden rounded-xl bg-[#efeded] shadow-sm aspect-[4/3]">
@@ -651,7 +652,7 @@ export const MovieDetails: React.FC = () => {
 
                 {/* More Movies Link */}
                 <Link
-                  to="/movies/now-showing"
+                  to={ROUTES.MOVIES.NOW_SHOWING}
                   className="mt-2 pt-3 border-t border-[#e4e2e2] text-center text-xs font-bold text-[#d71920] hover:text-[#ae0011] transition-colors flex items-center justify-center gap-1"
                 >
                   <span>XEM THÊM PHIM ĐANG CHIẾU</span>

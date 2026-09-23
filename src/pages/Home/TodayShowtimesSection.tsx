@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 interface DateItem {
   dayLabel: string; // e.g. "Thứ Hai"
@@ -28,7 +29,7 @@ const TodayShowtimesSection: React.FC = () => {
   const [formatFilter, setFormatFilter] = useState<'all' | '2d' | 'imax'>('all');
 
   const handleShowtimeClick = (slotId: string) => {
-    const targetUrl = `/booking/${slotId}`;
+    const targetUrl = ROUTES.BOOKING.SEAT_SELECTION(slotId);
     if (!requireAuth(undefined, targetUrl)) {
       return;
     }

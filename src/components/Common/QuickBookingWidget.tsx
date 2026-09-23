@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Zap, MapPin, ChevronDown, Calendar, Clock, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 const QuickBookingWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const QuickBookingWidget: React.FC = () => {
     }
 
     const showtimeId = TIME_TO_SHOWTIME_ID[selectedTime] ?? `st-${selectedTime}`;
-    const targetBookingUrl = `/booking/${showtimeId}`;
+    const targetBookingUrl = ROUTES.BOOKING.SEAT_SELECTION(showtimeId);
 
     // Auth Guard: Require login before booking
     if (!requireAuth(undefined, targetBookingUrl)) {

@@ -3,12 +3,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Film } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/';
+  const redirectUrl = searchParams.get('redirect') || ROUTES.HOME;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,11 +50,11 @@ export const Login: React.FC = () => {
       {/* ── HEADER ── */}
       <header className="w-full bg-white/80 backdrop-blur-xl shadow-xs border-b border-[#e4e2e2]">
         <div className="h-16 max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 transition-transform active:scale-95">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2 transition-transform active:scale-95">
             <span className="font-extrabold text-2xl tracking-tight text-[#ae0011]">NexCinema</span>
           </Link>
           <Link
-            to="/"
+            to={ROUTES.HOME}
             className="flex items-center gap-1.5 text-[#5f5e5e] hover:text-[#ae0011] transition-colors text-sm font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -137,7 +138,7 @@ export const Login: React.FC = () => {
                   <span className="text-xs text-[#5f5e5e]">Ghi nhớ đăng nhập</span>
                 </label>
                 <Link
-                  to="/forgot-password"
+                  to={ROUTES.AUTH.FORGOT_PASSWORD}
                   className="text-xs font-semibold text-[#d71920] hover:text-[#ae0011] transition-colors hover:underline"
                 >
                   Quên mật khẩu?
@@ -192,7 +193,7 @@ export const Login: React.FC = () => {
             {/* Footer */}
             <div className="mt-6 text-center text-xs text-[#5f5e5e]">
               Chưa có tài khoản?
-              <Link to="/register" className="text-[#d71920] font-bold hover:underline ml-1">
+              <Link to={ROUTES.AUTH.REGISTER} className="text-[#d71920] font-bold hover:underline ml-1">
                 Đăng ký ngay
               </Link>
             </div>

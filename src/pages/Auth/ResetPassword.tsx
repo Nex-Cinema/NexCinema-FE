@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import { Lock, Eye, EyeOff, CheckCircle2, Shield, ArrowLeft, ArrowRight, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -51,11 +52,11 @@ export const ResetPassword: React.FC = () => {
       {/* ── HEADER ── */}
       <header className="w-full bg-white/80 backdrop-blur-xl shadow-xs border-b border-[#e4e2e2]">
         <div className="h-16 max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 transition-transform active:scale-95">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2 transition-transform active:scale-95">
             <span className="font-extrabold text-2xl tracking-tight text-[#ae0011]">NexCinema</span>
           </Link>
           <Link
-            to="/"
+            to={ROUTES.HOME}
             className="flex items-center gap-1.5 text-[#5f5e5e] hover:text-[#ae0011] transition-colors text-sm font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -230,7 +231,7 @@ export const ResetPassword: React.FC = () => {
                 </div>
 
                 <Link
-                  to="/login"
+                  to={ROUTES.AUTH.LOGIN}
                   className="w-full h-12 bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-2"
                 >
                   <span>Đăng nhập ngay</span>

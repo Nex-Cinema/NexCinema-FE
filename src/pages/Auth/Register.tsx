@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Info, UserPlus, ArrowLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export const Register: React.FC = () => {
       const mockUser = { email, name: fullName, role: 'CUSTOMER' };
       login('mock-register-jwt-token', mockUser);
       toast.success('Đăng ký tài khoản thành công!');
-      navigate('/');
+      navigate(ROUTES.HOME);
     }, 800);
   };
 
@@ -74,7 +75,7 @@ export const Register: React.FC = () => {
       const mockUser = { email: 'new.google.user@gmail.com', name: 'Google New User', role: 'CUSTOMER' };
       login('mock-google-register-token', mockUser);
       toast.success('Đăng ký với Google thành công!');
-      navigate('/');
+      navigate(ROUTES.HOME);
     }, 1500);
   };
 
@@ -83,11 +84,11 @@ export const Register: React.FC = () => {
       {/* ── HEADER ── */}
       <header className="w-full bg-white/80 backdrop-blur-xl shadow-xs border-b border-[#e4e2e2]">
         <div className="h-16 max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 transition-transform active:scale-95">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2 transition-transform active:scale-95">
             <span className="font-extrabold text-2xl tracking-tight text-[#ae0011]">NexCinema</span>
           </Link>
           <Link
-            to="/"
+            to={ROUTES.HOME}
             className="flex items-center gap-1.5 text-[#5f5e5e] hover:text-[#ae0011] transition-colors text-sm font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -344,7 +345,7 @@ export const Register: React.FC = () => {
             {/* Link to Login */}
             <div className="mt-6 text-center text-xs text-[#5f5e5e]">
               Đã có tài khoản?
-              <Link to="/login" className="text-[#d71920] font-bold hover:underline inline-flex items-center gap-0.5 ml-1">
+              <Link to={ROUTES.AUTH.LOGIN} className="text-[#d71920] font-bold hover:underline inline-flex items-center gap-0.5 ml-1">
                 <span>Đăng nhập ngay</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>

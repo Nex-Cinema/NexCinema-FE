@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import {
   Check,
   ArrowRight,
@@ -57,7 +58,7 @@ export const PaymentStep: React.FC = () => {
             '⏰ Hết thời gian giữ ghế! Vui lòng chọn ghế lại.',
             { duration: 5000 }
           );
-          navigate('/checkout', { replace: true });
+          navigate(ROUTES.BOOKING.CHECKOUT, { replace: true });
           return 0;
         }
         return prev - 1;
@@ -105,7 +106,7 @@ export const PaymentStep: React.FC = () => {
           sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
           localStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
           toast.success('Thanh toán VNPay thành công!');
-          navigate('/booking/confirmation');
+          navigate(ROUTES.BOOKING.CONFIRMATION);
         }, 2000);
       } else {
         // BR#15: PayOS — mock QR + polling flow
@@ -129,7 +130,7 @@ export const PaymentStep: React.FC = () => {
           };
           sessionStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
           localStorage.setItem('booking_confirmation', JSON.stringify(confirmData));
-          navigate('/booking/confirmation');
+          navigate(ROUTES.BOOKING.CONFIRMATION);
         }, 3000);
       }
     }, 800);
@@ -139,7 +140,7 @@ export const PaymentStep: React.FC = () => {
   const handleBackFromPayment = () => {
     toast.success('Đã hủy giữ ghế. Quay lại chọn ghế.');
     sessionStorage.removeItem('booking_draft');
-    navigate('/checkout');
+    navigate(ROUTES.BOOKING.CHECKOUT);
   };
 
   const seatsList = bookingDraft?.seats || ['J4', 'J5'];

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import {
   CheckCircle2,
   Ticket,
@@ -178,7 +179,7 @@ export const BookingConfirmation: React.FC = () => {
             {/* ACTION BUTTONS */}
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[#e4e2e2]">
               <Link
-                to="/profile"
+                to={ROUTES.CUSTOMER.PROFILE}
                 className="py-3 px-4 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
               >
                 <Ticket className="w-4 h-4" />
@@ -186,7 +187,7 @@ export const BookingConfirmation: React.FC = () => {
               </Link>
 
               <Link
-                to="/"
+                to={ROUTES.HOME}
                 className="py-3 px-4 rounded-xl bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 border border-[#e4e2e2]"
               >
                 <Home className="w-4 h-4" />

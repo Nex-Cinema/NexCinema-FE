@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { ROUTES } from '@/constants';
 
 interface UserProfile {
   email: string;
@@ -58,7 +59,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('userRole');
     localStorage.removeItem('userCode');
     toast.success('Đã đăng xuất tài khoản!');
-    navigate('/login');
+    navigate(ROUTES.AUTH.LOGIN);
   }, [navigate]);
 
   const requireAuth = useCallback(
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       toast.error(customMsg);
       const redirect = targetPath || window.location.pathname + window.location.hash;
-      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+      navigate(`${ROUTES.AUTH.LOGIN}?redirect=${encodeURIComponent(redirect)}`);
       return false;
     },
     [isAuthenticated, navigate]

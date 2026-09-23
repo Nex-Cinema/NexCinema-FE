@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import {
   Clock,
   Ticket,
@@ -114,17 +115,19 @@ export const SeatSelection: React.FC = () => {
   const seatMap = generateSeats();
 
   // ── ISSUE-13 FIX: Single Seat Gap Rule ───────────────────────────
-  // Returns true if the proposed selectedIds would isolate a single AVAILABLE seat
-  // between two blocked positions (SOLD, HELD, or SELECTED) in the same row.
-  const hasIsolatedSeat = useCallback(
-    (proposedIds: string[]): boolean => {
+  // Returns number of isolated single AVAILABLE seats for a given set of proposed selected IDs
+  const countIsolatedSeats = useCallback(
+    (proposedIds: string[]): number => {
+      let count = 0;
       const rowLetters = rows.filter((r) => r !== 'K'); // Couple row exempt
       for (const row of rowLetters) {
         const rowSeats = (seatMap[row] || []).filter((s) => s.type !== 'COUPLE');
         for (let i = 0; i < rowSeats.length; i++) {
           const s = rowSeats[i];
-          // Only check seats that are AVAILABLE and NOT in the new proposed selection
-          if (s.status === 'AVAILABLE' && !proposedIds.includes(s.id)) {
+          const isOccupied =
+            s.status === 'SOLD' || s.status === 'HELD' || proposedIds.includes(s.id);
+          // Only check seats that are vacant in proposed state
+          if (!isOccupied) {
             const leftBlocked =
               i === 0 ||
               rowSeats[i - 1].status === 'SOLD' ||
@@ -135,11 +138,11 @@ export const SeatSelection: React.FC = () => {
               rowSeats[i + 1].status === 'SOLD' ||
               rowSeats[i + 1].status === 'HELD' ||
               proposedIds.includes(rowSeats[i + 1].id);
-            if (leftBlocked && rightBlocked) return true;
+            if (leftBlocked && rightBlocked) count++;
           }
         }
       }
-      return false;
+      return count;
     },
     [rows, seatMap]
   );
@@ -171,10 +174,12 @@ export const SeatSelection: React.FC = () => {
       }
     } else {
       // Standard or VIP single seat
+      const currentIsolated = countIsolatedSeats(selectedSeatIds);
+
       if (selectedSeatIds.includes(seat.id)) {
-        // Deselecting: check that removal doesn't isolate neighbour
+        // Deselecting: check if removal CREATES a new isolated seat
         const afterRemoval = selectedSeatIds.filter((id) => id !== seat.id);
-        if (hasIsolatedSeat(afterRemoval)) {
+        if (countIsolatedSeats(afterRemoval) > currentIsolated) {
           toast.error('Không thể bỏ chọn ghế này vì sẽ tạo ra 1 ghế trống đơn lẻ!');
           return;
         }
@@ -185,9 +190,9 @@ export const SeatSelection: React.FC = () => {
           toast.error(`Tối đa chỉ được chọn ${MAX_SEATS_PER_BOOKING} ghế trong một lần đặt vé!`);
           return;
         }
-        // ISSUE-13: Gap Rule — check proposed state before committing
+        // ISSUE-13: Gap Rule — check if adding seat CREATES a new isolated seat
         const proposed = [...selectedSeatIds, seat.id];
-        if (hasIsolatedSeat(proposed)) {
+        if (countIsolatedSeats(proposed) > currentIsolated) {
           toast.error(
             'Không thể chọn ghế này vì sẽ để trống 1 ghế đơn lẻ giữa các ghế đã chọn/đã bán. Vui lòng chọn ghế liền kề!',
             { duration: 4000 }
@@ -254,7 +259,7 @@ export const SeatSelection: React.FC = () => {
       })
     );
     toast.success('Đã chọn ghế thành công! Chuyển sang bước thanh toán...');
-    navigate('/checkout/payment');
+    navigate(ROUTES.BOOKING.PAYMENT);
   };
 
   // ── Seat button style helper ──────────────────────────────────────
@@ -593,7 +598,7 @@ export const SeatSelection: React.FC = () => {
 
                 {/* Back to Showtime Link */}
                 <Link
-                  to="/checkout"
+                  to={ROUTES.BOOKING.CHECKOUT}
                   className="text-center text-xs font-semibold text-[#5f5e5e] hover:text-[#d71920] transition-colors flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
+import { ROUTES } from '@/constants';
 
 interface BookingProgressBarProps {
   currentStep: 1 | 2 | 3 | 4;
@@ -16,10 +17,10 @@ interface BookingProgressBarProps {
  */
 export const BookingProgressBar: React.FC<BookingProgressBarProps> = ({ currentStep }) => {
   const steps = [
-    { num: 1, label: 'Chọn suất', path: '/checkout' },
-    { num: 2, label: 'Chọn ghế', path: '/booking/st-11:30' },
-    { num: 3, label: 'Thanh toán', path: '/checkout/payment' },
-    { num: 4, label: 'Xác nhận', path: '/booking/confirmation' },
+    { num: 1, label: 'Chọn suất', path: ROUTES.BOOKING.CHECKOUT },
+    { num: 2, label: 'Chọn ghế', path: ROUTES.BOOKING.SEAT_SELECTION('st-11:30') },
+    { num: 3, label: 'Thanh toán', path: ROUTES.BOOKING.PAYMENT },
+    { num: 4, label: 'Xác nhận', path: ROUTES.BOOKING.CONFIRMATION },
   ];
 
   return (

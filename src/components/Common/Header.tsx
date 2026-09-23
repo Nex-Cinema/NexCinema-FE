@@ -6,6 +6,7 @@ import InfoModal, { ModalType } from './InfoModal';
 import profileAvatar from '@/assets/profile.png';
 import UITLogo from '@/assets/LogoUIT2.jpg';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 const SEARCH_SUGGESTIONS = [
   { id: 'dune2', title: 'Dune: Hành Tinh Cát - Phần 2', genre: 'Khoa học viễn tưởng, Hành động', rating: '9.4' },
@@ -34,7 +35,7 @@ const Header: React.FC = () => {
   const displayName = user?.name || 'Khách hàng';
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === ROUTES.HOME) return location.pathname === ROUTES.HOME;
     return location.pathname.startsWith(path);
   };
 
@@ -55,20 +56,21 @@ const Header: React.FC = () => {
     setIsDropdownOpen(false);
     logout();
     toast.success('Đã đăng xuất tài khoản!');
-    navigate('/login');
+    navigate(ROUTES.AUTH.LOGIN);
   };
 
   const handleTicketHistoryClick = () => {
-    if (!requireAuth(undefined, '/profile?tab=transactions', 'Vui lòng đăng nhập để xem lịch sử đặt vé.')) {
+    const profileTxUrl = `${ROUTES.CUSTOMER.PROFILE}?tab=transactions`;
+    if (!requireAuth(undefined, profileTxUrl, 'Vui lòng đăng nhập để xem lịch sử đặt vé.')) {
       return;
     }
     setIsDropdownOpen(false);
-    navigate('/profile?tab=transactions');
+    navigate(profileTxUrl);
   };
 
   const handleShowtimesClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
+    if (location.pathname !== ROUTES.HOME) {
+      navigate(ROUTES.HOME);
       setTimeout(() => {
         const el = document.getElementById('lich-chieu-section');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -86,7 +88,7 @@ const Header: React.FC = () => {
   const handleSelectSearchResult = (movieId: string) => {
     setSearchQuery('');
     setIsSearchFocused(false);
-    navigate(`/movie/${movieId}`);
+    navigate(ROUTES.MOVIES.DETAIL(movieId));
   };
 
   const filteredMovies = SEARCH_SUGGESTIONS.filter(
@@ -101,7 +103,7 @@ const Header: React.FC = () => {
         <div className="h-20 max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 flex items-center justify-between gap-6">
           {/* BRAND LOGO & NAV */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2.5 -ml-4 sm:-ml-6 hover:opacity-90 transition-opacity">
+            <Link to={ROUTES.HOME} className="flex items-center gap-2.5 -ml-4 sm:-ml-6 hover:opacity-90 transition-opacity">
               <img
                 src={UITLogo}
                 alt="NexCinema Logo"
@@ -118,9 +120,9 @@ const Header: React.FC = () => {
             {/* NAV LINKS */}
             <nav className="hidden xl:flex items-center gap-1 font-sans">
               <Link
-                to="/movies/now-showing"
+                to={ROUTES.MOVIES.NOW_SHOWING}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  isActive('/movies/now-showing')
+                  isActive(ROUTES.MOVIES.NOW_SHOWING)
                     ? 'bg-[#d71920] text-white font-bold'
                     : 'text-[#5d3f3c] hover:text-gray-900 hover:bg-gray-100'
                 }`}
@@ -129,9 +131,9 @@ const Header: React.FC = () => {
               </Link>
 
               <Link
-                to="/movies/coming-soon"
+                to={ROUTES.MOVIES.COMING_SOON}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  isActive('/movies/coming-soon')
+                  isActive(ROUTES.MOVIES.COMING_SOON)
                     ? 'bg-[#d71920] text-white font-bold'
                     : 'text-[#5d3f3c] hover:text-gray-900 hover:bg-gray-100'
                 }`}
@@ -251,7 +253,7 @@ const Header: React.FC = () => {
                       <p className="text-xs font-bold text-gray-900 truncate">{displayName}</p>
                     </div>
                     <Link
-                      to="/profile"
+                      to={ROUTES.CUSTOMER.PROFILE}
                       onClick={() => setIsDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                     >
@@ -279,7 +281,7 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <Link
-                to="/login"
+                to={ROUTES.AUTH.LOGIN}
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold tracking-wide transition-all shadow-xs active:scale-95 cursor-pointer whitespace-nowrap shrink-0 ml-1"
               >
                 <User className="w-4 h-4 shrink-0" />
@@ -312,14 +314,14 @@ const Header: React.FC = () => {
             </div>
             <nav className="flex flex-col gap-2 font-semibold text-sm text-[#5d3f3c]">
               <Link
-                to="/movies/now-showing"
+                to={ROUTES.MOVIES.NOW_SHOWING}
                 onClick={() => setIsMenuOpen(false)}
                 className="py-1.5 hover:text-[#d71920]"
               >
                 Phim đang chiếu
               </Link>
               <Link
-                to="/movies/coming-soon"
+                to={ROUTES.MOVIES.COMING_SOON}
                 onClick={() => setIsMenuOpen(false)}
                 className="py-1.5 hover:text-[#d71920]"
               >

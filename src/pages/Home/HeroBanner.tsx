@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ticket, Play, Clock, Star, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { ROUTES } from '@/constants/routes';
 
 interface FeaturedMovie {
   id: string;
@@ -90,11 +91,11 @@ const HeroBanner: React.FC = () => {
   };
 
   const handleGoToDetails = () => {
-    navigate(`/movie/${currentMovie.id}`);
+    navigate(ROUTES.MOVIES.DETAIL(currentMovie.id));
   };
 
   const handleBookNow = () => {
-    const targetUrl = `/movie/${currentMovie.id}#lich-chieu-section`;
+    const targetUrl = `${ROUTES.MOVIES.DETAIL(currentMovie.id)}#lich-chieu-section`;
     if (!requireAuth(undefined, targetUrl)) {
       return;
     }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 import { ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -135,7 +136,7 @@ export const ClientProfile: React.FC = () => {
     setIsLogoutModalOpen(false);
     logout();
     toast.success('Đã đăng xuất tài khoản!');
-    navigate('/login');
+    navigate(ROUTES.AUTH.LOGIN);
   };
 
   return (
@@ -144,7 +145,7 @@ export const ClientProfile: React.FC = () => {
         
         {/* BREADCRUMB */}
         <div className="flex items-center gap-1.5 text-xs text-[#5f5e5e] mb-6">
-          <Link to="/" className="hover:text-[#d71920] transition-colors">
+          <Link to={ROUTES.HOME} className="hover:text-[#d71920] transition-colors">
             Trang chủ
           </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />

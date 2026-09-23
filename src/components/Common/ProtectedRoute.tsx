@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { ROUTES } from '@/constants/routes';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
@@ -39,7 +40,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (!isAuthenticated) {
     const redirectUrl = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/login?redirect=${redirectUrl}`} replace />;
+    return <Navigate to={`${ROUTES.AUTH.LOGIN}?redirect=${redirectUrl}`} replace />;
   }
 
   return children;
