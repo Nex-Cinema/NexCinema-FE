@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const mapUserToStaff = (u) => ({
+const mapUserToStaff = (u: any) => ({
   MaNhanVien: u.NhanVien?.MaNhanVien || u.MaTaiKhoan,
   MaTaiKhoan: u.MaTaiKhoan,
   HoTen: u.HoTen,
@@ -17,15 +17,14 @@ const mapUserToStaff = (u) => ({
 
 const personnelService = {
   getStaff: async () => {
-    const res = await axiosClient.get('/admin/nguoi-dung?limit=200');
+    const res: any = await axiosClient.get('/admin/nguoi-dung?limit=200');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
-    // Only return ADMIN and STAFF roles for Personnel module
     return items
-      .filter(u => u.VaiTro === 'ADMIN' || u.VaiTro === 'STAFF')
+      .filter((u: any) => u.VaiTro === 'ADMIN' || u.VaiTro === 'STAFF')
       .map(mapUserToStaff);
   },
 
-  addStaff: async (person) => {
+  addStaff: async (person: any) => {
     const payload = {
       TenDangNhap: person.Email,
       MatKhau: person.MatKhau || 'CinemaPlus@2026',
@@ -41,23 +40,20 @@ const personnelService = {
     return mapUserToStaff(data);
   },
 
-  updateStaff: async (maNhanVien, updates) => {
-    // 1. Resolve maNhanVien to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?limit=200');
+  updateStaff: async (maNhanVien: string, updates: any) => {
+    const resList: any = await axiosClient.get('/admin/nguoi-dung?limit=200');
     const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
-    const user = users.find(u => u.NhanVien?.MaNhanVien === maNhanVien || u.MaTaiKhoan === maNhanVien);
+    const user = users.find((u: any) => u.NhanVien?.MaNhanVien === maNhanVien || u.MaTaiKhoan === maNhanVien);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản nhân viên với mã: ${maNhanVien}`);
     }
 
     const maTaiKhoan = user.MaTaiKhoan;
 
-    // 2. Perform password update if provided and modified
     if (updates.MatKhau && updates.MatKhau !== 'CinemaPlus@2026') {
       await axiosClient.put(`/admin/nguoi-dung/${maTaiKhoan}/doi-mat-khau`, { MatKhau: updates.MatKhau });
     }
 
-    // 3. Perform profile update
     const payload = {
       ...(updates.HoTen !== undefined && { HoTen: updates.HoTen }),
       ...(updates.Email !== undefined && { Email: updates.Email }),

@@ -1,7 +1,7 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
 const statsService = {
-  getRevenueStats: async (filters = {}) => {
+  getRevenueStats: async (filters: Record<string, any> = {}) => {
     const { startDate, endDate, maPhim } = filters;
     const params = {
       ...(startDate && { tuNgay: startDate }),
@@ -14,7 +14,7 @@ const statsService = {
       ...(endDate && { denNgay: endDate }),
     };
 
-    const [revData, fillData, resReceipts] = await Promise.all([
+    const [revData, fillData, resReceipts]: [any, any, any] = await Promise.all([
       axiosClient.get('/admin/thong-ke/doanh-thu', { params }),
       axiosClient.get('/admin/thong-ke/ti-le-ghe', { params: fillParams }),
       axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000')
@@ -22,23 +22,21 @@ const statsService = {
 
     const receipts = Array.isArray(resReceipts) ? resReceipts : (resReceipts?.data || []);
 
-    // 1. Core Metrics
     const totalRevenue = revData?.TongDoanhThu || 0;
-    const ticketsSold = revData?.DoanhThuTheoPhim?.reduce((sum, p) => sum + p.SoVeBanRa, 0) || 0;
+    const ticketsSold = revData?.DoanhThuTheoPhim?.reduce((sum: number, p: any) => sum + p.SoVeBanRa, 0) || 0;
 
-    const totalOccupied = fillData?.reduce((sum, item) => sum + item.SoGheDaDat, 0) || 0;
-    const totalCapacity = fillData?.reduce((sum, item) => sum + item.TongSoGhe, 0) || 0;
+    const totalOccupied = fillData?.reduce((sum: number, item: any) => sum + item.SoGheDaDat, 0) || 0;
+    const totalCapacity = fillData?.reduce((sum: number, item: any) => sum + item.TongSoGhe, 0) || 0;
     const occupancyRate = totalCapacity > 0 ? ((totalOccupied / totalCapacity) * 100).toFixed(1) : '0.0';
 
     let hotMovie = 'N/A';
     if (revData?.DoanhThuTheoPhim && revData.DoanhThuTheoPhim.length > 0) {
-      const sorted = [...revData.DoanhThuTheoPhim].sort((a, b) => b.DoanhThu - a.DoanhThu);
+      const sorted = [...revData.DoanhThuTheoPhim].sort((a: any, b: any) => b.DoanhThu - a.DoanhThu);
       hotMovie = sorted[0].TenPhim;
     }
 
-    // 2. Daily Revenue Chart Data
-    const dailyMap = {};
-    receipts.forEach(p => {
+    const dailyMap: Record<string, number> = {};
+    receipts.forEach((p: any) => {
       if (p.TrangThai === 'DA_THANH_TOAN') {
         const dateStr = p.NgayTao ? new Date(p.NgayTao).toISOString().substring(0, 10) : '';
         if (startDate && dateStr < startDate) return;
@@ -56,22 +54,20 @@ const statsService = {
       day,
       revenue
     })).sort((a, b) => {
-      const [da, ma] = a.day.split('/');
-      const [db, mb] = b.day.split('/');
-      return new Date(2026, ma - 1, da) - new Date(2026, mb - 1, db);
+      const [da, ma] = a.day.split('/').map(Number);
+      const [db, mb] = b.day.split('/').map(Number);
+      return new Date(2026, ma - 1, da).getTime() - new Date(2026, mb - 1, db).getTime();
     });
 
-    // 3. Movie Revenue Chart Data
     const movieRevenueData = (revData?.DoanhThuTheoPhim || [])
-      .map(p => ({
+      .map((p: any) => ({
         name: p.TenPhim,
         value: p.DoanhThu
       }))
-      .sort((a, b) => b.value - a.value);
+      .sort((a: any, b: any) => b.value - a.value);
 
-    // 4. Room Occupancy Chart Data
-    const roomMap = {};
-    (fillData || []).forEach(item => {
+    const roomMap: Record<string, { tickets: number; capacity: number }> = {};
+    (fillData || []).forEach((item: any) => {
       const name = item.TenPhong;
       if (!roomMap[name]) {
         roomMap[name] = { tickets: 0, capacity: 0 };
@@ -87,9 +83,8 @@ const statsService = {
         value: Math.round((d.tickets / d.capacity) * 100)
       }));
 
-    // 5. Performance Details Table
-    const moviePerformance = {};
-    (fillData || []).forEach(item => {
+    const moviePerformance: Record<string, { shows: number; tickets: number; capacity: number }> = {};
+    (fillData || []).forEach((item: any) => {
       const name = item.TenPhim;
       if (!moviePerformance[name]) {
         moviePerformance[name] = { shows: 0, tickets: 0, capacity: 0 };
@@ -118,8 +113,8 @@ const statsService = {
     };
   },
 
-  exportRevenueReport: async (format) => {
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  exportRevenueReport: async (format: string) => {
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     await delay(1200);
     return {
       success: true,

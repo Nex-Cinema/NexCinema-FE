@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMovieDetail, getMovieReviews, getMovieShowtimes, createReview } from '../../api/movieApi';
-import { getMovieVisuals } from '../../utils/visualHelper';
+import { getMovieDetail, getMovieReviews, getMovieShowtimes, createReview } from '@/apis/movieApi';
+import { getMovieVisuals } from '@/utils/visualHelper';
 import toast from 'react-hot-toast';
 
 /**
@@ -10,32 +10,30 @@ import toast from 'react-hot-toast';
  * Fetches movie details, reviews, and showtimes concurrently.
  * Also owns review submission logic.
  *
- * @param {string} maPhim – movie ID from route params
+ * @param maPhim – movie ID from route params
  */
-const useMovieDetail = (maPhim) => {
+const useMovieDetail = (maPhim: string) => {
   const navigate = useNavigate();
 
-  const [rawMovie, setRawMovie] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const [rawMovie, setRawMovie] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [ratingSummary, setRatingSummary] = useState({ DiemTrungBinh: 0, SoLuongDanhGia: 0 });
-  const [showtimes, setShowtimes] = useState([]);
+  const [showtimes, setShowtimes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ── Review modal state ────────────────────────────────────────────────────
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
 
-  // ── Fetch all movie data ──────────────────────────────────────────────────
   useEffect(() => {
     if (!maPhim) return;
 
     const fetchMovieData = async () => {
       setLoading(true);
       try {
-        const [movieRes, reviewsRes, showtimesRes] = await Promise.all([
+        const [movieRes, reviewsRes, showtimesRes]: [any, any, any] = await Promise.all([
           getMovieDetail(maPhim),
           getMovieReviews(maPhim),
           getMovieShowtimes(maPhim),
@@ -55,7 +53,6 @@ const useMovieDetail = (maPhim) => {
     fetchMovieData();
   }, [maPhim]);
 
-  // ── Derived movie object (backward-compatible) ────────────────────────────
   const movie = useMemo(() => {
     if (!rawMovie) return null;
     const visuals = getMovieVisuals(rawMovie);
@@ -71,13 +68,12 @@ const useMovieDetail = (maPhim) => {
         : '',
       runtime: rawMovie.ThoiLuong,
       genres: rawMovie.TheLoai
-        ? rawMovie.TheLoai.split(',').map((g) => ({ name: g.trim() }))
+        ? rawMovie.TheLoai.split(',').map((g: string) => ({ name: g.trim() }))
         : [],
       videoUrl: visuals.trailer,
     };
   }, [rawMovie]);
 
-  // ── Review handlers ───────────────────────────────────────────────────────
   const handleOpenReviewModal = () => {
     const token = localStorage.getItem('accessToken');
     const role = localStorage.getItem('userRole');
@@ -91,7 +87,7 @@ const useMovieDetail = (maPhim) => {
     setIsReviewOpen(true);
   };
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('accessToken');
     const role = localStorage.getItem('userRole');
@@ -107,22 +103,22 @@ const useMovieDetail = (maPhim) => {
     setIsReviewSubmitting(true);
     const toastId = toast.loading('Đang gửi đánh giá...');
     try {
-      const payload = { MaPhim: rawMovie?.MaPhim || maPhim, SoSao: Number(rating) };
+      const payload: Record<string, any> = { MaPhim: rawMovie?.MaPhim || maPhim, SoSao: Number(rating) };
       if (comment.trim()) payload.BinhLuan = comment.trim();
       await createReview(payload);
       toast.success('Đánh giá phim thành công!');
       setIsReviewOpen(false);
       setComment('');
       setRating(5);
-      // Refresh reviews + movie after submission
-      const [reviewsRes, movieRes] = await Promise.all([
+
+      const [reviewsRes, movieRes]: [any, any] = await Promise.all([
         getMovieReviews(maPhim),
         getMovieDetail(maPhim),
       ]);
       setReviews(reviewsRes?.data || []);
       setRatingSummary(reviewsRes?.ratingSummary || { DiemTrungBinh: 0, SoLuongDanhGia: 0 });
       setRawMovie(movieRes);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lỗi khi gửi đánh giá:', err);
       if (err.response?.status === 401 || err.response?.status === 403) {
         toast.error('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
@@ -137,20 +133,17 @@ const useMovieDetail = (maPhim) => {
   };
 
   return {
-    // Data
     rawMovie,
     movie,
     reviews,
     ratingSummary,
     showtimes,
     loading,
-    // Review modal state
     isReviewOpen,
     rating,
     comment,
     hoverRating,
     isReviewSubmitting,
-    // Review actions
     handleOpenReviewModal,
     handleReviewSubmit,
     onCloseReview: () => setIsReviewOpen(false),

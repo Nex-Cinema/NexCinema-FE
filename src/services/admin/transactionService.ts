@@ -1,22 +1,22 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
 const transactionService = {
   getTransactions: async () => {
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
+    const res: any = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
 
-    const txList = [];
-    items.forEach(p => {
+    const txList: any[] = [];
+    items.forEach((p: any) => {
       const customerName = p.KhachHang?.TaiKhoan?.HoTen || 'Khách vãng lai';
       const firstDetail = p.ChiTietDatVes?.[0];
       const movieName = firstDetail?.GheSuatChieu?.SuatChieu?.Phim?.TenPhim || 'N/A';
-      const seatsList = p.ChiTietDatVes?.map(ct => {
+      const seatsList = p.ChiTietDatVes?.map((ct: any) => {
         const ghe = ct.GheSuatChieu?.Ghe;
         return ghe ? `${ghe.ViTriDay}${ghe.ViTriCot}` : '';
       }).filter(Boolean).join(', ') || 'N/A';
 
       if (p.GiaoDichs && p.GiaoDichs.length > 0) {
-        p.GiaoDichs.forEach(gd => {
+        p.GiaoDichs.forEach((gd: any) => {
           let displayStatus = 'Success';
           if (gd.TrangThai === 'CHO_XU_LY') displayStatus = 'Pending';
           if (gd.TrangThai === 'THAT_BAI') displayStatus = 'Failed';
@@ -36,7 +36,6 @@ const transactionService = {
           });
         });
       } else {
-        // Fallback for bookings without transaction records (e.g. cash bookings)
         let displayStatus = 'Success';
         if (p.TrangThai === 'DA_HUY') displayStatus = 'Refunded';
         if (p.TrangThai === 'CHO_THANH_TOAN') displayStatus = 'Pending';
@@ -59,21 +58,20 @@ const transactionService = {
     return txList;
   },
 
-  refundTransaction: async (maGiaoDich, reason) => {
+  refundTransaction: async (maGiaoDich: string, reason?: string) => {
     if (maGiaoDich.startsWith('CASH_')) {
       const maPhieuDat = maGiaoDich.replace('CASH_', '');
       await axiosClient.patch(`/admin/giao-dich/phieu-dat/${maPhieuDat}/huy`);
       return { success: true };
     }
 
-    // Resolve transaction amount by retrieving all receipts
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
+    const res: any = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
     
-    let targetGd = null;
+    let targetGd: any = null;
     for (const p of items) {
       if (p.GiaoDichs) {
-        targetGd = p.GiaoDichs.find(g => g.MaGiaoDich === maGiaoDich);
+        targetGd = p.GiaoDichs.find((g: any) => g.MaGiaoDich === maGiaoDich);
         if (targetGd) break;
       }
     }
@@ -88,19 +86,19 @@ const transactionService = {
     return { success: true };
   },
 
-  getRefundRequests: async (params) => {
+  getRefundRequests: async (params?: Record<string, any>) => {
     return axiosClient.get('/admin/hoan-tien', { params });
   },
 
-  getRefundRequestDetail: async (maHoanTien) => {
+  getRefundRequestDetail: async (maHoanTien: string) => {
     return axiosClient.get(`/admin/hoan-tien/${maHoanTien}`);
   },
 
-  approveRefundRequest: async (maHoanTien, payload) => {
+  approveRefundRequest: async (maHoanTien: string, payload?: any) => {
     return axiosClient.patch(`/admin/hoan-tien/${maHoanTien}/duyet`, payload);
   },
 
-  rejectRefundRequest: async (maHoanTien, payload) => {
+  rejectRefundRequest: async (maHoanTien: string, payload?: any) => {
     return axiosClient.patch(`/admin/hoan-tien/${maHoanTien}/tu-choi`, payload);
   }
 };

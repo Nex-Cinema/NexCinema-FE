@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const mapRoom = (r) => ({
+const mapRoom = (r: any) => ({
   MaPhongChieu: r.MaPhong,
   TenPhong: r.TenPhong,
   SoGhe: (r.soHang && r.soCot) ? (r.soHang * r.soCot) : (r.SoGhe || 0),
@@ -11,7 +11,7 @@ const mapRoom = (r) => ({
   NgayCapNhat: r.NgayCapNhat ? new Date(r.NgayCapNhat).toISOString().replace('T', ' ').substring(0, 19) : null,
 });
 
-const mapRoomType = (t) => ({
+const mapRoomType = (t: any) => ({
   MaLoaiPhong: t.MaLoaiPhong,
   TenLoaiPhong: t.TenLoaiPhong,
   GiaPhuThu: parseFloat(t.PhuThu),
@@ -23,14 +23,14 @@ const mapRoomType = (t) => ({
 
 const roomService = {
   getRooms: async () => {
-    const data = await axiosClient.get('/admin/phong-chieu');
+    const data: any = await axiosClient.get('/admin/phong-chieu');
     return data.map(mapRoom);
   },
-  getRoomById: async (id) => {
+  getRoomById: async (id: string) => {
     const data = await axiosClient.get(`/admin/phong-chieu/${id}`);
     return mapRoom(data);
   },
-  addRoom: async (room) => {
+  addRoom: async (room: any) => {
     const payload = {
       TenPhong: room.TenPhong,
       MaLoaiPhong: room.MaLoaiPhong,
@@ -40,7 +40,7 @@ const roomService = {
     const data = await axiosClient.post('/admin/phong-chieu', payload);
     return mapRoom(data);
   },
-  updateRoom: async (maPhong, updates) => {
+  updateRoom: async (maPhong: string, updates: any) => {
     const payload = {
       TenPhong: updates.TenPhong,
       MaLoaiPhong: updates.MaLoaiPhong,
@@ -50,16 +50,16 @@ const roomService = {
     const data = await axiosClient.put(`/admin/phong-chieu/${maPhong}`, payload);
     return mapRoom(data);
   },
-  deleteRoom: async (maPhong) => {
+  deleteRoom: async (maPhong: string) => {
     await axiosClient.delete(`/admin/phong-chieu/${maPhong}`);
     return true;
   },
 
   getRoomTypes: async () => {
-    const data = await axiosClient.get('/admin/loai-phong');
+    const data: any = await axiosClient.get('/admin/loai-phong');
     return data.map(mapRoomType);
   },
-  addRoomType: async (item) => {
+  addRoomType: async (item: any) => {
     const payload = {
       TenLoaiPhong: item.TenLoaiPhong,
       PhuThu: Number(item.GiaPhuThu),
@@ -67,7 +67,7 @@ const roomService = {
     const data = await axiosClient.post('/admin/loai-phong', payload);
     return mapRoomType(data);
   },
-  updateRoomType: async (id, updates) => {
+  updateRoomType: async (id: string, updates: any) => {
     const payload = {
       ...(updates.TenLoaiPhong !== undefined && { TenLoaiPhong: updates.TenLoaiPhong }),
       ...(updates.GiaPhuThu !== undefined && { PhuThu: Number(updates.GiaPhuThu) }),
@@ -76,7 +76,7 @@ const roomService = {
     const data = await axiosClient.put(`/admin/loai-phong/${id}`, payload);
     return mapRoomType(data);
   },
-  deleteRoomType: async (id) => {
+  deleteRoomType: async (id: string) => {
     await axiosClient.delete(`/admin/loai-phong/${id}`);
     return true;
   }

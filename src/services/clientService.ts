@@ -1,20 +1,18 @@
-import axiosPublic from '../api/axiosPublic';
+import axiosPublic from '@/apis/axiosPublic';
 
 // ============================================================
 // Helper: map Phim record từ backend sang format frontend dùng
 // ============================================================
-const mapMovie = (phim) => {
+const mapMovie = (phim: any) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const releaseDate = phim.NgayKhoiChieu ? new Date(phim.NgayKhoiChieu) : null;
   const isComingSoon = releaseDate ? releaseDate > today : false;
 
   return {
-    // ID dùng để điều hướng URL và tìm kiếm
     _id: phim.MaPhim,
     MaPhim: phim.MaPhim,
 
-    // Thông tin hiển thị
     title: phim.TenPhim,
     TenPhim: phim.TenPhim,
     poster_path: phim.HinhAnh || '',
@@ -24,32 +22,27 @@ const mapMovie = (phim) => {
     runtime: phim.ThoiLuong || 0,
     ThoiLuong: phim.ThoiLuong || 0,
 
-    // Ngày
     release_date: releaseDate ? releaseDate.toISOString().substring(0, 10) : '',
     NgayKhoiChieu: phim.NgayKhoiChieu || null,
     NgayKetThuc: phim.NgayKetThuc || null,
 
-    // Thể loại, diễn viên, đạo diễn
     genres: phim.TheLoai
-      ? phim.TheLoai.split(',').map((g) => ({ name: g.trim() }))
+      ? phim.TheLoai.split(',').map((g: string) => ({ name: g.trim() }))
       : [],
     TheLoai: phim.TheLoai || '',
     DaoDien: phim.DaoDien || '',
     DienVien: phim.DienVien || '',
     casts: phim.DienVien
-      ? phim.DienVien.split(',').map((name) => ({ name: name.trim() }))
+      ? phim.DienVien.split(',').map((name: string) => ({ name: name.trim() }))
       : [],
 
-    // Trailer & giới hạn tuổi
     videoUrl: phim.Trailer || '',
     Trailer: phim.Trailer || '',
     GioiHanTuoi: phim.GioiHanTuoi || 'P',
 
-    // Rating (nếu có)
     vote_average: phim.vote_average || null,
     original_language: 'vi',
 
-    // Phân loại đang chiếu / sắp chiếu
     isComingSoon,
     KhaDung: phim.KhaDung ? 1 : 0,
   };
@@ -58,8 +51,7 @@ const mapMovie = (phim) => {
 // ============================================================
 // Helper: map SuatChieu record thành format slot cho UI
 // ============================================================
-const mapShowtime = (sc) => {
-  // GioChieu từ backend là ISO datetime string
+const mapShowtime = (sc: any) => {
   const gioChieuDate = sc.GioChieu ? new Date(sc.GioChieu) : null;
   const gioChieuStr = gioChieuDate
     ? gioChieuDate.toTimeString().substring(0, 5)
@@ -93,61 +85,41 @@ const mapShowtime = (sc) => {
 // Service
 // ============================================================
 const clientService = {
-  /**
-   * Lấy danh sách phim (public, chỉ phim khả dụng).
-   * Backend mặc định trả về phim đang chiếu nếu không có includeInactive.
-   */
-  getMovies: async ({ limit = 30, page = 1 } = {}) => {
-    const res = await axiosPublic.get(`/phim`, {
+  getMovies: async ({ limit = 30, page = 1 }: { limit?: number; page?: number } = {}) => {
+    const res: any = await axiosPublic.get('/phim', {
       params: { limit, page },
     });
-    // Backend trả về dạng paginated: { data, pagination }
     const items = Array.isArray(res)
       ? res
       : res?.data
         ? res.data
-        : Array.isArray(res)
-          ? res
-          : [];
+        : [];
     return items.map(mapMovie);
   },
 
-  /**
-   * Lấy chi tiết một phim theo MaPhim.
-   */
-  getMovieById: async (maPhim) => {
+  getMovieById: async (maPhim: string) => {
     const phim = await axiosPublic.get(`/phim/${maPhim}`);
     return mapMovie(phim);
   },
 
-  /**
-   * Lấy danh sách suất chiếu theo phim và ngày.
-   * @param {string} maPhim
-   * @param {string} ngayChieu - định dạng YYYY-MM-DD
-   */
-  getShowtimes: async (maPhim, ngayChieu) => {
-    const params = {};
+  getShowtimes: async (maPhim?: string, ngayChieu?: string) => {
+    const params: Record<string, string> = {};
     if (maPhim) params.maPhim = maPhim;
     if (ngayChieu) params.ngayChieu = ngayChieu;
 
-    const result = await axiosPublic.get(`/suat-chieu`, { params });
+    const result: any = await axiosPublic.get('/suat-chieu', { params });
     const items = Array.isArray(result) ? result : result?.data || [];
     return items
-      .filter((sc) => sc.KhaDung)
+      .filter((sc: any) => sc.KhaDung)
       .map(mapShowtime);
   },
 
-  /**
-   * Lấy sơ đồ ghế và trạng thái của một suất chiếu.
-   * Trả về object: { [seatKey]: 'empty' | 'booked' | 'held' }
-   * seatKey = `${ViTriDay}${ViTriCot}` (ví dụ: "A1", "B3")
-   */
-  getSeatMap: async (maSuatChieu) => {
-    const seats = await axiosPublic.get(`/suat-chieu/${maSuatChieu}/ghe`);
+  getSeatMap: async (maSuatChieu: string) => {
+    const seats: any = await axiosPublic.get(`/suat-chieu/${maSuatChieu}/ghe`);
     const seatList = Array.isArray(seats) ? seats : seats?.data || [];
 
-    const occupiedSeats = {};
-    seatList.forEach((gsc) => {
+    const occupiedSeats: Record<string, boolean> = {};
+    seatList.forEach((gsc: any) => {
       const ghe = gsc.Ghe || gsc;
       const seatKey = `${ghe.ViTriDay}${ghe.ViTriCot}`;
       if (gsc.TrangThai === 'DA_DAT' || gsc.TrangThai === 'DANG_GIU') {

@@ -1,26 +1,23 @@
 import axiosClient from './axiosClient';
+import { CancelBookingPayload, RequestRefundPayload } from '@/types/api.type';
 
 /**
  * Hủy phiếu đặt vé
- * @param {string} maPhieuDat 
- * @param {object} payload - { LyDoHoan: string }
  */
-export const cancelBooking = (maPhieuDat, payload) => {
+export const cancelBooking = (maPhieuDat: string, payload: CancelBookingPayload): Promise<any> => {
   return axiosClient.post(`/dat-ve/${maPhieuDat}/huy`, payload);
 };
 
 /**
  * Gửi yêu cầu hoàn tiền
- * @param {object} payload - { MaPhieuDat: string, LyDo: string }
  */
-export const requestRefund = (payload) => {
+export const requestRefund = (payload: RequestRefundPayload): Promise<any> => {
   return axiosClient.post('/hoan-tien/yeu-cau', payload);
 };
 
 /**
  * Lấy danh sách yêu cầu hoàn tiền của tôi
- * @param {object} params - { page: number, limit: number }
  */
-export const getMyRefundRequests = (params) => {
+export const getMyRefundRequests = (params?: { page?: number; limit?: number }): Promise<any> => {
   return axiosClient.get('/hoan-tien/cua-toi', { params });
 };

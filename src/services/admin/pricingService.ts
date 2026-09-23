@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const mapSeatType = (t) => ({
+const mapSeatType = (t: any) => ({
   MaLoaiGhe: t.MaLoaiGhe,
   TenLoaiGhe: t.TenLoaiGhe,
   GiaPhuThu: parseFloat(t.PhuThu),
@@ -10,7 +10,7 @@ const mapSeatType = (t) => ({
   NgayCapNhat: t.NgayCapNhat ? new Date(t.NgayCapNhat).toISOString().replace('T', ' ').substring(0, 19) : null,
 });
 
-const mapDayType = (t) => ({
+const mapDayType = (t: any) => ({
   MaLoaiNgay: t.MaLoaiNgay,
   TenLoaiNgay: t.TenLoaiNgay,
   GiaPhuThu: parseFloat(t.PhuThu),
@@ -22,10 +22,10 @@ const mapDayType = (t) => ({
 
 const pricingService = {
   getSeatTypes: async () => {
-    const data = await axiosClient.get('/admin/loai-ghe');
+    const data: any = await axiosClient.get('/admin/loai-ghe');
     return data.map(mapSeatType);
   },
-  addSeatType: async (item) => {
+  addSeatType: async (item: any) => {
     const payload = {
       TenLoaiGhe: item.TenLoaiGhe,
       PhuThu: Number(item.GiaPhuThu),
@@ -33,7 +33,7 @@ const pricingService = {
     const data = await axiosClient.post('/admin/loai-ghe', payload);
     return mapSeatType(data);
   },
-  updateSeatType: async (id, updates) => {
+  updateSeatType: async (id: string, updates: any) => {
     const payload = {
       ...(updates.TenLoaiGhe !== undefined && { TenLoaiGhe: updates.TenLoaiGhe }),
       ...(updates.GiaPhuThu !== undefined && { PhuThu: Number(updates.GiaPhuThu) }),
@@ -42,16 +42,16 @@ const pricingService = {
     const data = await axiosClient.put(`/admin/loai-ghe/${id}`, payload);
     return mapSeatType(data);
   },
-  deleteSeatType: async (id) => {
+  deleteSeatType: async (id: string) => {
     await axiosClient.delete(`/admin/loai-ghe/${id}`);
     return true;
   },
 
   getDayTypes: async () => {
-    const data = await axiosClient.get('/admin/loai-ngay');
+    const data: any = await axiosClient.get('/admin/loai-ngay');
     return data.map(mapDayType);
   },
-  addDayType: async (item) => {
+  addDayType: async (item: any) => {
     const payload = {
       TenLoaiNgay: item.TenLoaiNgay,
       PhuThu: Number(item.GiaPhuThu),
@@ -59,7 +59,7 @@ const pricingService = {
     const data = await axiosClient.post('/admin/loai-ngay', payload);
     return mapDayType(data);
   },
-  updateDayType: async (id, updates) => {
+  updateDayType: async (id: string, updates: any) => {
     const payload = {
       ...(updates.TenLoaiNgay !== undefined && { TenLoaiNgay: updates.TenLoaiNgay }),
       ...(updates.GiaPhuThu !== undefined && { PhuThu: Number(updates.GiaPhuThu) }),
@@ -68,7 +68,7 @@ const pricingService = {
     const data = await axiosClient.put(`/admin/loai-ngay/${id}`, payload);
     return mapDayType(data);
   },
-  deleteDayType: async (id) => {
+  deleteDayType: async (id: string) => {
     await axiosClient.delete(`/admin/loai-ngay/${id}`);
     return true;
   }

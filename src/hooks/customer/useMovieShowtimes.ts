@@ -8,15 +8,14 @@ const DAYS_OF_WEEK = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
  * Groups raw showtime array into date-keyed buckets and derives the
  * available date list + current slot list based on selected date.
  *
- * @param {Array}  showtimes – raw API showtimes array
+ * @param showtimes – raw API showtimes array
  */
-const useMovieShowtimes = (showtimes) => {
+const useMovieShowtimes = (showtimes: any[]) => {
   const [selectedDateIdState, setSelectedDateId] = useState('');
   const [selectedSlotIndex, setSelectedSlotIndex] = useState(0);
 
-  // ── Group showtimes by date ───────────────────────────────────────────────
   const groupedShowtimes = useMemo(() => {
-    const groups = {};
+    const groups: Record<string, any[]> = {};
     if (Array.isArray(showtimes)) {
       showtimes.forEach((st) => {
         const d = new Date(st.NgayChieu);
@@ -30,7 +29,6 @@ const useMovieShowtimes = (showtimes) => {
     return groups;
   }, [showtimes]);
 
-  // ── Derive sorted date list ───────────────────────────────────────────────
   const realDates = useMemo(() => {
     return Object.keys(groupedShowtimes)
       .sort()
@@ -44,7 +42,6 @@ const useMovieShowtimes = (showtimes) => {
       });
   }, [groupedShowtimes]);
 
-  // Derive active date ID dynamically to avoid setState in effect
   const selectedDateId = useMemo(() => {
     if (selectedDateIdState && realDates.some((rd) => rd.id === selectedDateIdState)) {
       return selectedDateIdState;
@@ -52,13 +49,12 @@ const useMovieShowtimes = (showtimes) => {
     return realDates[0]?.id || '';
   }, [realDates, selectedDateIdState]);
 
-  // ── Available slots for selected date ────────────────────────────────────
   const availableSlots = useMemo(() => {
     const rawSlots = groupedShowtimes[selectedDateId] || [];
     return rawSlots.map((st) => ({ ...st, time: st.GioChieu, showId: st.MaSuatChieu }));
   }, [groupedShowtimes, selectedDateId]);
 
-  const handleSelectDate = (dateId) => {
+  const handleSelectDate = (dateId: string) => {
     setSelectedDateId(dateId);
     setSelectedSlotIndex(0);
   };

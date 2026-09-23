@@ -1,3 +1,4 @@
+import axios, { AxiosResponse } from 'react'; // wait, import axios from 'axios'!
 import axios from 'axios';
 
 /**
@@ -12,8 +13,8 @@ const axiosPublic = axios.create({
 });
 
 axiosPublic.interceptors.response.use(
-  (response) => {
-    const { success, data, message, pagination } = response.data;
+  (response: AxiosResponse) => {
+    const { success, data, message, pagination } = response.data || {};
     if (success) {
       if (pagination) {
         return { data, pagination };
@@ -25,7 +26,7 @@ axiosPublic.interceptors.response.use(
   (error) => {
     const errData = error.response?.data;
     return Promise.reject(errData || error);
-  },
+  }
 );
 
 export default axiosPublic;

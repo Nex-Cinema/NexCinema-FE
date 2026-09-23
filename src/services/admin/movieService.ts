@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const mapMovie = (m) => ({
+const mapMovie = (m: any) => ({
   MaPhim: m.MaPhim,
   TenPhim: m.TenPhim,
   ThoiLuong: Number(m.ThoiLuong),
@@ -20,12 +20,12 @@ const mapMovie = (m) => ({
 
 const movieService = {
   getMovies: async () => {
-    const res = await axiosClient.get('/phim?includeInactive=true&limit=100');
+    const res: any = await axiosClient.get('/phim?includeInactive=true&limit=100');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
     return items.map(mapMovie);
   },
 
-  addMovie: async (movie) => {
+  addMovie: async (movie: any) => {
     const payload = {
       TenPhim: movie.TenPhim,
       ThoiLuong: Number(movie.ThoiLuong),
@@ -44,7 +44,7 @@ const movieService = {
     return mapMovie(data);
   },
 
-  updateMovie: async (maPhim, updates) => {
+  updateMovie: async (maPhim: string, updates: any) => {
     const payload = {
       ...(updates.TenPhim !== undefined && { TenPhim: updates.TenPhim }),
       ...(updates.ThoiLuong !== undefined && { ThoiLuong: Number(updates.ThoiLuong) }),
@@ -63,7 +63,7 @@ const movieService = {
     return mapMovie(data);
   },
 
-  deleteMovie: async (maPhim) => {
+  deleteMovie: async (maPhim: string) => {
     await axiosClient.delete(`/admin/phim/${maPhim}`);
     return true;
   }

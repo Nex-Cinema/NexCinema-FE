@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const mapCustomer = (u) => ({
+const mapCustomer = (u: any) => ({
   MaKhachHang: u.KhachHang?.MaKhachHang || u.MaTaiKhoan,
   MaTaiKhoan: u.MaTaiKhoan,
   HoTen: u.HoTen,
@@ -17,16 +17,15 @@ const mapCustomer = (u) => ({
 
 const customerService = {
   getCustomers: async () => {
-    const res = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
+    const res: any = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
     return items.map(mapCustomer);
   },
 
-  lockCustomerAccount: async (maKhachHang, reason) => {
-    // 1. Resolve maKhachHang to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
+  lockCustomerAccount: async (maKhachHang: string, reason?: string) => {
+    const resList: any = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
     const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
-    const user = users.find(u => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
+    const user = users.find((u: any) => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản khách hàng với mã: ${maKhachHang}`);
     }
@@ -40,11 +39,10 @@ const customerService = {
     };
   },
 
-  unlockCustomerAccount: async (maKhachHang) => {
-    // 1. Resolve maKhachHang to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
+  unlockCustomerAccount: async (maKhachHang: string) => {
+    const resList: any = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
     const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
-    const user = users.find(u => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
+    const user = users.find((u: any) => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản khách hàng với mã: ${maKhachHang}`);
     }
@@ -54,17 +52,16 @@ const customerService = {
     return true;
   },
 
-  getCustomerTransactions: async (maKhachHang) => {
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
+  getCustomerTransactions: async (maKhachHang: string) => {
+    const res: any = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
     const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
     
-    // Filter tickets belonging to this customer
     return items
-      .filter(p => p.MaKhachHang === maKhachHang || p.KhachHang?.MaKhachHang === maKhachHang)
-      .map(p => {
+      .filter((p: any) => p.MaKhachHang === maKhachHang || p.KhachHang?.MaKhachHang === maKhachHang)
+      .map((p: any) => {
         const firstDetail = p.ChiTietDatVes?.[0];
         const movieName = firstDetail?.GheSuatChieu?.SuatChieu?.Phim?.TenPhim || 'N/A';
-        const seatsList = p.ChiTietDatVes?.map(ct => {
+        const seatsList = p.ChiTietDatVes?.map((ct: any) => {
           const ghe = ct.GheSuatChieu?.Ghe;
           return ghe ? `${ghe.ViTriDay}${ghe.ViTriCot}` : '';
         }).filter(Boolean).join(', ') || 'Chưa chọn';

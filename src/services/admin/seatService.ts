@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const getAisles = (cols) => {
+const getAisles = (cols: number) => {
   if (cols <= 6) return [];
   if (cols <= 10) return [3, 8];
   return [Math.floor(cols / 3) + 1, Math.floor(cols * 2 / 3) + 1];
@@ -8,8 +8,8 @@ const getAisles = (cols) => {
 
 const seatService = {
   getSeatMaps: async () => {
-    const data = await axiosClient.get('/admin/so-do-ghe');
-    return data.map(r => ({
+    const data: any = await axiosClient.get('/admin/so-do-ghe');
+    return data.map((r: any) => ({
       MaSoDoGhe: r.MaSoDo,
       TenSoDo: r.TenSoDo,
       TongHang: r.SoHang,
@@ -19,9 +19,9 @@ const seatService = {
     }));
   },
 
-  getSeatMapByRoomId: async (roomId) => {
-    const room = await axiosClient.get(`/admin/phong-chieu/${roomId}`);
-    const template = await axiosClient.get(`/admin/so-do-ghe/${room.MaSoDo}`);
+  getSeatMapByRoomId: async (roomId: string) => {
+    const room: any = await axiosClient.get(`/admin/phong-chieu/${roomId}`);
+    const template: any = await axiosClient.get(`/admin/so-do-ghe/${room.MaSoDo}`);
     return {
       MaSoDoGhe: template.MaSoDo,
       TenSoDo: template.TenSoDo,
@@ -32,9 +32,9 @@ const seatService = {
     };
   },
 
-  getSeatsByRoom: async (roomId) => {
-    const data = await axiosClient.get(`/admin/phong-chieu/${roomId}/ghe`);
-    return data.map(s => ({
+  getSeatsByRoom: async (roomId: string) => {
+    const data: any = await axiosClient.get(`/admin/phong-chieu/${roomId}/ghe`);
+    return data.map((s: any) => ({
       MaGhe: s.MaGhe,
       ViTriDay: s.ViTriDay,
       ViTriCot: s.ViTriCot,
@@ -43,9 +43,9 @@ const seatService = {
     }));
   },
 
-  saveSeatConfig: async (roomId, overrides) => {
+  saveSeatConfig: async (roomId: string, overrides: Record<string, any>) => {
     const ghes = Object.entries(overrides)
-      .filter(([, value]) => value.MaGhe) // Must have MaGhe (UUID)
+      .filter(([, value]) => value.MaGhe)
       .map(([, value]) => ({
         maGhe: value.MaGhe,
         maLoaiGhe: value.MaLoaiGhe,
@@ -59,14 +59,14 @@ const seatService = {
     return false;
   },
 
-  addSeatMap: async (data) => {
+  addSeatMap: async (data: any) => {
     const payload = {
       TenSoDo: data.TenSoDo || data.MaSoDoGhe || `Sơ đồ ${data.TongHang}x${data.TongCot}`,
       SoHang: Number(data.TongHang),
       SoCot: Number(data.TongCot),
       CauTruc: data.CauTruc
     };
-    const res = await axiosClient.post('/admin/so-do-ghe', payload);
+    const res: any = await axiosClient.post('/admin/so-do-ghe', payload);
     return {
       MaSoDoGhe: res.MaSoDo,
       TenSoDo: res.TenSoDo,
@@ -77,7 +77,7 @@ const seatService = {
     };
   },
 
-  updateSeatMap: async (id, data) => {
+  updateSeatMap: async (id: string, data: any) => {
     const payload = {
       TenSoDo: data.TenSoDo || data.MaSoDoGhe || `Sơ đồ ${data.TongHang}x${data.TongCot}`,
       SoHang: Number(data.TongHang),
@@ -85,7 +85,7 @@ const seatService = {
       CauTruc: data.CauTruc,
       KhaDung: data.KhaDung === 1
     };
-    const res = await axiosClient.put(`/admin/so-do-ghe/${id}`, payload);
+    const res: any = await axiosClient.put(`/admin/so-do-ghe/${id}`, payload);
     return {
       MaSoDoGhe: res.MaSoDo,
       TenSoDo: res.TenSoDo,
@@ -96,7 +96,7 @@ const seatService = {
     };
   },
 
-  deleteSeatMap: async (id) => {
+  deleteSeatMap: async (id: string) => {
     await axiosClient.delete(`/admin/so-do-ghe/${id}`);
     return true;
   }

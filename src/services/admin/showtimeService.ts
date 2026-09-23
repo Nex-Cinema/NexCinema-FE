@@ -1,19 +1,18 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
 const showtimeService = {
   getShowtimes: async () => {
-    const data = await axiosClient.get('/admin/suat-chieu');
+    const data: any = await axiosClient.get('/admin/suat-chieu');
     
-    // Concurrently fetch seat statuses to calculate booked vs total seats
-    const results = await Promise.all(data.map(async (st) => {
-      let gheList = [];
+    const results = await Promise.all(data.map(async (st: any) => {
+      let gheList: any[] = [];
       try {
         gheList = await axiosClient.get(`/admin/suat-chieu/${st.MaSuatChieu}/ghe`);
       } catch (err) {
         console.error('Error fetching seats for showtime:', st.MaSuatChieu, err);
       }
 
-      const bookedCount = gheList.filter(g => g.TrangThai === 'DA_DAT' || g.TrangThai === 'DANG_GIU').length;
+      const bookedCount = gheList.filter((g: any) => g.TrangThai === 'DA_DAT' || g.TrangThai === 'DANG_GIU').length;
       
       const startLocal = st.GioChieu ? new Date(st.GioChieu) : null;
       let endLocalStr = '';
@@ -45,8 +44,7 @@ const showtimeService = {
     return results;
   },
 
-  addShowtime: async (showtime) => {
-    // Align with backend getCombinedDateTime logic by passing correct ISO strings
+  addShowtime: async (showtime: any) => {
     const ngayChieuUTC = new Date(`${showtime.NgayChieu}T00:00:00Z`);
     const gioChieuUTC = new Date(`${showtime.NgayChieu}T${showtime.GioChieu.substring(0, 5)}:00Z`);
 
@@ -64,15 +62,14 @@ const showtimeService = {
     return data;
   },
 
-  updateShowtime: async (id, updates) => {
-    const payload = {};
+  updateShowtime: async (id: string, updates: any) => {
+    const payload: Record<string, any> = {};
     if (updates.MaPhim !== undefined) payload.MaPhim = updates.MaPhim;
     if (updates.MaPhongChieu !== undefined) payload.MaPhong = updates.MaPhongChieu;
     if (updates.MaLoaiNgay !== undefined) payload.MaLoaiNgay = updates.MaLoaiNgay;
     if (updates.GiaVeCoBan !== undefined) payload.GiaVeGoc = parseFloat(updates.GiaVeCoBan);
     if (updates.KhaDung !== undefined) payload.KhaDung = updates.KhaDung === 1;
 
-    // Convert date / time parameters if updated
     const ngay = updates.NgayChieu;
     const gio = updates.GioChieu;
 
@@ -88,14 +85,14 @@ const showtimeService = {
     return data;
   },
 
-  deleteShowtime: async (id) => {
+  deleteShowtime: async (id: string) => {
     await axiosClient.delete(`/admin/suat-chieu/${id}`);
     return true;
   },
 
-  getShowtimeSeats: async (maSuatChieu) => {
-    const data = await axiosClient.get(`/admin/suat-chieu/${maSuatChieu}/ghe`);
-    return data.map(gsc => ({
+  getShowtimeSeats: async (maSuatChieu: string) => {
+    const data: any = await axiosClient.get(`/admin/suat-chieu/${maSuatChieu}/ghe`);
+    return data.map((gsc: any) => ({
       MaGheSuatChieu: gsc.MaGheSuatChieu,
       MaSuatChieu: gsc.MaSuatChieu,
       MaGhe: gsc.Ghe ? `${gsc.Ghe.MaPhong}-${gsc.Ghe.ViTriDay}${gsc.Ghe.ViTriCot}` : gsc.MaGhe || 'A1',

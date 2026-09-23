@@ -1,6 +1,6 @@
-import axiosClient from '../../api/axiosClient';
+import axiosClient from '@/apis/axiosClient';
 
-const formatTime = (t) => {
+const formatTime = (t: any) => {
   if (!t) return '00:00:00';
   if (typeof t === 'string' && t.includes('T')) {
     return t.split('T')[1].substring(0, 8);
@@ -12,7 +12,7 @@ const formatTime = (t) => {
   return t;
 };
 
-const mapShift = (s) => ({
+const mapShift = (s: any) => ({
   MaCaLamViec: s.MaCa,
   TenCa: s.TenCa,
   GioBatDau: formatTime(s.GioBatDau),
@@ -25,11 +25,11 @@ const mapShift = (s) => ({
 
 const shiftService = {
   getShifts: async () => {
-    const data = await axiosClient.get('/admin/ca-lam-viec');
+    const data: any = await axiosClient.get('/admin/ca-lam-viec');
     return data.map(mapShift);
   },
 
-  addShift: async (shift) => {
+  addShift: async (shift: any) => {
     const payload = {
       TenCa: shift.TenCa,
       GioBatDau: shift.GioBatDau.length === 5 ? `${shift.GioBatDau}:00` : shift.GioBatDau,
@@ -40,7 +40,7 @@ const shiftService = {
     return mapShift(data);
   },
 
-  updateShift: async (maCa, updates) => {
+  updateShift: async (maCa: string, updates: any) => {
     const payload = {
       ...(updates.TenCa !== undefined && { TenCa: updates.TenCa }),
       ...(updates.GioBatDau !== undefined && { 
@@ -57,14 +57,14 @@ const shiftService = {
     return mapShift(data);
   },
 
-  deleteShift: async (maCa) => {
+  deleteShift: async (maCa: string) => {
     await axiosClient.delete(`/admin/ca-lam-viec/${maCa}`);
     return true;
   },
 
   getShiftDetails: async () => {
-    const data = await axiosClient.get('/admin/ca-lam-viec/phan-ca/lich-truc');
-    return data.map(sd => {
+    const data: any = await axiosClient.get('/admin/ca-lam-viec/phan-ca/lich-truc');
+    return data.map((sd: any) => {
       const staffName = sd.NhanVien?.TaiKhoan?.HoTen || 'N/A';
       const staffRole = sd.NhanVien?.ChucVu || 'N/A';
       const shiftName = sd.CaLamViec?.TenCa || 'N/A';
@@ -87,24 +87,24 @@ const shiftService = {
     });
   },
 
-  addShiftDetail: async (detail) => {
+  addShiftDetail: async (detail: any) => {
     const dates = [];
     const startDate = new Date(detail.NgayLam);
     const endDate = detail.NgayLap ? new Date(detail.NgayLap) : startDate;
 
-    let current = new Date(startDate);
+    const current = new Date(startDate);
     while (current <= endDate) {
       dates.push(current.toISOString().substring(0, 10));
-      if (detail.KieuLap === 1) { // Weekly
+      if (detail.KieuLap === 1) {
         current.setDate(current.getDate() + 7);
-      } else if (detail.KieuLap === 2) { // Daily
+      } else if (detail.KieuLap === 2) {
         current.setDate(current.getDate() + 1);
       } else {
         break;
       }
     }
 
-    let lastResult = null;
+    let lastResult: any = null;
     for (const d of dates) {
       const payload = {
         MaNhanVien: detail.MaNhanVien,
@@ -123,15 +123,15 @@ const shiftService = {
     };
   },
 
-  toggleShiftDetailStatus: async (maChiTietCa) => {
-    const data = await axiosClient.patch(`/admin/ca-lam-viec/phan-ca/${maChiTietCa}/toggle`);
+  toggleShiftDetailStatus: async (maChiTietCa: string) => {
+    const data: any = await axiosClient.patch(`/admin/ca-lam-viec/phan-ca/${maChiTietCa}/toggle`);
     return {
       MaChiTietCa: maChiTietCa,
       KhaDung: data.KhaDung ? 1 : 0,
     };
   },
 
-  deleteShiftDetail: async (maChiTietCa) => {
+  deleteShiftDetail: async (maChiTietCa: string) => {
     await axiosClient.delete(`/admin/ca-lam-viec/phan-ca/${maChiTietCa}`);
     return true;
   }

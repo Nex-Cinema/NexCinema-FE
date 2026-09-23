@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { cancelHeldSeats } from '../../api/bookingApi';
+import { cancelHeldSeats } from '@/apis/bookingApi';
 
 /**
  * useSeatHoldTimer
@@ -9,26 +9,21 @@ import { cancelHeldSeats } from '../../api/bookingApi';
  * Also registers an unmount cleanup to release seats if the user
  * navigates away before completing payment.
  *
- * @param {Function} onExpire – callback invoked when the 10-min timer hits zero
+ * @param onExpire – callback invoked when the 10-min timer hits zero
  */
-const useSeatHoldTimer = (onExpire) => {
-  const [heldSeatIds, setHeldSeatIds] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(600); // seconds
+const useSeatHoldTimer = (onExpire?: () => void) => {
+  const [heldSeatIds, setHeldSeatIds] = useState<string[]>([]);
+  const [timeLeft, setTimeLeft] = useState<number>(600); // seconds
 
-  // Stable refs so cleanup closures always have fresh values
   const hasActiveHoldRef = useRef(false);
-  const heldSeatIdsRef = useRef([]);
+  const heldSeatIdsRef = useRef<string[]>([]);
   const maSuatChieuRef = useRef('');
   const isPaymentSuccessRef = useRef(false);
   const onExpireRef = useRef(onExpire);
 
-  // Keep onExpireRef current without re-triggering effects
   useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
-
-  // Keep heldSeatIdsRef synced
   useEffect(() => { heldSeatIdsRef.current = heldSeatIds; }, [heldSeatIds]);
 
-  // ── Unmount cleanup ───────────────────────────────────────────────────────
   useEffect(() => {
     return () => {
       if (
@@ -44,7 +39,6 @@ const useSeatHoldTimer = (onExpire) => {
     };
   }, []);
 
-  // ── 10-minute countdown ───────────────────────────────────────────────────
   useEffect(() => {
     if (heldSeatIds.length === 0) return;
     const timerId = setInterval(() => {
@@ -60,10 +54,7 @@ const useSeatHoldTimer = (onExpire) => {
     return () => { if (timerId) clearInterval(timerId); };
   }, [heldSeatIds]);
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-
-  /** Call after seats are successfully held via POST /dat-ve/giu-ghe */
-  const activateHold = (seatIds, maSuatChieu) => {
+  const activateHold = (seatIds: string[], maSuatChieu: string) => {
     heldSeatIdsRef.current = seatIds;
     maSuatChieuRef.current = maSuatChieu;
     hasActiveHoldRef.current = true;
@@ -72,7 +63,6 @@ const useSeatHoldTimer = (onExpire) => {
     setTimeLeft(600);
   };
 
-  /** Call after payment completes successfully */
   const markPaymentSuccess = () => {
     isPaymentSuccessRef.current = true;
     hasActiveHoldRef.current = false;
@@ -80,7 +70,6 @@ const useSeatHoldTimer = (onExpire) => {
     setTimeLeft(600);
   };
 
-  /** Cancel hold explicitly (back button, timer expiry) */
   const releaseHold = async () => {
     const seatIds = heldSeatIdsRef.current;
     const maSuatChieu = maSuatChieuRef.current;
