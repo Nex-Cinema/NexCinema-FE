@@ -10,7 +10,11 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import BookingProgressBar from '../../components/common/BookingProgressBar';
+import BookingProgressBar from '@/features/booking/components/BookingProgressBar';
+import SeatLegend from '@/features/booking/components/SeatLegend';
+import ShowtimePill from '@/components/shared/ShowtimePill';
+import AgeBadge from '@/components/shared/AgeBadge';
+import Modal from '@/components/ui/Modal';
 
 import { useSeatSelection } from '@/features/booking/hooks/useSeatSelection';
 import { saveBookingDraft } from '@/features/booking/utils/bookingSession';
@@ -19,10 +23,10 @@ import {
   SEAT_HOLD_DURATION_S,
   AGE_RESTRICTED_RATINGS,
 } from '@/features/booking/constants/bookingConstants';
-import { Seat, ShowtimePill } from '@/features/booking/types/booking.type';
+import { Seat, ShowtimePill as ShowtimePillType } from '@/features/booking/types/booking.type';
 
 // ── Mock Data ─────────────────────────────────────────────────────
-const SHOWTIME_PILLS: ShowtimePill[] = [
+const SHOWTIME_PILLS: ShowtimePillType[] = [
   { id: 'st-10:45', time: '10:45', seatsLeft: 0, isSoldOut: true },
   { id: 'st-11:30', time: '11:30', isCurrent: true, seatsLeft: 42 },
   { id: 'st-13:00', time: '13:00', seatsLeft: 6 }, // Low stock (< 10)
@@ -151,39 +155,17 @@ export const SeatSelection: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {SHOWTIME_PILLS.map((pill) => {
-                  const isCurrent = pill.id === currentShowtimeId;
-                  const isLowStock = pill.seatsLeft !== undefined && pill.seatsLeft > 0 && pill.seatsLeft < 10;
-                  return (
-                    <button
-                      key={pill.id}
-                      disabled={pill.isSoldOut}
-                      onClick={() => handleChangeShowtime(pill.id, pill.time, pill.isSoldOut)}
-                      title={pill.isSoldOut ? 'Suất chiếu đã hết vé' : isLowStock ? `Còn ${pill.seatsLeft} ghế` : `Suất chiếu ${pill.time}`}
-                      className={`px-3.5 py-1.5 rounded-full font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                        pill.isSoldOut
-                          ? 'bg-[#e4e2e2]/70 text-[#8e8c8c] line-through cursor-not-allowed opacity-70 border border-[#e4e2e2]'
-                          : isCurrent
-                          ? 'bg-[#d71920] text-white shadow-sm ring-2 ring-[#d71920]/30'
-                          : isLowStock
-                          ? 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'
-                          : 'bg-[#f5f3f3] hover:bg-[#e4e2e2] text-[#1b1c1c]'
-                      }`}
-                    >
-                      <span>{pill.time}</span>
-                      {pill.isSoldOut && (
-                        <span className="text-[10px] no-underline font-normal text-[#ba1a1a]">
-                          (Hết vé)
-                        </span>
-                      )}
-                      {!pill.isSoldOut && isLowStock && (
-                        <span className="text-[10px] font-semibold text-amber-700">
-                          (Còn {pill.seatsLeft})
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                {SHOWTIME_PILLS.map((pill) => (
+                  <ShowtimePill
+                    key={pill.id}
+                    id={pill.id}
+                    time={pill.time}
+                    seatsLeft={pill.seatsLeft}
+                    isSoldOut={pill.isSoldOut}
+                    isSelected={pill.id === currentShowtimeId}
+                    onClick={() => handleChangeShowtime(pill.id, pill.time, pill.isSoldOut)}
+                  />
+                ))}
               </div>
             </div>
 
@@ -294,39 +276,8 @@ export const SeatSelection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Seat Legend */}
-              <div className="mt-6 pt-4 border-t border-[#e4e2e2] w-full flex flex-wrap items-center justify-center gap-5 text-xs text-[#5f5e5e]">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#f1f5f9] border border-slate-300" />
-                  <span>Ghế tiêu chuẩn (50.000đ)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-amber-50 border border-amber-400" />
-                  <span className="font-semibold text-amber-900">Ghế VIP (110.000đ)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-5 rounded-t bg-pink-50 border border-pink-400 flex items-center justify-center text-[9px] font-bold text-pink-800">
-                    K1-2
-                  </div>
-                  <span className="font-semibold text-pink-900">Ghế Đôi (220.000đ/cặp)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#d71920]" />
-                  <span className="font-bold text-[#1b1c1c]">Đang chọn</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-orange-100 border border-orange-300 flex items-center justify-center text-[10px] text-orange-500">
-                    ⏳
-                  </div>
-                  <span className="text-orange-700">Đang giữ</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-t bg-[#e2e8f0] text-slate-400 flex items-center justify-center text-[10px]">
-                    ✕
-                  </div>
-                  <span>Đã bán</span>
-                </div>
-              </div>
+              {/* Extracted Seat Legend Component */}
+              <SeatLegend />
 
               {/* Max Selection Notice */}
               <div className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-[#f5f3f3] rounded-lg text-xs text-[#5f5e5e]">
@@ -362,9 +313,7 @@ export const SeatSelection: React.FC = () => {
                   />
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-1 mb-1">
-                      <span className="px-1.5 py-0.5 rounded bg-[#d71920] text-white font-bold text-[10px]">
-                        C16
-                      </span>
+                      <AgeBadge rating={MOVIE_AGE_RATING} />
                       <span className="px-1.5 py-0.5 rounded bg-[#e4e2e2] text-[#1b1c1c] font-semibold text-[10px]">
                         2D IMAX Phụ Đề
                       </span>
@@ -465,65 +414,49 @@ export const SeatSelection: React.FC = () => {
       </div>
 
       {/* ── ISSUE-16: AGE GATE CONFIRMATION MODAL ─────────────────────────────── */}
-      {isAgeGateOpen && (
-        <div
-          onClick={() => setIsAgeGateOpen(false)}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center animate-in zoom-in duration-150 border border-gray-200"
-          >
-            {/* Rating badge */}
-            <div className="flex items-center justify-center mb-4">
-              <span
-                className={`px-4 py-2 rounded-xl font-black text-2xl shadow-sm ${
-                  MOVIE_AGE_RATING === 'C18'
-                    ? 'bg-red-600 text-white'
-                    : MOVIE_AGE_RATING === 'C16'
-                    ? 'bg-amber-500 text-gray-900'
-                    : 'bg-blue-600 text-white'
-                }`}
-              >
-                {MOVIE_AGE_RATING}
-              </span>
-            </div>
+      <Modal
+        isOpen={isAgeGateOpen}
+        onClose={() => setIsAgeGateOpen(false)}
+        maxWidthClass="max-w-sm"
+      >
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <AgeBadge rating={MOVIE_AGE_RATING} className="text-2xl px-4 py-2 rounded-xl" />
+          </div>
 
-            <h3 className="text-base font-bold text-[#1b1c1c]">Xác nhận độ tuổi</h3>
-            <p className="text-xs text-[#5f5e5e] mt-2 leading-relaxed">
-              Phim{' '}
-              <span className="font-bold text-[#1b1c1c]">"{MOVIE_TITLE}"</span> được xếp hạng{' '}
-              <span className="font-black text-[#d71920]">{MOVIE_AGE_RATING}</span>.
-              {MOVIE_AGE_RATING === 'C18'
-                ? ' Chỉ dành cho khán giả từ 18 tuổi trở lên.'
-                : MOVIE_AGE_RATING === 'C16'
-                ? ' Chỉ dành cho khán giả từ 16 tuổi trở lên.'
-                : ' Chỉ dành cho khán giả từ 13 tuổi trở lên.'}
-            </p>
-            <p className="text-[11px] text-gray-400 mt-2 italic">
-              Nhân viên rạp có thể yêu cầu xuất trình CCCD / Căn cước / Hộ chiếu tại cổng soát vé.
-            </p>
+          <h3 className="text-base font-bold text-[#1b1c1c]">Xác nhận độ tuổi</h3>
+          <p className="text-xs text-[#5f5e5e] mt-2 leading-relaxed">
+            Phim <span className="font-bold text-[#1b1c1c]">"{MOVIE_TITLE}"</span> được xếp hạng{' '}
+            <span className="font-black text-[#d71920]">{MOVIE_AGE_RATING}</span>.
+            {MOVIE_AGE_RATING === 'C18'
+              ? ' Chỉ dành cho khán giả từ 18 tuổi trở lên.'
+              : MOVIE_AGE_RATING === 'C16'
+              ? ' Chỉ dành cho khán giả từ 16 tuổi trở lên.'
+              : ' Chỉ dành cho khán giả từ 13 tuổi trở lên.'}
+          </p>
+          <p className="text-[11px] text-gray-400 mt-2 italic">
+            Nhân viên rạp có thể yêu cầu xuất trình CCCD / Căn cước / Hộ chiếu tại cổng soát vé.
+          </p>
 
-            <div className="grid grid-cols-2 gap-3 mt-5">
-              <button
-                onClick={() => setIsAgeGateOpen(false)}
-                className="py-2.5 rounded-xl bg-[#f5f3f3] hover:bg-gray-200 text-[#1b1c1c] font-bold text-xs transition-colors cursor-pointer"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => {
-                  setIsAgeGateOpen(false);
-                  proceedToPayment();
-                }}
-                className="py-2.5 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
-              >
-                Tôi đủ tuổi, tiếp tục
-              </button>
-            </div>
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <button
+              onClick={() => setIsAgeGateOpen(false)}
+              className="py-2.5 rounded-xl bg-[#f5f3f3] hover:bg-gray-200 text-[#1b1c1c] font-bold text-xs transition-colors cursor-pointer"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={() => {
+                setIsAgeGateOpen(false);
+                proceedToPayment();
+              }}
+              className="py-2.5 rounded-xl bg-[#d71920] hover:bg-[#ae0011] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+            >
+              Tôi đủ tuổi, tiếp tục
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

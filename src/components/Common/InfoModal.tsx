@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, ShieldCheck, Ticket, Info, FileText } from 'lucide-react';
+import { ShieldCheck, Ticket, Info, FileText } from 'lucide-react';
+import Modal from '@/components/ui/Modal';
 
 export type ModalType = 'PRICE_RULES' | 'CINEMA_INTRO' | 'TERMS' | 'PRIVACY' | null;
 
@@ -94,7 +95,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, modalType
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-[#d71920] font-bold text-lg border-b pb-2">
               <FileText className="w-5 h-5" />
-              <span>Điều Khoản Sử Dụng Service</span>
+              <span>Điều Khoản Sử Dụng Dịch Vụ</span>
             </div>
             <div className="text-xs text-[#5f5e5e] space-y-2 leading-relaxed max-h-60 overflow-y-auto pr-2">
               <p className="font-bold text-[#1b1c1c]">1. Đặt vé trực tuyến</p>
@@ -127,27 +128,21 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, modalType
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
+    <Modal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-lg">
+      <div className="space-y-4">
         {renderContent()}
 
         <div className="pt-3 border-t flex justify-end">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-lg bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold transition-colors"
+            className="px-5 py-2 rounded-lg bg-[#d71920] hover:bg-[#ae0011] text-white text-xs font-bold transition-colors cursor-pointer"
           >
             Đóng
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

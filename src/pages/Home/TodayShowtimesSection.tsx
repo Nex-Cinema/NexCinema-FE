@@ -4,6 +4,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { ROUTES } from '@/constants/routes';
+import AgeBadge from '@/components/shared/AgeBadge';
+import ShowtimePill from '@/components/shared/ShowtimePill';
+import MoviePoster from '@/components/shared/MoviePoster';
 
 interface DateItem {
   dayLabel: string; // e.g. "Thứ Hai"
@@ -19,7 +22,7 @@ const DATES: DateItem[] = [
   { dayLabel: 'Thứ Năm', dateStr: '31/10', fullDate: '2024-10-31' },
   { dayLabel: 'Thứ Sáu', dateStr: '01/11', fullDate: '2024-11-01' },
   { dayLabel: 'Thứ Bảy', dateStr: '02/11', fullDate: '2024-11-02' },
-  { dayLabel: 'Chủ Nhật', dateStr: '03/11', fullDate: '2024-11-03' }
+  { dayLabel: 'Chủ Nhật', dateStr: '03/11', fullDate: '2024-11-03' },
 ];
 
 const TodayShowtimesSection: React.FC = () => {
@@ -53,11 +56,11 @@ const TodayShowtimesSection: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">Định dạng chiếu:</span>
+            <span className="text-xs text-[#5f5e5e]">Định dạng chiếu:</span>
             <button 
               onClick={() => setFormatFilter('all')}
               className={`px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-colors ${
-                formatFilter === 'all' ? 'bg-[#efeded] text-gray-900' : 'text-gray-500 hover:bg-gray-100'
+                formatFilter === 'all' ? 'bg-[#efeded] text-gray-900' : 'text-[#5f5e5e] hover:bg-gray-100'
               }`}
             >
               Tất cả
@@ -65,7 +68,7 @@ const TodayShowtimesSection: React.FC = () => {
             <button 
               onClick={() => setFormatFilter('2d')}
               className={`px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-colors ${
-                formatFilter === '2d' ? 'bg-[#efeded] text-gray-900' : 'text-gray-500 hover:bg-gray-100'
+                formatFilter === '2d' ? 'bg-[#efeded] text-gray-900' : 'text-[#5f5e5e] hover:bg-gray-100'
               }`}
             >
               2D Phụ đề
@@ -73,7 +76,7 @@ const TodayShowtimesSection: React.FC = () => {
             <button 
               onClick={() => setFormatFilter('imax')}
               className={`px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-colors ${
-                formatFilter === 'imax' ? 'bg-[#efeded] text-gray-900' : 'text-gray-500 hover:bg-gray-100'
+                formatFilter === 'imax' ? 'bg-[#efeded] text-gray-900' : 'text-[#5f5e5e] hover:bg-gray-100'
               }`}
             >
               IMAX Laser
@@ -120,13 +123,13 @@ const TodayShowtimesSection: React.FC = () => {
           {/* DUNE 2 SHOWTIMES */}
           <div className="p-4 rounded-xl bg-gray-50/70 border border-gray-100 flex flex-col lg:flex-row gap-4">
             <div className="flex gap-4 lg:w-72 flex-shrink-0">
-              <img 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsvnK8eJ0wALfItVJsqupCJzMagS-bfICkTAZe0o4DQBYAiIILEID9oIgCmFNp0G3HNGfVdzG_uZcyB-HbNCe1CMDZ4GveXFeNNx4z03uOU51kKwidQUJsKBDspsbuwKDR_0Ow9KG_Yl-b-DQqxbVKAQby0QECifPSH14WSvGx4XQu-dCS-pYMPuOpfw8kUq_ZgpndjlbhuMDgZCmWK4Zj5dOeK1rboBWApdE5WvKqTvlDpiYa2zAsqw" 
+              <MoviePoster
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsvnK8eJ0wALfItVJsqupCJzMagS-bfICkTAZe0o4DQBYAiIILEID9oIgCmFNp0G3HNGfVdzG_uZcyB-HbNCe1CMDZ4GveXFeNNx4z03uOU51kKwidQUJsKBDspsbuwKDR_0Ow9KG_Yl-b-DQqxbVKAQby0QECifPSH14WSvGx4XQu-dCS-pYMPuOpfw8kUq_ZgpndjlbhuMDgZCmWK4Zj5dOeK1rboBWApdE5WvKqTvlDpiYa2zAsqw"
                 alt="Dune 2"
-                className="w-16 h-24 rounded-lg object-cover flex-shrink-0"
+                className="w-16 h-24 rounded-lg flex-shrink-0"
               />
               <div className="space-y-1">
-                <span className="px-1.5 py-0.5 rounded bg-amber-500 text-gray-900 font-bold text-[10px]">C16</span>
+                <AgeBadge rating="C16" />
                 <h4 className="font-bold text-sm text-gray-900 line-clamp-1">Dune: Hành Tinh Cát 2</h4>
                 <p className="text-xs text-gray-500">166 phút • 2D / IMAX</p>
               </div>
@@ -138,22 +141,10 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng IMAX Laser (Âm thanh 12 kênh)
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button onClick={() => handleShowtimeClick('st-101')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">13:30</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 48 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-102')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">16:45</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 22 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-103')} className="px-3.5 py-2 rounded-lg bg-[#d71920] text-white shadow-xs group text-left cursor-pointer">
-                    <div className="font-bold text-xs">19:30</div>
-                    <div className="text-[10px] text-white/80">Còn 8 ghế (Hot)</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-104')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">22:15</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 64 ghế</div>
-                  </button>
+                  <ShowtimePill id="st-101" time="13:30" seatsLeft={48} onClick={() => handleShowtimeClick('st-101')} />
+                  <ShowtimePill id="st-102" time="16:45" seatsLeft={22} onClick={() => handleShowtimeClick('st-102')} />
+                  <ShowtimePill id="st-103" time="19:30" seatsLeft={8} isHot onClick={() => handleShowtimeClick('st-103')} />
+                  <ShowtimePill id="st-104" time="22:15" seatsLeft={64} onClick={() => handleShowtimeClick('st-104')} />
                 </div>
               </div>
 
@@ -162,18 +153,9 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng Rạp 02 • 2D Phụ đề
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button onClick={() => handleShowtimeClick('st-201')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">10:00</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 85 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-202')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">14:15</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 51 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-203')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">17:40</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 30 ghế</div>
-                  </button>
+                  <ShowtimePill id="st-201" time="10:00" seatsLeft={85} onClick={() => handleShowtimeClick('st-201')} />
+                  <ShowtimePill id="st-202" time="14:15" seatsLeft={51} onClick={() => handleShowtimeClick('st-202')} />
+                  <ShowtimePill id="st-203" time="17:40" seatsLeft={30} onClick={() => handleShowtimeClick('st-203')} />
                 </div>
               </div>
             </div>
@@ -182,13 +164,13 @@ const TodayShowtimesSection: React.FC = () => {
           {/* GODZILLA X KONG SHOWTIMES */}
           <div className="p-4 rounded-xl bg-gray-50/70 border border-gray-100 flex flex-col lg:flex-row gap-4">
             <div className="flex gap-4 lg:w-72 flex-shrink-0">
-              <img 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXfUBhaIEiJyrypDlluJqhf2sVBHU-mtaUUlhqOyeZZgn-SIJc2ardqZL7UVP-hKi6VEmhoT2GO8wHsSB39nXosQa4e9Bzp_Zp04k83zok_8MQkaMvCLx1IVnUjRVFI5OqbDspZbc8IBJdQuXzQcO8010O4Dv-HrtcZKMIWHyVp37Klk89AzFdQjoK6T2uQxGyxaEPr9nDo99loOk2Y5PDRg3zbbK4AwBEsmYRfWp5vaM-XMpLIfdfbA" 
+              <MoviePoster
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXfUBhaIEiJyrypDlluJqhf2sVBHU-mtaUUlhqOyeZZgn-SIJc2ardqZL7UVP-hKi6VEmhoT2GO8wHsSB39nXosQa4e9Bzp_Zp04k83zok_8MQkaMvCLx1IVnUjRVFI5OqbDspZbc8IBJdQuXzQcO8010O4Dv-HrtcZKMIWHyVp37Klk89AzFdQjoK6T2uQxGyxaEPr9nDo99loOk2Y5PDRg3zbbK4AwBEsmYRfWp5vaM-XMpLIfdfbA"
                 alt="Godzilla x Kong"
-                className="w-16 h-24 rounded-lg object-cover flex-shrink-0"
+                className="w-16 h-24 rounded-lg flex-shrink-0"
               />
               <div className="space-y-1">
-                <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold text-[10px]">C13</span>
+                <AgeBadge rating="C13" />
                 <h4 className="font-bold text-sm text-gray-900 line-clamp-1">Godzilla x Kong</h4>
                 <p className="text-xs text-gray-500">115 phút • 2D / 3D Atmos</p>
               </div>
@@ -200,22 +182,10 @@ const TodayShowtimesSection: React.FC = () => {
                   Phòng Rạp 01 • 3D Dolby Atmos
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  <button onClick={() => handleShowtimeClick('st-301')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">11:15</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 40 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-302')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">15:00</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 18 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-303')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">18:30</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 12 ghế</div>
-                  </button>
-                  <button onClick={() => handleShowtimeClick('st-304')} className="px-3.5 py-2 rounded-lg bg-white hover:bg-[#d71920] hover:text-white text-gray-900 shadow-xs transition-colors group text-left border border-gray-100 cursor-pointer">
-                    <div className="font-bold text-xs">21:05</div>
-                    <div className="text-[10px] text-gray-500 group-hover:text-white/80">Còn 55 ghế</div>
-                  </button>
+                  <ShowtimePill id="st-301" time="11:15" seatsLeft={40} onClick={() => handleShowtimeClick('st-301')} />
+                  <ShowtimePill id="st-302" time="15:00" seatsLeft={18} onClick={() => handleShowtimeClick('st-302')} />
+                  <ShowtimePill id="st-303" time="18:30" seatsLeft={12} onClick={() => handleShowtimeClick('st-303')} />
+                  <ShowtimePill id="st-304" time="21:05" seatsLeft={55} onClick={() => handleShowtimeClick('st-304')} />
                 </div>
               </div>
             </div>
