@@ -36,7 +36,7 @@ const SeatsGrid = ({ seats }) => {
     const row = coordinate.match(/[A-Za-z]+/)?.[0]?.toUpperCase() || 'A';
     const column = Number(coordinate.match(/\d+/)?.[0] || 1);
     if (!rowsMap[row]) rowsMap[row] = [];
-    rowsMap[row].push({ ...seat, column, label: coordinate });
+    rowsMap[row].push({ ...seat, column, label: seat.TenGhe || coordinate });
   });
 
   const rowKeys = Object.keys(rowsMap).sort();

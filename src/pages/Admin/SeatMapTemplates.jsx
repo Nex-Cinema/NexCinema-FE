@@ -15,6 +15,7 @@ import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Co
 import SeatMapPreviewModal from '../../components/Admin/SeatMaps/SeatMapPreviewModal';
 import SeatMapTemplateModal from '../../components/Admin/SeatMaps/SeatMapTemplateModal';
 import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
+import { getSeatMapStats, parseSeatMapStructure } from '../../utils/seatMapHelper';
 
 const SeatMapTemplates = () => {
   const [templates, setTemplates] = useState([]);
@@ -26,7 +27,7 @@ const SeatMapTemplates = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const initialFormState = {
-    MaSoDoGhe: '',
+    TenSoDo: '',
     TongHang: 10,
     TongCot: 12,
     CauTruc: '{"aisles": {"rows": [], "cols": [4, 9]}}',
@@ -57,21 +58,23 @@ const SeatMapTemplates = () => {
     formData,
     setFormData,
     handleChange,
-    handleSubmit
+    handleSubmit,
+    errors,
+    isSubmitting
   } = useAdminForm(initialFormState, async (data, { resetForm }) => {
     try {
       if (editingTemplate) {
         await adminService.updateSeatMap(editingTemplate.MaSoDoGhe, {
-          TenSoDo: data.MaSoDoGhe,
+          TenSoDo: data.TenSoDo,
           TongHang: Number(data.TongHang),
           TongCot: Number(data.TongCot),
           CauTruc: data.CauTruc,
-          KhaDung: data.KhaDung === 1
+          KhaDung: data.KhaDung === true || data.KhaDung === 1 || data.KhaDung === '1'
         });
         showSuccess("Cập nhật sơ đồ mẫu thành công!");
       } else {
         await adminService.addSeatMap({
-          TenSoDo: data.MaSoDoGhe,
+          TenSoDo: data.TenSoDo,
           TongHang: Number(data.TongHang),
           TongCot: Number(data.TongCot),
           CauTruc: data.CauTruc
@@ -96,11 +99,11 @@ const SeatMapTemplates = () => {
   const handleEdit = (template) => {
     setEditingTemplate(template);
     setFormData({
-      MaSoDoGhe: template.MaSoDoGhe,
+      TenSoDo: template.TenSoDo,
       TongHang: template.TongHang,
       TongCot: template.TongCot,
       CauTruc: template.CauTruc,
-      KhaDung: template.KhaDung ?? 1
+      KhaDung: template.KhaDung === true || template.KhaDung === 1 || template.KhaDung === '1' ? 1 : 0
     });
     setIsModalOpen(true);
   };
@@ -139,7 +142,8 @@ const SeatMapTemplates = () => {
     templates,
     ['TenSoDo', 'MaSoDoGhe'],
     (t, f) => {
-      const matchKhaDung = !f.activeStatus || f.activeStatus === 'All' || t.KhaDung === Number(f.activeStatus);
+      const normalizedStatus = t.KhaDung === true || t.KhaDung === 1 || t.KhaDung === '1' ? 1 : 0;
+      const matchKhaDung = !f.activeStatus || f.activeStatus === 'All' || normalizedStatus === Number(f.activeStatus);
       return matchKhaDung;
     }
   );
@@ -150,7 +154,12 @@ const SeatMapTemplates = () => {
     { header: 'Số cột', accessor: 'TongCot', className: 'text-slate-400' },
     { 
       header: 'Tổng số ghế', 
-      render: (t) => <span className="font-bold text-emerald-500">{t.TongHang * t.TongCot}</span> 
+      render: (t) => {
+        try {
+          const stats = getSeatMapStats(Number(t.TongHang), Number(t.TongCot), parseSeatMapStructure(t.CauTruc));
+          return <span className="font-bold text-emerald-500">{stats.units} ghế · {stats.capacity} chỗ</span>;
+        } catch { return <span className="text-slate-500">Chưa xác định</span>; }
+      }
     },
     {
       header: 'Hành động',
@@ -238,6 +247,7 @@ const SeatMapTemplates = () => {
       )}
 
       <SeatMapTemplateModal
+        key={`${editingTemplate?.MaSoDoGhe || 'new'}-${isModalOpen}`}
         isOpen={isModalOpen}
         editingTemplate={editingTemplate}
         formData={formData}
@@ -247,6 +257,8 @@ const SeatMapTemplates = () => {
           setIsModalOpen(false);
           setEditingTemplate(null);
         }}
+        isSubmitting={isSubmitting}
+        errors={errors}
       />
 
       <SeatMapPreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} />

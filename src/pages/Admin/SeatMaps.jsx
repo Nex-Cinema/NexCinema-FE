@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import AdminLayout from '../../components/Admin/Layout/AdminLayout';
 import adminService from '../../services/adminService';
-import { Lock, Unlock, Save } from 'lucide-react';
+import { Armchair, Lock, MousePointer2, Save, Unlock } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toastHelper';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import AdminButton from '../../components/Admin/Common/AdminButton';
@@ -46,7 +46,9 @@ const SeatMaps = () => {
             initialOverrides[seatKey] = {
               MaGhe: seat.MaGhe,
               MaLoaiGhe: seat.MaLoaiGhe,
-              KhaDung: seat.KhaDung
+              KhaDung: seat.KhaDung,
+              DoRongCot: seat.DoRongCot || 1,
+              SucChua: seat.SucChua || 1,
             };
           });
           setOverrides(initialOverrides);
@@ -81,6 +83,7 @@ const SeatMaps = () => {
         console.error("JSON Parse error", e);
       }
     }
+    const couples = Array.isArray(struct?.couples) ? struct.couples : [];
     
     for (let r = 0; r < rows; r++) {
       const row = [];
@@ -95,14 +98,19 @@ const SeatMaps = () => {
         }
 
         const seatId = `${room.MaPhongChieu}-${rowChar}${c + 1}`;
+        const coupleStart = couples.some((item) => item.row === r + 1 && item.startCol === c + 1);
+        const coupleCovered = couples.some((item) => item.row === r + 1 && item.startCol + 1 === c + 1);
         const baseSeat = {
           MaChiTietSoDo: seatId,
           MaSoDoGhe: room.MaSoDoGhe,
           MaLoaiGhe: seatTypes[0]?.MaLoaiGhe || 'LG01',
           Hang: rowChar,
           Cot: c + 1,
+          DoRongCot: coupleStart ? 2 : 1,
+          SucChua: coupleStart ? 2 : 1,
           KhaDung: 1,
-          isAisle
+          isAisle,
+          isCovered: coupleCovered,
         };
         // Apply overrides
         row.push({ ...baseSeat, ...(overrides[seatId] || {}) });
@@ -171,38 +179,40 @@ const SeatMaps = () => {
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         {/* Toolbox */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-6 shadow-2xl">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Chỉnh sửa vùng chọn</h3>
-            <p className="text-[10px] text-slate-500 mb-4 italic leading-relaxed">Giữ Shift để chọn nhiều ghế cùng lúc.</p>
+        <div className="space-y-4 xl:sticky xl:top-6">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_32px_rgba(23,23,23,.06)]">
+            <div className="mb-5 flex items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-red-50 text-(--admin-brand)"><MousePointer2 size={17} /></span>
+              <div><h3 className="text-sm font-extrabold text-neutral-950">Chỉnh vùng ghế</h3><p className="mt-1 text-[11px] leading-relaxed text-neutral-500">Nhấn một ghế, giữ Shift để chọn thêm.</p></div>
+            </div>
             
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại ghế</label>
+                <label className="text-[10px] font-bold uppercase tracking-[.16em] text-neutral-400">Loại ghế</label>
                 <div className="grid grid-cols-1 gap-2">
                   {seatTypes.map(type => (
                     <button
                       key={type.MaLoaiGhe}
                       onClick={() => updateSelectedSeats({ MaLoaiGhe: type.MaLoaiGhe })}
                       disabled={selectedSeats.length === 0}
-                      className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all group cursor-pointer"
+                      className="group flex cursor-pointer items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 p-3 transition-all hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-35"
                     >
-                      <span className="text-sm font-bold text-slate-300 group-hover:text-white">{type.TenLoaiGhe}</span>
+                      <span className="text-sm font-bold text-neutral-700 group-hover:text-neutral-950">{type.TenLoaiGhe}</span>
                       <CinemaSeat label="" typeName={type.TenLoaiGhe} compact disabled className="pointer-events-none !h-6 !w-8" />
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-white/5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái vận hành</label>
+              <div className="space-y-3 border-t border-neutral-100 pt-4">
+                <label className="text-[10px] font-bold uppercase tracking-[.16em] text-neutral-400">Trạng thái vận hành</label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => updateSelectedSeats({ KhaDung: 0 })}
                     disabled={selectedSeats.length === 0}
-                    className="flex-grow flex items-center justify-center gap-2 p-3.5 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 disabled:opacity-30 transition-all cursor-pointer"
+                    className="flex flex-grow cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-red-600 transition-all hover:bg-red-100 disabled:opacity-30"
                   >
                     <Lock size={14} />
                     <span className="text-[10px] font-black uppercase">Khóa</span>
@@ -210,7 +220,7 @@ const SeatMaps = () => {
                   <button
                     onClick={() => updateSelectedSeats({ KhaDung: 1 })}
                     disabled={selectedSeats.length === 0}
-                    className="flex-grow flex items-center justify-center gap-2 p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 disabled:opacity-30 transition-all cursor-pointer"
+                    className="flex flex-grow cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-30"
                   >
                     <Unlock size={14} />
                     <span className="text-[10px] font-black uppercase">Mở</span>
@@ -221,16 +231,14 @@ const SeatMaps = () => {
           </div>
 
           {/* Selection Stats */}
-          {selectedSeats.length > 0 && (
-            <div className="bg-white/[0.04] border border-red-500/20 rounded-3xl p-6 animate-in fade-in slide-in-from-bottom-4">
-              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Đang chọn</span>
-              <div className="mt-2 text-2xl font-black text-white">{selectedSeats.length} <span className="text-sm font-bold text-slate-500">ghế</span></div>
-            </div>
-          )}
+          <div className="flex items-center gap-3 rounded-2xl bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(23,23,23,.16)]">
+            <span className="grid size-10 place-items-center rounded-xl bg-white/10 text-red-400"><Armchair size={19} /></span>
+            <div><span className="text-[9px] font-bold uppercase tracking-[.18em] text-neutral-400">Vùng đang chọn</span><div className="mt-0.5 text-xl font-black">{selectedSeats.length} <span className="text-xs font-semibold text-neutral-400">ghế</span></div></div>
+          </div>
         </div>
 
         {/* Matrix Canvas */}
-        <div className="lg:col-span-9">
+        <div className="min-w-0">
           <div className="admin-seat-map-canvas">
             {/* Screen */}
             <div className="admin-cinema-screen">
@@ -239,30 +247,31 @@ const SeatMaps = () => {
               </div>
             </div>
 
-            <div 
-              className="admin-seat-grid custom-scrollbar"
-              style={{ gridTemplateColumns: `repeat(${template.TongCot}, minmax(0, 1fr))` }}
-            >
-              {matrix.flat().map((seat) => {
-                if (seat.isAisle) {
-                  return (
-                    <div key={seat.MaChiTietSoDo} className="w-9 h-9 shrink-0"></div>
-                  );
-                }
-                const typeName = getSeatTypeName(seat.MaLoaiGhe);
-                return (
-                  <CinemaSeat
-                    key={seat.MaChiTietSoDo}
-                    label={`${seat.Hang}${seat.Cot}`}
-                    typeName={typeName}
-                    state={seat.KhaDung === 0 ? 'locked' : 'available'}
-                    selected={selectedSeats.includes(seat.MaChiTietSoDo)}
-                    compact
-                    className={seat.KhaDung === 0 ? 'admin-seat--locked' : getAdminSeatClassName(typeName)}
-                    onClick={(event) => handleSeatClick(seat.MaChiTietSoDo, event)}
-                  />
-                );
-              })}
+            <div className="admin-seat-grid custom-scrollbar">
+              <div className="admin-seat-column-labels"><span />{Array.from({ length: template.TongCot }, (_, index) => <b key={index}>{index + 1}</b>)}<span /></div>
+              {matrix.map((row) => (
+                <div key={row[0]?.Hang} className="admin-seat-grid-row">
+                  <b>{row[0]?.Hang}</b>
+                  {row.map((seat) => {
+                    if (seat.isCovered) return null;
+                    if (seat.isAisle) return <span key={seat.MaChiTietSoDo} className="size-9 shrink-0" />;
+                    const typeName = getSeatTypeName(seat.MaLoaiGhe);
+                    return (
+                      <CinemaSeat
+                        key={seat.MaChiTietSoDo}
+                        label={seat.DoRongCot > 1 ? `${seat.Hang}${seat.Cot}–${seat.Hang}${seat.Cot + seat.DoRongCot - 1}` : `${seat.Hang}${seat.Cot}`}
+                        typeName={typeName}
+                        state={seat.KhaDung === 0 ? 'locked' : 'available'}
+                        selected={selectedSeats.includes(seat.MaChiTietSoDo)}
+                        compact
+                        className={seat.KhaDung === 0 ? 'admin-seat--locked' : getAdminSeatClassName(typeName)}
+                        onClick={(event) => handleSeatClick(seat.MaChiTietSoDo, event)}
+                      />
+                    );
+                  })}
+                  <b>{row[0]?.Hang}</b>
+                </div>
+              ))}
             </div>
 
             {/* Legend */}

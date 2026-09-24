@@ -99,6 +99,11 @@ const showtimeService = {
       MaGheSuatChieu: gsc.MaGheSuatChieu,
       MaSuatChieu: gsc.MaSuatChieu,
       MaGhe: gsc.Ghe ? `${gsc.Ghe.MaPhong}-${gsc.Ghe.ViTriDay}${gsc.Ghe.ViTriCot}` : gsc.MaGhe || 'A1',
+      TenGhe: gsc.Ghe
+        ? (gsc.Ghe.DoRongCot > 1 ? `${gsc.Ghe.ViTriDay}${gsc.Ghe.ViTriCot}–${gsc.Ghe.ViTriDay}${gsc.Ghe.ViTriCot + gsc.Ghe.DoRongCot - 1}` : `${gsc.Ghe.ViTriDay}${gsc.Ghe.ViTriCot}`)
+        : 'A1',
+      DoRongCot: gsc.Ghe?.DoRongCot || 1,
+      SucChua: gsc.Ghe?.SucChua || 1,
       TrangThai: gsc.TrangThai === 'DA_DAT' ? 1 : (gsc.TrangThai === 'DANG_GIU' ? 2 : 0),
       KhaDung: gsc.KhaDung ? 1 : 0,
       TenLoaiGhe: gsc.Ghe?.LoaiGhe?.TenLoaiGhe || 'Thường',
