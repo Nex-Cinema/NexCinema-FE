@@ -1,15 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatVND } from '../../../utils/formatHelper';
-
-/**
- * Helper: format a GioChieu ISO-string or "HH:mm:ss" to "HH:mm".
- * Kept local since it is only used here and in the container.
- */
-export const formatTime = (isoString) => {
-  if (!isoString) return '00:00';
-  const date = new Date(isoString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-};
+import { formatShowtimeTime } from '../../../utils/showtimeHelper';
 
 /**
  * ShowtimeSelector — date strip + time-slot grid + "Đặt vé" action button.
@@ -94,7 +85,7 @@ const ShowtimeSelector = ({
                       : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-red-300 hover:bg-red-50'
                   }`}
                 >
-                  <span className="text-lg font-black tracking-wider">{formatTime(slot.time)}</span>
+                  <span className="text-lg font-black tracking-wider">{formatShowtimeTime(slot.time)}</span>
                   <span className="text-[10px] uppercase opacity-80 mt-1 font-bold">
                     {slot.PhongChieu?.TenPhong || 'Phòng chiếu'}
                   </span>

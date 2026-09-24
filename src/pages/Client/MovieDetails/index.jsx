@@ -120,10 +120,10 @@ const MovieDetails = () => {
   };
 
   const handleBackFromPayment = async () => {
+    await holdTimer.releaseHold();
     setConfirmedTotalPrice(0);
     setBookingStage('seat');
     setShouldReloadSeatMap(Date.now());
-    await holdTimer.releaseHold();
   };
 
   const handleConfirmBooking = (seats, totalPrice, heldIds, maSuatChieu) => {

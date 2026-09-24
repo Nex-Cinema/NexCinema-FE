@@ -1,280 +1,63 @@
-import { X, Calendar, MapPin, Copy, Check, RotateCcw } from 'lucide-react';
-import { formatVND, formatDateTime } from '../../../utils/formatHelper';
-import { getShowtimeStartFromBooking } from '../../../utils/showtimeHelper';
-import {
-  getBookingStatusLabel,
-  getTransactionStatusLabel,
-  getRefundStatusLabel,
-} from '../../../utils/statusHelper';
+import { useEffect, useRef } from 'react';
+import { Check, Copy, RotateCcw, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
-/**
- * BookingDetailModal — full-screen overlay showing ticket details, QR codes,
- * transaction info, and refund info for a selected booking.
- * All state and handlers come from the Profile container via props.
- */
-const BookingDetailModal = ({
-  isOpen,
-  detailLoading,
-  bookingDetail,
-  refundRequests,
-  copiedTicketId,
-  onClose,
-  onCopyTicketId,
-  onCancelBooking,
-  onRefundRequest,
-}) => {
+import { formatVND, formatDateTime } from '../../../utils/formatHelper';
+import { formatShowtimeTime, getShowtimeStartFromBooking } from '../../../utils/showtimeHelper';
+import { getBookingStatusLabel, getTransactionStatusLabel, getRefundStatusLabel } from '../../../utils/statusHelper';
+
+const BookingDetailModal = ({ isOpen, detailLoading, bookingDetail, refundRequests, copiedTicketId, onClose, onCopyTicketId, onCancelBooking, onRefundRequest }) => {
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousFocus = document.activeElement;
+    dialogRef.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onCloseRef.current();
+      if (event.key !== 'Tab') return;
+      const focusable = dialogRef.current?.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (!focusable?.length) { event.preventDefault(); dialogRef.current?.focus(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      else if (!dialogRef.current?.contains(document.activeElement)) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => { document.removeEventListener('keydown', handleKeyDown); document.body.style.overflow = previousOverflow; previousFocus?.focus?.(); };
+  }, [isOpen]);
   if (!isOpen) return null;
 
   const now = new Date();
-
-  // Compute detail-level eligibility
   const detailShowtimeStart = bookingDetail ? getShowtimeStartFromBooking(bookingDetail) : null;
   const detailIsFuture = detailShowtimeStart && detailShowtimeStart >= now;
-  const detailRefundReq = bookingDetail
-    ? refundRequests.find(r => r.PhieuDatVe?.MaPhieuDat === bookingDetail.MaPhieuDat)
-    : null;
+  const detailRefundReq = bookingDetail ? refundRequests.find(r => r.PhieuDatVe?.MaPhieuDat === bookingDetail.MaPhieuDat) : null;
   const detailHasRefundRecord = !!detailRefundReq;
+  const detailCanCancel = bookingDetail && bookingDetail.TrangThai === 'DA_THANH_TOAN' && detailIsFuture && !detailHasRefundRecord;
+  const detailCanRequestRefund = bookingDetail && bookingDetail.TrangThai === 'DA_HUY' && detailIsFuture && !detailHasRefundRecord;
+  const tickets = bookingDetail?.ChiTietDatVes || [];
+  const showtime = tickets[0]?.SuatChieu;
 
-  const detailCanCancel =
-    bookingDetail &&
-    bookingDetail.TrangThai === 'DA_THANH_TOAN' &&
-    detailIsFuture &&
-    !detailHasRefundRecord;
-
-  const detailCanRequestRefund =
-    bookingDetail &&
-    bookingDetail.TrangThai === 'DA_HUY' &&
-    detailIsFuture &&
-    !detailHasRefundRecord;
-
-  return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#020617]/95 p-5 shadow-2xl animate-in zoom-in-95 duration-300 sm:p-6">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-red-600 rounded-full text-white transition-colors cursor-pointer z-10"
-        >
-          <X size={16} />
-        </button>
-
-        {detailLoading || !bookingDetail ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-400" />
-            <p className="text-gray-400 text-sm">Đang tải chi tiết đặt vé...</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6 text-left">
-            {/* Header */}
-            <div>
-              <span className="text-[10px] font-bold text-yellow-400 tracking-widest uppercase">
-                Chi tiết đặt vé
-              </span>
-              <h3 className="text-2xl font-black text-white uppercase leading-tight tracking-tight text-glow mt-1">
-                {bookingDetail.ChiTietDatVes[0]?.SuatChieu?.Phim?.TenPhim || 'Thông tin vé'}
-              </h3>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 mt-2">
-                <p className="flex items-center gap-1">
-                  <Calendar size={12} />
-                  Suất: {detailShowtimeStart ? formatDateTime(detailShowtimeStart) : 'Không xác định'}
-                </p>
-                <p className="flex items-center gap-1">
-                  <MapPin size={12} />
-                  Phòng: {bookingDetail.ChiTietDatVes[0]?.SuatChieu?.PhongChieu?.TenPhong}{' '}
-                  ({bookingDetail.ChiTietDatVes[0]?.SuatChieu?.PhongChieu?.TenLoaiPhong})
-                </p>
-              </div>
-            </div>
-
-            <hr className="border-white/5" />
-
-            {/* Main content grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-              {/* Left: Tickets list */}
-              <div className="flex flex-col gap-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Danh sách vé ({bookingDetail.ChiTietDatVes.length})
-                </h4>
-                <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {bookingDetail.ChiTietDatVes.map((ticket) => {
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticket.MaChiTietDat}`;
-                    return (
-                      <div
-                        key={ticket.MaChiTietDat}
-                        className="bg-white/5 border border-white/5 p-3.5 rounded-2xl flex items-center gap-4 hover:border-white/10 transition-colors"
-                      >
-                        {/* QR Code */}
-                        <div className="w-20 h-20 bg-white p-1 rounded-xl shrink-0 flex items-center justify-center relative overflow-hidden">
-                          <img
-                            src={qrUrl}
-                            alt={`QR Ticket ${ticket.Ghe?.TenGhe}`}
-                            className="w-full h-full"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-slate-950 text-white text-[8px] font-mono p-1 text-center leading-none hidden">
-                            QR Offline
-                          </div>
-                        </div>
-
-                        {/* Ticket info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center mb-0.5">
-                            <span className="text-white font-extrabold text-sm">Ghế {ticket.Ghe?.TenGhe}</span>
-                            <span className="text-yellow-400 font-bold text-xs">{formatVND(ticket.GiaVe)}</span>
-                          </div>
-                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                            Loại: {ticket.Ghe?.TenLoaiGhe || 'Thường'}
-                          </p>
-                          {/* Copyable ticket code */}
-                          <div className="flex items-center gap-2 mt-2 bg-slate-950/70 py-1 px-2.5 rounded-lg border border-white/5">
-                            <span className="text-[9px] text-gray-600 font-bold uppercase tracking-wider shrink-0">Mã vé:</span>
-                            <span className="text-[10px] font-mono text-gray-300 truncate select-all">{ticket.MaChiTietDat}</span>
-                            <button
-                              type="button"
-                              onClick={() => onCopyTicketId(ticket.MaChiTietDat)}
-                              className="p-1 hover:text-white text-gray-400 transition-colors cursor-pointer shrink-0 ml-auto"
-                              title="Sao chép mã vé"
-                            >
-                              {copiedTicketId === ticket.MaChiTietDat
-                                ? <Check size={12} className="text-emerald-400" />
-                                : <Copy size={12} />}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right: Invoice / transaction summary */}
-              <div className="flex flex-col gap-4 bg-white/5 border border-white/5 p-4 rounded-2xl">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/5 pb-2">
-                  Thông tin hóa đơn
-                </h4>
-
-                <div className="flex flex-col gap-3 text-xs text-gray-400">
-                  <div className="flex justify-between">
-                    <span>Mã phiếu đặt:</span>
-                    <span className="text-white font-bold select-all truncate max-w-[150px]" title={bookingDetail.MaPhieuDat}>
-                      {bookingDetail.MaPhieuDat}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Thời gian lập phiếu:</span>
-                    <span className="text-white font-medium">{formatDateTime(bookingDetail.NgayTao)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Trạng thái phiếu:</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getBookingStatusLabel(bookingDetail.TrangThai).css}`}>
-                      {getBookingStatusLabel(bookingDetail.TrangThai).text}
-                    </span>
-                  </div>
-
-                  <hr className="border-white/5 my-1" />
-
-                  {/* Transactions */}
-                  {bookingDetail.GiaoDichs && bookingDetail.GiaoDichs.length > 0 ? (
-                    bookingDetail.GiaoDichs.map((tx) => (
-                      <div key={tx.MaGiaoDich} className="flex flex-col gap-2 bg-slate-950/45 p-3 rounded-xl border border-white/5">
-                        <div className="flex justify-between font-bold text-white text-[11px]">
-                          <span>Thanh toán {tx.PhuongThuc?.toUpperCase()}</span>
-                          <span className={getTransactionStatusLabel(tx.TrangThai).text === 'Thành công' ? 'text-emerald-400' : 'text-yellow-400'}>
-                            {getTransactionStatusLabel(tx.TrangThai).text}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-gray-500 flex flex-col gap-1">
-                          <p className="truncate">Mã giao dịch: {tx.MaGiaoDichNgoai || tx.MaGiaoDich}</p>
-                          <p>Thời gian GD: {formatDateTime(tx.NgayGiaoDich)}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500 py-2">Chưa có thông tin giao dịch thanh toán.</p>
-                  )}
-
-                  <hr className="border-white/5 my-1" />
-
-                  {/* Total */}
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-white">Tổng tiền:</span>
-                    <span className="text-lg font-black text-yellow-400">{formatVND(bookingDetail.TongTien)}</span>
-                  </div>
-
-                  {/* Refund block */}
-                  {detailRefundReq && (
-                    <div className="flex flex-col gap-3 bg-white/5 border border-white/10 p-3.5 rounded-xl mt-3.5 text-left animate-in fade-in duration-200">
-                      <h4 className="text-[11px] font-bold text-yellow-400 uppercase tracking-wider border-b border-white/5 pb-2">
-                        Thông tin hoàn tiền
-                      </h4>
-                      <div className="flex flex-col gap-2 text-[11px] text-gray-400">
-                        <div className="flex justify-between">
-                          <span>Mã hoàn tiền:</span>
-                          <span className="text-white font-mono truncate max-w-[120px] select-all" title={detailRefundReq.MaHoanTien}>
-                            {detailRefundReq.MaHoanTien}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Số tiền hoàn:</span>
-                          <span className="text-yellow-400 font-bold">{formatVND(detailRefundReq.SoTienHoan)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Trạng thái:</span>
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getRefundStatusLabel(detailRefundReq.TrangThai).css}`}>
-                            {getRefundStatusLabel(detailRefundReq.TrangThai).text}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Ngày yêu cầu:</span>
-                          <span className="text-white">{formatDateTime(detailRefundReq.NgayTao)}</span>
-                        </div>
-                        {detailRefundReq.NgayHoanTien && (
-                          <div className="flex justify-between">
-                            <span>Ngày xử lý:</span>
-                            <span className="text-white">{formatDateTime(detailRefundReq.NgayHoanTien)}</span>
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1 mt-1 border-t border-white/5 pt-2">
-                          <span className="font-bold text-gray-500">Lý do:</span>
-                          <p className="text-white italic leading-relaxed">"{detailRefundReq.LyDo}"</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer actions */}
-            {(detailCanCancel || detailCanRequestRefund) && (
-              <div className="flex items-center justify-end gap-3 mt-4 border-t border-white/5 pt-4">
-                {detailCanCancel && (
-                  <button
-                    onClick={() => onCancelBooking(bookingDetail.MaPhieuDat)}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-[0_0_15px_rgba(225,29,72,0.3)] animate-in fade-in duration-200"
-                  >
-                    <X size={14} /><span>Hủy vé &amp; Hoàn tiền</span>
-                  </button>
-                )}
-                {detailCanRequestRefund && (
-                  <button
-                    onClick={() => onRefundRequest(bookingDetail.MaPhieuDat)}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-[0_0_15px_rgba(217,119,6,0.3)] animate-in fade-in duration-200"
-                  >
-                    <RotateCcw size={14} /><span>Yêu cầu hoàn tiền</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="booking-detail-title" tabIndex={-1} className="relative max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 text-neutral-900 shadow-2xl outline-none sm:p-8">
+      <button type="button" onClick={onClose} title="Đóng" aria-label="Đóng chi tiết đặt vé" className="absolute right-4 top-4 rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"><X size={20} /></button>
+      {detailLoading || !bookingDetail ? <div className="py-20 text-center text-sm text-neutral-600">Đang tải chi tiết đặt vé…</div> : <>
+        <header className="border-b border-neutral-200 pb-5 pr-10"><p className="text-sm font-semibold text-red-700">Chi tiết đặt vé</p><h2 id="booking-detail-title" className="mt-1 text-2xl font-bold">{showtime?.Phim?.TenPhim || 'Thông tin vé'}</h2><div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-600"><span>Ngày: {showtime?.NgayChieu ? new Date(showtime.NgayChieu).toLocaleDateString('vi-VN') : 'Chưa có thông tin'}</span><span>Giờ: {formatShowtimeTime(showtime?.GioChieu)}</span><span>Phòng: {showtime?.PhongChieu?.TenPhong || 'Chưa có thông tin'}</span></div></header>
+        <div className="mt-6 grid gap-6 md:grid-cols-[1.2fr_.8fr]">
+          <div><h3 className="mb-3 font-semibold">Danh sách vé ({tickets.length})</h3>{tickets.length ? <div className="space-y-3">{tickets.map((ticket) => <article key={ticket.MaChiTietDat || ticket.Ghe?.TenGhe} className="flex flex-col gap-4 rounded-xl border border-neutral-200 p-4 sm:flex-row">{ticket.MaChiTietDat && <QRCodeSVG value={ticket.MaChiTietDat} size={88} level="M" title={`Mã QR vé ghế ${ticket.Ghe?.TenGhe || ''}`} className="shrink-0 self-center sm:self-start" />}<div className="min-w-0 flex-1"><div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between sm:gap-3"><strong className="min-w-0 break-words">Ghế {ticket.Ghe?.TenGhe || 'Chưa rõ'}</strong><strong className="shrink-0 text-red-700">{formatVND(ticket.GiaVe)}</strong></div><p className="mt-1 text-sm text-neutral-600">{Number(ticket.Ghe?.SucChua || ticket.SucChua || 1) > 1 ? `${ticket.Ghe?.SucChua || ticket.SucChua} người / ghế đôi` : '1 người'}</p>{ticket.MaChiTietDat && <div className="mt-3 flex min-w-0 items-center gap-2"><code className="min-w-0 truncate text-xs text-neutral-500">{ticket.MaChiTietDat}</code><button type="button" title="Sao chép mã vé" onClick={() => onCopyTicketId(ticket.MaChiTietDat)} className="shrink-0 rounded p-1 hover:bg-neutral-100">{copiedTicketId === ticket.MaChiTietDat ? <Check size={14} /> : <Copy size={14} />}</button></div>}</div></article>)}</div> : <p className="rounded-xl bg-neutral-100 p-4 text-sm">Chưa có chi tiết mã vé.</p>}</div>
+          <aside className="rounded-xl border border-neutral-200 p-4"><h3 className="font-semibold">Thông tin hóa đơn</h3><dl className="mt-4 space-y-3 text-sm"><div><dt className="text-neutral-500">Mã đặt vé</dt><dd className="mt-1 break-all font-mono">{bookingDetail.MaPhieuDat}</dd></div><div><dt className="text-neutral-500">Ngày lập phiếu</dt><dd>{formatDateTime(bookingDetail.NgayTao)}</dd></div><div><dt className="text-neutral-500">Trạng thái</dt><dd>{getBookingStatusLabel(bookingDetail.TrangThai).text}</dd></div><div><dt className="text-neutral-500">Tổng tiền</dt><dd className="text-lg font-bold text-red-700">{formatVND(bookingDetail.TongTien)}</dd></div></dl>
+            <div className="mt-5 border-t border-neutral-200 pt-4"><h4 className="font-semibold">Giao dịch</h4>{bookingDetail.GiaoDichs?.length ? bookingDetail.GiaoDichs.map((tx) => <div key={tx.MaGiaoDich} className="mt-3 text-sm"><p>{tx.PhuongThuc?.toUpperCase() || 'Thanh toán'} · {getTransactionStatusLabel(tx.TrangThai).text}</p><p className="text-neutral-500">{formatDateTime(tx.NgayGiaoDich)}</p></div>) : <p className="mt-2 text-sm text-neutral-500">Chưa có thông tin giao dịch.</p>}</div>
+            {detailRefundReq && <div className="mt-5 border-t border-neutral-200 pt-4 text-sm"><h4 className="font-semibold">Hoàn tiền</h4><p className="mt-2">{getRefundStatusLabel(detailRefundReq.TrangThai).text} · {formatVND(detailRefundReq.SoTienHoan)}</p><p className="mt-1 text-neutral-500">{detailRefundReq.LyDo || 'Không có lý do'}</p></div>}
+          </aside>
+        </div>
+        {(detailCanCancel || detailCanRequestRefund) && <footer className="mt-6 flex justify-end border-t border-neutral-200 pt-5">{detailCanCancel && <button type="button" onClick={() => onCancelBooking(bookingDetail.MaPhieuDat)} className="rounded-xl bg-red-700 px-5 py-3 text-sm font-semibold text-white"><X size={15} className="mr-2 inline" />Hủy vé &amp; hoàn tiền</button>}{detailCanRequestRefund && <button type="button" onClick={() => onRefundRequest(bookingDetail.MaPhieuDat)} className="rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white"><RotateCcw size={15} className="mr-2 inline" />Yêu cầu hoàn tiền</button>}</footer>}
+      </>}
+    </section>
+  </div>;
 };
 
 export default BookingDetailModal;

@@ -1,7 +1,17 @@
 import axiosClient from './axiosClient';
 
-export const getSeatMap = (maSuatChieu) => {
-  return axiosClient.get(`/suat-chieu/${maSuatChieu}/ghe`);
+/**
+ * Lấy sơ đồ ghế của một suất chiếu.
+ *
+ * @param {string} maSuatChieu - Mã suất chiếu.
+ * @param {AbortSignal} [signal] - Signal để hủy request khi component unmount/đổi suất.
+ * @returns {Promise<object>} Sơ đồ ghế đã được axios interceptor unwrap.
+ */
+export const getSeatMap = (maSuatChieu, signal) => {
+  return axiosClient.get(`/suat-chieu/${maSuatChieu}/ghe`, {
+    signal,
+    timeout: 10000,
+  });
 };
 
 /**
@@ -33,7 +43,7 @@ export const cancelHeldSeats = (maSuatChieu, seatIds) => {
  * @param {object} payload
  * @param {string} payload.MaSuatChieu
  * @param {string[]} payload.DanhSachMaGheSuatChieu
- * @param {string} payload.PhuongThucThanhToan - 'VNPAY' | 'TIEN_MAT'
+ * @param {string} payload.PhuongThucThanhToan - 'TIEN_MAT'
  * @param {string} payload.KetQuaThanhToan - 'THANH_CONG' | 'THAT_BAI'
  */
 export const simulatedCheckout = (payload) => {
@@ -45,7 +55,7 @@ export const simulatedCheckout = (payload) => {
  * @param {object} payload
  * @param {string} payload.MaSuatChieu
  * @param {string[]} payload.DanhSachMaGheSuatChieu
- * @param {string} payload.PhuongThucThanhToan - 'VNPAY' | 'TIEN_MAT' | 'PAYOS'
+ * @param {string} payload.PhuongThucThanhToan - 'TIEN_MAT' | 'PAYOS'
  */
 export const realCheckout = (payload) => {
   return axiosClient.post('/dat-ve/thanh-toan', payload);

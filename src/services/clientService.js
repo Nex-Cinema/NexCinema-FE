@@ -1,4 +1,5 @@
 import axiosPublic from '../api/axiosPublic';
+import { formatShowtimeTime } from '../utils/showtimeHelper';
 
 // ============================================================
 // Helper: map Phim record từ backend sang format frontend dùng
@@ -59,17 +60,15 @@ const mapMovie = (phim) => {
 // Helper: map SuatChieu record thành format slot cho UI
 // ============================================================
 const mapShowtime = (sc) => {
-  // GioChieu từ backend là ISO datetime string
-  const gioChieuDate = sc.GioChieu ? new Date(sc.GioChieu) : null;
-  const gioChieuStr = gioChieuDate
-    ? gioChieuDate.toTimeString().substring(0, 5)
-    : '';
+  const formattedStartTime = formatShowtimeTime(sc.GioChieu);
+  const gioChieuStr = formattedStartTime === '--:--' ? '' : formattedStartTime;
 
   const thoiLuong = sc.Phim?.ThoiLuong || 0;
   let gioKetThucStr = '';
-  if (gioChieuDate && thoiLuong) {
-    const end = new Date(gioChieuDate.getTime() + thoiLuong * 60 * 1000);
-    gioKetThucStr = end.toTimeString().substring(0, 5);
+  if (gioChieuStr && thoiLuong) {
+    const [hour, minute] = gioChieuStr.split(':').map(Number);
+    const endMinutes = hour * 60 + minute + thoiLuong;
+    gioKetThucStr = `${String(Math.floor(endMinutes / 60) % 24).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
   }
 
   return {
@@ -83,6 +82,7 @@ const mapShowtime = (sc) => {
     TenPhong: sc.PhongChieu?.TenPhong || 'N/A',
     LoaiPhong: sc.PhongChieu?.LoaiPhong?.TenLoaiPhong || '',
     startTime: sc.GioChieu || '',
+    NgayChieu: sc.NgayChieu || null,
     endTime: gioKetThucStr
       ? `${new Date(sc.NgayChieu).toISOString().substring(0, 10)}T${gioKetThucStr}:00`
       : '',

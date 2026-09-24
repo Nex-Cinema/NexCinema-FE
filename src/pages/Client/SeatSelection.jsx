@@ -24,6 +24,8 @@ const getSeatState = (seat) => {
   return 'available';
 };
 
+const getSeatCapacity = (seat) => Math.max(1, Number(seat?.SucChua) || 1);
+
 const SeatMap = ({ data, selectedSeats, onSeatClick }) => {
   const { rows, totalColumns, structure } = useMemo(() => {
     if (!data) return { rows: [], totalColumns: 0, structure: null };
@@ -41,26 +43,31 @@ const SeatMap = ({ data, selectedSeats, onSeatClick }) => {
   }, [data]);
 
   return (
-    <div className="mx-auto flex min-w-max flex-col items-center px-4 pb-3">
-      <div className="mb-1.5 flex items-center gap-1.5">
-        <span className="w-7" />
+    <div className="mx-auto flex min-w-max flex-col items-center px-5 py-4">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="w-8" />
         {Array.from({ length: totalColumns }, (_, index) => (
-          <span key={index} className="grid h-5 w-9 place-items-center font-mono text-[10px] font-bold text-slate-400">{index + 1}</span>
+          <span key={index} className="grid h-5 w-11 place-items-center font-mono text-[10px] font-bold text-slate-400">{index + 1}</span>
         ))}
-        <span className="w-7" />
+        <span className="w-8" />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         {rows.map(([rowName, columns], rowIndex) => (
-          <div key={rowName} className="flex items-center gap-1.5">
-            <span className="w-7 text-center font-mono text-xs font-bold text-slate-400">{rowName}</span>
+          <div key={rowName} className="flex items-center gap-2">
+            <span className="w-8 text-center font-mono text-[11px] font-black text-slate-400">{rowName}</span>
             {Array.from({ length: totalColumns }, (_, columnIndex) => {
               const seat = columns[columnIndex + 1];
-              if (!seat || isAislePosition(structure, rowIndex, columnIndex)) return <span key={`${rowName}-${columnIndex}`} className="h-9 w-9 shrink-0" />;
+              const coveringSeat = Object.values(columns).find((item) => {
+                const start = Number(item.SoThuTu || Number.parseInt(item.TenGhe.slice(1), 10));
+                return start < columnIndex + 1 && start + (Number(item.DoRongCot) || 1) > columnIndex + 1;
+              });
+              if (coveringSeat) return null;
+              if (!seat || isAislePosition(structure, rowIndex, columnIndex)) return <span key={`${rowName}-${columnIndex}`} className="h-11 w-11 shrink-0" />;
               const state = getSeatState(seat);
               const selected = selectedSeats.some((item) => item.MaGheSuatChieu === seat.MaGheSuatChieu);
-              return <CinemaSeat key={seat.MaGheSuatChieu} label={seat.TenGhe} typeName={seat.TenLoaiGhe} state={state} selected={selected} disabled={state !== 'available'} onClick={() => onSeatClick(seat)} title={`${seat.TenGhe} · ${seat.TenLoaiGhe} · ${seat.GiaVeTinhToan.toLocaleString('vi-VN')} đ`} />;
+              return <CinemaSeat key={seat.MaGheSuatChieu} label={seat.TenGhe} typeName={seat.TenLoaiGhe} state={state} selected={selected} disabled={state !== 'available'} onClick={() => onSeatClick(seat)} title={`${seat.TenGhe} · ${seat.TenLoaiGhe} · ${getSeatCapacity(seat)} người · ${seat.GiaVeTinhToan.toLocaleString('vi-VN')} đ`} />;
             })}
-            <span className="w-7 text-center font-mono text-xs font-bold text-slate-400">{rowName}</span>
+            <span className="w-8 text-center font-mono text-[11px] font-black text-slate-400">{rowName}</span>
           </div>
         ))}
       </div>
@@ -73,35 +80,46 @@ const SeatSelection = ({ availableSlots, selectedSlotIndex, setSelectedSlotIndex
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [seatMapData, setSeatMapData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [reloadRequest, setReloadRequest] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
   const lastShowtimeId = useRef('');
   const currentSlot = availableSlots[selectedSlotIndex];
+  const showtimeId = currentSlot?.MaSuatChieu || currentSlot?.showId || '';
+  const missingShowtimeError = 'Không tìm thấy suất chiếu hợp lệ. Vui lòng quay lại và chọn lại suất chiếu.';
+  const effectiveLoadError = showtimeId ? loadError : missingShowtimeError;
+  const showLoading = Boolean(showtimeId) && isLoading;
   const totalAmount = selectedSeats.reduce((total, seat) => total + seat.GiaVeTinhToan, 0);
+  const selectedCapacity = selectedSeats.reduce((total, seat) => total + getSeatCapacity(seat), 0);
 
   useEffect(() => {
-    const showtimeId = currentSlot?.MaSuatChieu || currentSlot?.showId;
     if (!showtimeId) return undefined;
-    let ignore = false;
+
+    const abortController = new AbortController();
     const loadSeats = async () => {
       setIsLoading(true);
+      setLoadError('');
       try {
-        const result = await getSeatMap(showtimeId);
-        if (ignore) return;
+        const result = await getSeatMap(showtimeId, abortController.signal);
         setSeatMapData(result);
         if (lastShowtimeId.current !== showtimeId) {
           setSelectedSeats([]);
           lastShowtimeId.current = showtimeId;
         }
       } catch (error) {
-        if (!ignore) toast.error('Không thể tải sơ đồ ghế của suất chiếu này.');
+        if (abortController.signal.aborted) return;
+        const message = error?.message || 'Không thể tải sơ đồ ghế của suất chiếu này.';
+        setSeatMapData(null);
+        setLoadError(message);
+        toast.error('Không thể tải sơ đồ ghế của suất chiếu này.');
         console.error('Error fetching seat map:', error);
       } finally {
-        if (!ignore) setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
     loadSeats();
-    return () => { ignore = true; };
-  }, [currentSlot, shouldReloadSeatMap]);
+    return () => abortController.abort();
+  }, [reloadRequest, shouldReloadSeatMap, showtimeId]);
 
   const handleSeatClick = (seat) => {
     if (seat.TrangThai !== 'TRONG') return;
@@ -117,7 +135,6 @@ const SeatSelection = ({ availableSlots, selectedSlotIndex, setSelectedSlotIndex
       navigate('/login', { state: { from: `/movie/${currentSlot?.MaPhim}` } });
       return;
     }
-    const showtimeId = currentSlot?.MaSuatChieu || currentSlot?.showId;
     if (!showtimeId) return toast.error('Không tìm thấy thông tin suất chiếu.');
     try {
       setIsHolding(true);
@@ -151,26 +168,44 @@ const SeatSelection = ({ availableSlots, selectedSlotIndex, setSelectedSlotIndex
         </div>
       </aside>
 
-      <section className="grid min-h-[620px] grid-rows-[auto_auto_auto_minmax(190px,1fr)_auto] overflow-hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 lg:min-h-0">
+      <section className="grid min-h-[600px] grid-rows-[auto_auto_minmax(300px,1fr)_auto] overflow-hidden rounded-[28px] bg-white p-4 shadow-[0_18px_55px_rgba(23,23,23,.08)] ring-1 ring-black/5 lg:min-h-0 lg:p-5">
         <div className="flex items-start justify-between gap-4">
           <div><span className="text-[9px] font-bold uppercase tracking-[.2em] text-(--client-primary)">Bước 02</span><h1 className="text-xl font-extrabold tracking-tight text-neutral-950">Chọn ghế ngồi</h1></div>
-          <div className="text-right text-xs text-neutral-500"><strong className="block text-sm text-neutral-950">{formatTime(currentSlot?.time || currentSlot?.GioChieu || '00:00')}</strong>{seatMapData?.SoDoGhe && <span>{seatMapData.SoDoGhe.TongHang} hàng · {seatMapData.SoDoGhe.TongCot} cột</span>}</div>
+          <div className="text-right text-xs text-neutral-500"><strong className="block text-sm text-neutral-950">{formatTime(currentSlot?.GioChieu || currentSlot?.time)}</strong>{seatMapData?.SoDoGhe && <span>{seatMapData.SoDoGhe.TongHang} hàng · {seatMapData.SoDoGhe.TongCot} cột</span>}</div>
         </div>
-        <div className="mx-auto mt-2 flex w-full max-w-2xl items-center gap-3" aria-label="Vị trí màn hình">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-red-200" /><div className="flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-[9px] font-bold uppercase tracking-[.18em] text-(--client-primary)"><MonitorPlay size={15} /> Màn hình</div><span className="h-px flex-1 bg-gradient-to-l from-transparent to-red-200" />
-        </div>
-        <SeatLegend className="border-b border-neutral-100 py-2.5" />
-        <div className="min-h-0 overflow-auto py-2 custom-scrollbar">
-          {isLoading ? <div className="grid h-full min-h-48 place-items-center text-center"><div><span className="mx-auto block size-8 animate-spin rounded-full border-2 border-red-100 border-t-(--client-primary)" /><p className="mt-3 text-xs font-semibold text-neutral-500">Đang tải sơ đồ ghế…</p></div></div> : <SeatMap data={seatMapData} selectedSeats={selectedSeats} onSeatClick={handleSeatClick} />}
+        <SeatLegend className="border-b border-neutral-100 py-3" />
+        <div className="min-h-0 overflow-auto py-3 custom-scrollbar">
+          {showLoading ? (
+            <div className="grid h-full min-h-48 place-items-center text-center"><div><span className="mx-auto block size-8 animate-spin rounded-full border-2 border-red-100 border-t-(--client-primary)" /><p className="mt-3 text-xs font-semibold text-neutral-500">Đang tải sơ đồ ghế…</p></div></div>
+          ) : effectiveLoadError ? (
+            <div className="grid h-full min-h-48 place-items-center px-4 text-center">
+              <div>
+                <p className="text-sm font-bold text-neutral-900">Không thể tải sơ đồ ghế</p>
+                <p className="mt-1 max-w-md text-xs text-neutral-500">{effectiveLoadError}</p>
+                {showtimeId && <button type="button" onClick={() => setReloadRequest((value) => value + 1)} className="mt-4 rounded-full border border-red-200 px-4 py-2 text-xs font-bold text-(--client-primary) transition-colors hover:bg-red-50">Thử lại</button>}
+              </div>
+            </div>
+          ) : (
+            <div className="mx-auto flex min-h-full w-fit min-w-full items-center justify-center">
+              <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(180deg,#fff_0%,#f8fafc_100%)] px-3 pb-5 pt-14 ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_white,0_18px_45px_rgba(15,23,42,.08)] sm:px-8">
+                <div className="absolute inset-x-8 top-5 flex items-center gap-3" aria-label="Vị trí màn hình">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent to-red-200" />
+                  <div className="flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-[9px] font-black uppercase tracking-[.18em] text-(--client-primary)"><MonitorPlay size={14} /> Màn hình</div>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent to-red-200" />
+                </div>
+                <SeatMap data={seatMapData} selectedSeats={selectedSeats} onSeatClick={handleSeatClick} />
+              </div>
+            </div>
+          )}
         </div>
         <div className="grid items-center gap-3 border-t border-neutral-100 pt-3 sm:grid-cols-[1fr_auto]">
           <div className="grid min-w-0 grid-cols-3 gap-3 text-xs">
-            <div><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Suất chiếu</span><strong className="text-neutral-950">{formatTime(currentSlot?.time || currentSlot?.GioChieu || '00:00')}</strong></div>
-            <div className="min-w-0"><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Ghế đã chọn</span><strong className="block truncate text-neutral-950">{selectedSeats.length ? selectedSeats.map((seat) => seat.TenGhe).join(', ') : 'Chưa chọn'}</strong></div>
+            <div><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Suất chiếu</span><strong className="text-neutral-950">{formatTime(currentSlot?.GioChieu || currentSlot?.time)}</strong></div>
+            <div className="min-w-0"><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Ghế đã chọn</span><strong className="block truncate text-neutral-950">{selectedSeats.length ? `${selectedSeats.map((seat) => seat.TenGhe).join(', ')} · ${selectedCapacity} người` : 'Chưa chọn'}</strong></div>
             <div><span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">Tổng tiền</span><strong className="text-(--client-primary)">{formatVND(totalAmount)}</strong></div>
           </div>
           <button disabled={!selectedSeats.length || isHolding} onClick={handleConfirm} className="group flex h-11 items-center justify-center gap-3 rounded-full bg-(--client-primary) pl-5 pr-2 text-xs font-bold text-white transition-all duration-500 ease-[cubic-bezier(.32,.72,0,1)] enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40">
-            {isHolding ? 'Đang giữ ghế…' : `Tiếp tục (${selectedSeats.length})`}<span className="grid size-7 place-items-center rounded-full bg-white/15 transition-transform duration-500 group-hover:translate-x-0.5"><ChevronRight size={15} /></span>
+            {isHolding ? 'Đang giữ ghế…' : `Tiếp tục (${selectedCapacity})`}<span className="grid size-7 place-items-center rounded-full bg-white/15 transition-transform duration-500 group-hover:translate-x-0.5"><ChevronRight size={15} /></span>
           </button>
         </div>
       </section>

@@ -78,7 +78,7 @@ const MovieHero = ({
             onClick={onShowTrailer}
             className="client-secondary-button"
           >
-            <Play size={16} fill="white" /> Xem Trailer
+            <Play size={16} fill="currentColor" /> Xem Trailer
           </button>
           <button
             onClick={onStartBooking}

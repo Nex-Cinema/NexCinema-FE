@@ -1,183 +1,147 @@
-import { useEffect, useState, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, XCircle, AlertCircle, Home, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { AlertCircle, ArrowRight, Check, Home, Loader2, RefreshCw, ShieldCheck, User, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getVNPayPaymentStatus } from '../../api/paymentApi';
-import { getBookingDetail } from '../../api/bookingHistoryApi';
-import TicketConfirmation from './TicketConfirmation';
 
-const formatTime = (isoString) => {
-  if (!isoString) return '00:00';
-  const date = new Date(isoString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-};
+import { getBookingDetail } from '../../api/bookingHistoryApi';
+import { getVNPayPaymentStatus } from '../../api/paymentApi';
+import TicketConfirmation from './TicketConfirmation';
+import { formatShowtimeTime } from '../../utils/showtimeHelper';
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 15;
 
 const VNPayReturn = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [statusState, setStatusState] = useState('polling'); // 'polling' | 'success' | 'failed' | 'timeout'
+  const maGiaoDich = searchParams.get('maGiaoDich');
+  const returnStatus = searchParams.get('status');
+  const [statusState, setStatusState] = useState(() => (maGiaoDich && returnStatus !== 'failed' ? 'polling' : 'failed'));
   const [bookingDetail, setBookingDetail] = useState(null);
-  
-  const maGiaoDich = searchParams.get('maGiaoDich') || searchParams.get('vnp_TxnRef');
-  const hasPolled = useRef(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
+    let timeoutId;
+
     if (!maGiaoDich) {
-      setStatusState('failed');
-      setLoading(false);
-      toast.error('Không tìm thấy mã giao dịch thanh toán!');
-      return;
+      toast.error('Không tìm thấy mã giao dịch VNPay.');
+      return () => {};
     }
+    if (returnStatus === 'failed') return () => {};
 
-    if (hasPolled.current) return;
-    hasPolled.current = true;
-
-    let pollAttempts = 0;
-    const maxAttempts = 20; // 20 * 2.5s = 50s
-    let intervalId = null;
-
-    const checkStatus = async () => {
+    const pollStatus = async (attempt) => {
       try {
-        pollAttempts++;
-        const res = await getVNPayPaymentStatus(maGiaoDich);
-        
-        if (res.status === 'THANH_CONG') {
-          clearInterval(intervalId);
-          // Fetch booking details
-          const detailRes = await getBookingDetail(res.maPhieuDat);
-          setBookingDetail(detailRes);
+        const paymentStatus = await getVNPayPaymentStatus(maGiaoDich);
+        if (cancelled) return;
+
+        if (paymentStatus.status === 'THANH_CONG') {
+          const detail = await getBookingDetail(paymentStatus.maPhieuDat);
+          if (cancelled) return;
+          setBookingDetail(detail);
           setStatusState('success');
-          setLoading(false);
-          toast.success('Thanh toán thành công!');
-        } else if (res.status === 'THAT_BAI' || res.status === 'DA_HUY') {
-          clearInterval(intervalId);
+          toast.success('Thanh toán VNPay Sandbox thành công!');
+          return;
+        }
+
+        if (paymentStatus.status === 'THAT_BAI') {
           setStatusState('failed');
-          setLoading(false);
-          toast.error('Giao dịch thanh toán thất bại hoặc đã bị hủy.');
-        } else {
-          // Still pending
-          if (pollAttempts >= maxAttempts) {
-            clearInterval(intervalId);
-            setStatusState('timeout');
-            setLoading(false);
-          }
+          return;
         }
-      } catch (err) {
-        console.error('Error checking VNPay status:', err);
-        if (pollAttempts >= maxAttempts) {
-          clearInterval(intervalId);
-          setStatusState('timeout');
-          setLoading(false);
-        }
+      } catch {
+        // Network and propagation delays are retried within the polling window.
       }
+
+      if (attempt >= MAX_POLL_ATTEMPTS) {
+        setStatusState('timeout');
+        return;
+      }
+      timeoutId = window.setTimeout(() => pollStatus(attempt + 1), POLL_INTERVAL_MS);
     };
 
-    // Run first check immediately
-    checkStatus();
-
-    // Start interval
-    intervalId = setInterval(checkStatus, 2500);
-
+    pollStatus(1);
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      cancelled = true;
+      if (timeoutId) window.clearTimeout(timeoutId);
     };
-  }, [maGiaoDich]);
-
-  if (loading || statusState === 'polling') {
-    return (
-      <div className="min-h-screen bg-[#090514] text-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-[#1b1223]/60 backdrop-blur-md border border-white/5 p-10 rounded-3xl max-w-md w-full flex flex-col items-center gap-6 shadow-2xl">
-          <Loader2 className="w-16 h-16 text-[#ff436e] animate-spin" />
-          <h2 className="text-2xl font-black uppercase tracking-wider italic text-white">Xác nhận thanh toán</h2>
-          <p className="text-gray-400 text-sm">
-            Đang xác nhận kết quả thanh toán từ cổng VNPay. Vui lòng không đóng trình duyệt hoặc tải lại trang...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  }, [maGiaoDich, retryKey, returnStatus]);
 
   if (statusState === 'success' && bookingDetail) {
-    // Transform booking details for TicketConfirmation
-    const firstDetail = bookingDetail.ChiTietDatVes?.[0];
-    const movie = firstDetail?.SuatChieu?.Phim;
-    const selectedDateId = firstDetail?.SuatChieu?.NgayChieu 
-      ? new Date(firstDetail.SuatChieu.NgayChieu).toLocaleDateString('vi-VN') 
-      : '';
-    const currentSlot = firstDetail?.SuatChieu;
-    const selectedSeats = bookingDetail.ChiTietDatVes?.map(ct => ct.Ghe) || [];
+    const firstTicket = bookingDetail.ChiTietDatVes?.[0];
+    const showtime = firstTicket?.SuatChieu;
+    const selectedDateId = showtime?.NgayChieu ? new Date(showtime.NgayChieu).toLocaleDateString('vi-VN') : '';
 
     return (
       <TicketConfirmation
-        movie={movie}
+        movie={showtime?.Phim}
         selectedDateId={selectedDateId}
-        currentSlot={currentSlot}
-        selectedSeats={selectedSeats}
-        formatTime={formatTime}
+        currentSlot={showtime}
+        selectedSeats={bookingDetail.ChiTietDatVes?.map((ticket) => ticket.Ghe) || []}
+        formatTime={formatShowtimeTime}
         bookingResult={bookingDetail}
         onHome={() => navigate('/')}
       />
     );
   }
 
-  if (statusState === 'failed') {
-    return (
-      <div className="min-h-screen bg-[#090514] text-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-[#1b1223]/60 backdrop-blur-md border border-white/5 p-10 rounded-3xl max-w-md w-full flex flex-col items-center gap-6 shadow-2xl">
-          <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center border border-red-500/30">
-            <XCircle size={36} />
-          </div>
-          <h2 className="text-2xl font-black uppercase tracking-wider italic text-red-500">Thanh Toán Thất Bại</h2>
-          <p className="text-gray-400 text-sm">
-            Giao dịch thanh toán VNPay của bạn đã thất bại hoặc bị hủy bỏ. Vui lòng chọn lại suất chiếu khác hoặc thực hiện lại thanh toán.
-          </p>
-          <div className="flex flex-col gap-3 w-full mt-4">
-            <button 
-              onClick={() => navigate('/')}
-              className="w-full bg-[#ff436e] hover:bg-[#e0325a] text-white font-bold py-3 rounded-xl transition-all text-xs uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,67,110,0.3)] cursor-pointer"
-            >
-              <Home size={16} /> Quay về Trang chủ
-            </button>
-            <button 
-              onClick={() => navigate('/profile', { state: { activeTab: 'upcoming' } })}
-              className="w-full bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 font-bold py-3 rounded-xl transition-all text-xs uppercase flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <User size={16} /> Lịch sử đặt vé
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isPolling = statusState === 'polling';
+  const isFailed = statusState === 'failed';
+  const title = isPolling ? 'Đang xác nhận giao dịch' : isFailed ? 'Thanh toán chưa hoàn tất' : 'Cần thêm một lần kiểm tra';
+  const description = isPolling
+    ? 'VNPay đã đưa bạn trở lại NexCinema. Hệ thống đang đối chiếu chữ ký và cập nhật vé.'
+    : isFailed
+      ? 'Giao dịch bị hủy hoặc VNPay trả về kết quả không thành công. Ghế sẽ được mở lại theo thời hạn giữ.'
+      : 'Kết quả chưa kịp đồng bộ trong lần kiểm tra đầu tiên. Bạn có thể kiểm tra lại ngay mà không cần thanh toán lần nữa.';
 
-  // Timeout state
   return (
-    <div className="min-h-screen bg-[#090514] text-white flex flex-col items-center justify-center p-6 text-center">
-      <div className="bg-[#1b1223]/60 backdrop-blur-md border border-white/5 p-10 rounded-3xl max-w-md w-full flex flex-col items-center gap-6 shadow-2xl">
-        <div className="w-16 h-16 bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center border border-yellow-500/30 animate-pulse">
-          <AlertCircle size={36} />
+    <main className="relative grid min-h-screen place-items-center overflow-hidden bg-[#f4f1f1] p-5 text-left">
+      <div className="absolute -left-24 top-1/3 size-72 rounded-full bg-red-200/35 blur-3xl" />
+      <div className="absolute -right-24 bottom-0 size-80 rounded-full bg-neutral-300/50 blur-3xl" />
+
+      <section className="relative w-full max-w-xl overflow-hidden rounded-[32px] bg-white shadow-[0_32px_90px_rgba(23,23,23,.14)] ring-1 ring-black/5">
+        <div className="bg-neutral-950 px-6 py-7 text-white sm:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.18em] text-neutral-400"><ShieldCheck size={15} className="text-emerald-400" /> VNPay Sandbox</span>
+            <span className="font-mono text-[10px] text-neutral-500">{maGiaoDich?.slice(0, 8).toUpperCase()}</span>
+          </div>
+          <div className="mt-8 flex items-start gap-4">
+            {isPolling ? (
+              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-red-500/15 text-red-400"><Loader2 className="animate-spin" size={28} /></span>
+            ) : isFailed ? (
+              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-red-500/15 text-red-400"><XCircle size={28} /></span>
+            ) : (
+              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-amber-500/15 text-amber-400"><AlertCircle size={28} /></span>
+            )}
+            <div><p className="text-[9px] font-black uppercase tracking-[.18em] text-red-400">Trạng thái thanh toán</p><h1 className="mt-1 text-2xl font-extrabold tracking-[-.03em]">{title}</h1><p className="mt-3 text-xs leading-relaxed text-neutral-400">{description}</p></div>
+          </div>
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-wider italic text-yellow-500">Đang Xử Lý Giao Dịch</h2>
-        <p className="text-gray-400 text-sm">
-          Giao dịch đang được xử lý hoặc mất quá nhiều thời gian để phản hồi. Vui lòng kiểm tra lại trạng thái trong lịch sử đặt vé của bạn sau ít phút.
-        </p>
-        <div className="flex flex-col gap-3 w-full mt-4">
-          <button 
-            onClick={() => navigate('/')}
-            className="w-full bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 font-bold py-3 rounded-xl transition-all text-xs uppercase flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Home size={16} /> Quay về Trang chủ
-          </button>
-          <button 
-            onClick={() => navigate('/profile', { state: { activeTab: 'upcoming' } })}
-            className="w-full bg-[#ff436e] hover:bg-[#e0325a] text-white font-bold py-3 rounded-xl transition-all text-xs uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,67,110,0.3)] cursor-pointer"
-          >
-            <User size={16} /> Kiểm tra Lịch sử đặt vé
-          </button>
+
+        <div className="p-6 sm:p-8">
+          <div className="grid grid-cols-[24px_1fr] gap-x-3 gap-y-0">
+            <span className="grid size-6 place-items-center rounded-full bg-emerald-500 text-white"><Check size={13} strokeWidth={3} /></span>
+            <div className="border-l border-neutral-200 pb-6 pl-4"><strong className="block text-xs text-neutral-950">Đã trở về từ VNPay</strong><small className="mt-1 block text-[11px] text-neutral-500">Thông tin phản hồi đã được ký bởi cổng thanh toán.</small></div>
+            <span className={`grid size-6 place-items-center rounded-full ${isPolling ? 'bg-(--client-primary) text-white' : isFailed ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'}`}>{isPolling ? <Loader2 size={13} className="animate-spin" /> : <AlertCircle size={13} />}</span>
+            <div className="pl-4"><strong className="block text-xs text-neutral-950">Đối chiếu và phát hành vé</strong><small className="mt-1 block text-[11px] text-neutral-500">{isPolling ? 'Đang xử lý, thường chỉ mất vài giây.' : 'Chưa có kết quả cuối cùng cho giao dịch này.'}</small></div>
+          </div>
+
+          {!isPolling && (
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              {!isFailed && (
+                <button type="button" onClick={() => { setStatusState('polling'); setRetryKey((value) => value + 1); }} className="group flex min-h-12 items-center justify-between rounded-xl bg-(--client-primary) px-4 text-xs font-extrabold text-white transition hover:bg-(--client-primary-hover)">
+                  Kiểm tra lại <span className="grid size-7 place-items-center rounded-lg bg-white/15"><RefreshCw size={14} /></span>
+                </button>
+              )}
+              <button type="button" onClick={() => navigate('/profile', { state: { activeTab: 'upcoming' } })} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-xs font-bold text-neutral-700 transition hover:bg-neutral-100">
+                <User size={15} /> Lịch sử đặt vé
+              </button>
+              <button type="button" onClick={() => navigate('/')} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border border-neutral-200 px-4 text-xs font-bold text-neutral-700 transition hover:bg-neutral-50 ${isFailed ? 'sm:col-span-2' : ''}`}>
+                <Home size={15} /> Về trang chủ <ArrowRight size={14} />
+              </button>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

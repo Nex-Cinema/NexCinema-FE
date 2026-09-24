@@ -19,16 +19,20 @@ export const getPayOSPaymentStatus = (maGiaoDich) => {
 };
 
 /**
- * Tạo link thanh toán VNPay
- * @param {string} maPhieuDat 
+ * Tạo URL thanh toán VNPay Sandbox.
+ *
+ * @param {string} maPhieuDat - Mã phiếu đặt đang chờ thanh toán.
+ * @returns {Promise<object>} Thông tin giao dịch và URL chuyển hướng.
  */
 export const createVNPayPayment = (maPhieuDat) => {
   return axiosClient.post('/payment/vnpay/create', { MaPhieuDat: maPhieuDat });
 };
 
 /**
- * Lấy trạng thái giao dịch thanh toán VNPay
- * @param {string} maGiaoDich 
+ * Lấy trạng thái giao dịch VNPay đã được backend cập nhật qua IPN.
+ *
+ * @param {string} maGiaoDich - Mã giao dịch nội bộ hoặc mã tham chiếu VNPay.
+ * @returns {Promise<object>} Trạng thái giao dịch và phiếu đặt.
  */
 export const getVNPayPaymentStatus = (maGiaoDich) => {
   return axiosClient.get(`/payment/vnpay/${maGiaoDich}/status`);

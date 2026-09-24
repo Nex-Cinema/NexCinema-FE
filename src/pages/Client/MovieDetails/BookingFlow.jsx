@@ -1,8 +1,8 @@
 import SeatSelection from '../SeatSelection';
 import Payment from '../Payment';
 import TicketConfirmation from '../TicketConfirmation';
-import { formatTime } from './ShowtimeSelector';
 import BookingStepper from '../../../components/Client/BookingStepper';
+import { formatShowtimeTime } from '../../../utils/showtimeHelper';
 
 /**
  * BookingFlow
@@ -64,7 +64,7 @@ const BookingFlow = ({
         selectedDateId={selectedDateId}
         currentSlot={currentSlot}
         selectedSeats={confirmedSeats}
-        formatTime={formatTime}
+        formatTime={formatShowtimeTime}
         bookingResult={bookingResult}
         onHome={onHome}
       />
@@ -80,7 +80,7 @@ const BookingFlow = ({
         currentSlot={currentSlot}
         selectedSeats={confirmedSeats}
         amount={confirmedTotalPrice}
-        formatTime={formatTime}
+        formatTime={formatShowtimeTime}
         timeLeft={timeLeft}
         maSuatChieu={maSuatChieu}
         heldSeatIds={heldSeatIds}
@@ -99,7 +99,7 @@ const BookingFlow = ({
         availableSlots={availableSlots}
         selectedSlotIndex={selectedSlotIndex}
         setSelectedSlotIndex={setSelectedSlotIndex}
-        formatTime={formatTime}
+        formatTime={formatShowtimeTime}
         onBack={onBackFromSeats}
         onConfirmBooking={onConfirmBooking}
         shouldReloadSeatMap={shouldReloadSeatMap}
