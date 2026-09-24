@@ -15,6 +15,8 @@ import AdminFilterSelect from '../../components/Admin/Common/AdminFilterSelect';
 import { AdminPersonCell } from '../../components/Admin/Common/AdminEntityCell';
 import { AdminEmptyState, AdminLoadingSkeleton } from '../../components/Admin/Common/AdminState';
 import AdminPagination from '../../components/Admin/Common/AdminPagination';
+import AdminButton from '../../components/Admin/Common/AdminButton';
+import FormField from '../../components/Admin/Common/FormField';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -215,49 +217,55 @@ const Customers = () => {
       {/* Side Drawer: Transaction History */}
       {isHistoryOpen && (
         <div className="fixed inset-0 z-[150] flex justify-end">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsHistoryOpen(false)}></div>
-          <div className="relative w-full max-w-2xl bg-[#0b0f19] h-screen shadow-2xl border-l border-white/10 p-8 animate-in slide-in-from-right duration-300 flex flex-col">
-            <div className="flex items-center justify-between mb-8">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setIsHistoryOpen(false)}></div>
+          <div className="relative w-full max-w-2xl bg-white h-screen shadow-2xl border-l border-neutral-200 p-6 flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="flex items-start justify-between pb-4 mb-4 border-b border-neutral-100">
               <div>
-                <h3 className="text-xl font-bold text-white">Lịch sử đặt vé</h3>
-                <p className="text-slate-500 text-xs mt-1">
-                  Khách hàng: <strong>{selectedCust?.HoTen}</strong> ({selectedCust?.Email}) | SĐT: {selectedCust?.SoDienThoai} | Giới tính: {selectedCust?.GioiTinh} | Ngày sinh: {selectedCust?.NgaySinh}
+                <h3 className="text-lg font-bold text-neutral-900">Lịch sử đặt vé</h3>
+                <p className="text-neutral-500 text-xs mt-1 leading-relaxed">
+                  Khách hàng: <strong className="text-neutral-800">{selectedCust?.HoTen}</strong> ({selectedCust?.Email}) | SĐT: {selectedCust?.SoDienThoai} | Giới tính: {selectedCust?.GioiTinh} | Ngày sinh: {selectedCust?.NgaySinh}
                 </p>
               </div>
-              <button onClick={() => setIsHistoryOpen(false)} className="p-2 hover:bg-white/5 rounded-xl cursor-pointer text-slate-400 hover:text-white transition-all"><X size={20} /></button>
+              <button 
+                onClick={() => setIsHistoryOpen(false)} 
+                className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
+                title="Đóng"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div className="flex-grow overflow-y-auto space-y-4 pr-1 no-scrollbar">
+            <div className="flex-grow overflow-y-auto space-y-3 pr-1">
               {loadingTransactions ? (
-                <div className="h-64 flex justify-center items-center text-slate-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500 mr-3"></div>
+                <div className="h-64 flex justify-center items-center text-neutral-500 text-sm">
+                  <div className="animate-spin rounded-full h-7 w-7 border-t-2 border-b-2 border-red-600 mr-3"></div>
                   Đang tải giao dịch...
                 </div>
               ) : transactions.length === 0 ? (
-                <div className="h-64 flex flex-col justify-center items-center text-slate-600 border border-dashed border-white/5 rounded-3xl">
-                  <CheckSquare size={32} className="mb-2" />
-                  <span>Chưa có giao dịch nào được thực hiện.</span>
+                <div className="h-64 flex flex-col justify-center items-center text-neutral-400 border border-dashed border-neutral-200 rounded-2xl">
+                  <CheckSquare size={32} className="mb-2 text-neutral-300" />
+                  <span className="text-sm">Chưa có giao dịch nào được thực hiện.</span>
                 </div>
               ) : (
                 transactions.map((t) => (
-                  <div key={t.MaDatVe} className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={t.MaDatVe} className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4 transition-all hover:border-neutral-300 hover:bg-white">
+                    <div className="flex justify-between items-start mb-2">
                       <div>
-                        <span className="text-xs text-red-500 font-bold font-mono">{t.MaDatVe}</span>
-                        <h4 className="font-bold text-white text-sm mt-1">{t.Phim}</h4>
+                        <span className="text-xs font-semibold text-red-600 font-mono">{t.MaDatVe}</span>
+                        <h4 className="font-semibold text-neutral-900 text-sm mt-0.5">{t.Phim}</h4>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        t.TrangThai === 'Thành công' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-white/5 text-slate-500 border border-white/5'
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        t.TrangThai === 'Thành công' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
                       }`}>
                         {t.TrangThai}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-400 mt-4">
-                      <div>Ghế: <span className="text-slate-200">{t.Ghe}</span></div>
-                      <div>Phương thức: <span className="text-slate-200">{t.PTThanhToan}</span></div>
-                      <div>Ngày đặt: <span className="text-slate-200 font-mono">{t.NgayDat}</span></div>
-                      <div>Tổng tiền: <span className="text-red-500 font-bold font-mono">{formatPrice(t.TongTien)}</span></div>
+                    <div className="grid grid-cols-2 gap-3 text-xs text-neutral-500 mt-3 pt-3 border-t border-neutral-200/60">
+                      <div>Ghế: <span className="font-medium text-neutral-800">{t.Ghe}</span></div>
+                      <div>Phương thức: <span className="font-medium text-neutral-800">{t.PTThanhToan}</span></div>
+                      <div>Ngày đặt: <span className="font-medium text-neutral-800 font-mono">{t.NgayDat}</span></div>
+                      <div>Tổng tiền: <span className="font-semibold text-red-600 font-mono">{formatPrice(t.TongTien)}</span></div>
                     </div>
                   </div>
                 ))
@@ -273,39 +281,38 @@ const Customers = () => {
         onClose={() => setIsLockModalOpen(false)} 
         title="Khóa tài khoản khách hàng"
       >
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 bg-red-500/5 border border-red-500/15 rounded-2xl p-4 text-red-400 text-sm">
-            <AlertTriangle size={24} className="shrink-0" />
-            <p>Hành động này sẽ khóa tài khoản của <strong>{selectedCust?.HoTen}</strong>, ngăn chặn hoàn toàn việc đăng nhập và đặt vé trực tuyến.</p>
+        <div className="space-y-5">
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-xs leading-relaxed text-red-800">
+            <AlertTriangle size={20} className="shrink-0 text-red-600 mt-0.5" />
+            <p>Hành động này sẽ khóa tài khoản của <strong className="font-semibold text-red-900">{selectedCust?.HoTen}</strong>, ngăn chặn hoàn toàn việc đăng nhập và đặt vé trực tuyến.</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lý do khóa tài khoản (Bắt buộc)</label>
+          <FormField label="Lý do khóa tài khoản" required helperText="Ghi rõ lý do vi phạm hoặc yêu cầu khóa tài khoản.">
             <textarea 
               required
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-slate-300 text-sm min-h-[100px]"
+              className="min-h-[100px] resize-y"
               placeholder="Nhập lý do chi tiết..."
               value={lockReason}
               onChange={e => setLockReason(e.target.value)}
             />
-          </div>
+          </FormField>
 
-          <div className="flex gap-4 pt-4 border-t border-white/5">
-            <button 
+          <div className="flex justify-end gap-2 border-t border-neutral-100 pt-4">
+            <AdminButton 
               type="button" 
-              onClick={() => setIsLockModalOpen(false)} 
-              className="flex-grow py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 hover:text-white transition-all text-xs uppercase tracking-widest cursor-pointer text-slate-400"
+              variant="outline"
+              onClick={() => setIsLockModalOpen(false)}
             >
               Hủy
-            </button>
-            <button 
+            </AdminButton>
+            <AdminButton 
               type="button"
+              variant="danger"
               disabled={!lockReason.trim()}
               onClick={handleToggleLockStatus}
-              className="flex-grow py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:opacity-50 text-white transition-all shadow-lg shadow-red-500/20 text-xs uppercase tracking-widest cursor-pointer"
             >
-              Xác nhận Khóa
-            </button>
+              Xác nhận khóa
+            </AdminButton>
           </div>
         </div>
       </Modal>

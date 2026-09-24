@@ -6,6 +6,8 @@ import AdminFilterSelect from '../../../components/Admin/Common/AdminFilterSelec
 import { formatPrice } from './formatPrice';
 import { AlertTriangle, Eye, Check, X } from 'lucide-react';
 import Modal from '../../../components/Admin/Common/Modal';
+import AdminButton from '../../../components/Admin/Common/AdminButton';
+import FormField from '../../../components/Admin/Common/FormField';
 import ConfirmDialog from '../../../components/Common/ConfirmDialog';
 import useRefundRequests from './useRefundRequests';
 import RefundDetailModal from './RefundDetailModal';
@@ -156,39 +158,40 @@ export default function RefundRequestsTab({ activeTab }) {
         onClose={() => setIsRejectModalOpen(false)} 
         title="Từ chối yêu cầu hoàn tiền"
       >
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 bg-red-500/5 border border-red-500/15 rounded-2xl p-4 text-red-400 text-sm">
-            <AlertTriangle size={24} className="shrink-0" />
-            <p>Hành động này sẽ từ chối đơn hoàn tiền. Trạng thái yêu cầu hoàn tiền chuyển thành "Từ chối". Vé và giao dịch đặt vé vẫn sẽ ở trạng thái đã hủy (hoặc giữ nguyên).</p>
+        <div className="space-y-5">
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-xs leading-relaxed text-red-800">
+            <AlertTriangle size={20} className="shrink-0 text-red-600 mt-0.5" />
+            <p>
+              Hành động này sẽ từ chối đơn hoàn tiền. Trạng thái yêu cầu hoàn tiền chuyển thành &quot;Từ chối&quot;. Vé và giao dịch đặt vé vẫn sẽ ở trạng thái đã hủy (hoặc giữ nguyên).
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nhập lý do từ chối (LyDoTuChoi)</label>
+          <FormField label="Lý do từ chối (LyDoTuChoi)" required helperText="Ghi rõ lý do không chấp thuận hoàn tiền cho yêu cầu này">
             <textarea 
               required
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3 px-4 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-slate-300 text-sm min-h-[80px]"
+              className="min-h-[90px] resize-y"
               placeholder="Nhập lý do từ chối hoàn tiền..."
               value={rejectReasonInput}
               onChange={e => setRejectReasonInput(e.target.value)}
             />
-          </div>
+          </FormField>
 
-          <div className="flex gap-4 pt-4 border-t border-white/5">
-            <button 
+          <div className="flex justify-end gap-2 border-t border-neutral-100 pt-4">
+            <AdminButton 
               type="button" 
-              onClick={() => setIsRejectModalOpen(false)} 
-              className="flex-grow py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 hover:text-white transition-all text-xs uppercase tracking-widest cursor-pointer text-slate-400"
+              variant="outline"
+              onClick={() => setIsRejectModalOpen(false)}
             >
               Đóng
-            </button>
-            <button 
+            </AdminButton>
+            <AdminButton 
               type="button"
+              variant="danger"
               disabled={!rejectReasonInput.trim() || isActionLoading}
               onClick={handleRejectSubmit}
-              className="flex-grow py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:opacity-50 text-white transition-all shadow-lg shadow-red-500/20 text-xs uppercase tracking-widest cursor-pointer"
             >
-              Xác nhận Từ chối
-            </button>
+              {isActionLoading ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+            </AdminButton>
           </div>
         </div>
       </Modal>
