@@ -128,7 +128,7 @@ export default function BookingTransactionsTab() {
                 >
                   <option value="All">Phương thức thanh toán</option>
                   <option value="PAYOS">PayOS</option>
-                  <option value="VNPAY">VNPay</option>
+                  <option value="VNPAY">VNPay Sandbox</option>
                   <option value="CARD">Thẻ Quốc tế</option>
                   <option value="TIEN_MAT">Tiền mặt</option>
                   <option value="CHUYEN_KHOAN">Chuyển khoản</option>
