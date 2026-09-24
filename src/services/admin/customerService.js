@@ -1,4 +1,14 @@
 import axiosClient from '../../api/axiosClient';
+import { fetchAllPages } from './pagination';
+
+const getUsers = (params = {}) => fetchAllPages(
+  (pageParams) => axiosClient.get('/admin/nguoi-dung', { params: pageParams }),
+  params,
+);
+
+const getBookings = () => fetchAllPages(
+  (params) => axiosClient.get('/admin/giao-dich/phieu-dat', { params }),
+);
 
 const mapCustomer = (u) => ({
   MaKhachHang: u.KhachHang?.MaKhachHang || u.MaTaiKhoan,
@@ -17,15 +27,13 @@ const mapCustomer = (u) => ({
 
 const customerService = {
   getCustomers: async () => {
-    const res = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
-    const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+    const items = await getUsers({ vaiTro: 'CUSTOMER' });
     return items.map(mapCustomer);
   },
 
   lockCustomerAccount: async (maKhachHang, reason) => {
     // 1. Resolve maKhachHang to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
-    const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
+    const users = await getUsers({ vaiTro: 'CUSTOMER' });
     const user = users.find(u => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản khách hàng với mã: ${maKhachHang}`);
@@ -42,8 +50,7 @@ const customerService = {
 
   unlockCustomerAccount: async (maKhachHang) => {
     // 1. Resolve maKhachHang to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?vaiTro=CUSTOMER&limit=200');
-    const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
+    const users = await getUsers({ vaiTro: 'CUSTOMER' });
     const user = users.find(u => u.KhachHang?.MaKhachHang === maKhachHang || u.MaTaiKhoan === maKhachHang);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản khách hàng với mã: ${maKhachHang}`);
@@ -55,8 +62,7 @@ const customerService = {
   },
 
   getCustomerTransactions: async (maKhachHang) => {
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
-    const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+    const items = await getBookings();
     
     // Filter tickets belonging to this customer
     return items

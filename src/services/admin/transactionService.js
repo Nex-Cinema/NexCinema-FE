@@ -1,9 +1,13 @@
 import axiosClient from '../../api/axiosClient';
+import { fetchAllPages } from './pagination';
+
+const getBookings = () => fetchAllPages(
+  (params) => axiosClient.get('/admin/giao-dich/phieu-dat', { params }),
+);
 
 const transactionService = {
   getTransactions: async () => {
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
-    const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+    const items = await getBookings();
 
     const txList = [];
     items.forEach(p => {
@@ -67,8 +71,7 @@ const transactionService = {
     }
 
     // Resolve transaction amount by retrieving all receipts
-    const res = await axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000');
-    const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+    const items = await getBookings();
     
     let targetGd = null;
     for (const p of items) {

@@ -1,4 +1,10 @@
 import axiosClient from '../../api/axiosClient';
+import { fetchAllPages } from './pagination';
+
+const getUsers = (params = {}) => fetchAllPages(
+  (pageParams) => axiosClient.get('/admin/nguoi-dung', { params: pageParams }),
+  params,
+);
 
 const mapUserToStaff = (u) => ({
   MaNhanVien: u.NhanVien?.MaNhanVien || u.MaTaiKhoan,
@@ -17,8 +23,7 @@ const mapUserToStaff = (u) => ({
 
 const personnelService = {
   getStaff: async () => {
-    const res = await axiosClient.get('/admin/nguoi-dung?limit=200');
-    const items = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+    const items = await getUsers();
     // Only return ADMIN and STAFF roles for Personnel module
     return items
       .filter(u => u.VaiTro === 'ADMIN' || u.VaiTro === 'STAFF')
@@ -43,8 +48,7 @@ const personnelService = {
 
   updateStaff: async (maNhanVien, updates) => {
     // 1. Resolve maNhanVien to maTaiKhoan
-    const resList = await axiosClient.get('/admin/nguoi-dung?limit=200');
-    const users = Array.isArray(resList) ? resList : (resList && Array.isArray(resList.data) ? resList.data : []);
+    const users = await getUsers();
     const user = users.find(u => u.NhanVien?.MaNhanVien === maNhanVien || u.MaTaiKhoan === maNhanVien);
     if (!user) {
       throw new Error(`Không tìm thấy tài khoản nhân viên với mã: ${maNhanVien}`);

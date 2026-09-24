@@ -1,4 +1,5 @@
 import axiosClient from '../../api/axiosClient';
+import { fetchAllPages } from './pagination';
 
 const statsService = {
   getRevenueStats: async (filters = {}) => {
@@ -14,13 +15,11 @@ const statsService = {
       ...(endDate && { denNgay: endDate }),
     };
 
-    const [revData, fillData, resReceipts] = await Promise.all([
+    const [revData, fillData, receipts] = await Promise.all([
       axiosClient.get('/admin/thong-ke/doanh-thu', { params }),
       axiosClient.get('/admin/thong-ke/ti-le-ghe', { params: fillParams }),
-      axiosClient.get('/admin/giao-dich/phieu-dat?limit=1000')
+      fetchAllPages((pageParams) => axiosClient.get('/admin/giao-dich/phieu-dat', { params: pageParams })),
     ]);
-
-    const receipts = Array.isArray(resReceipts) ? resReceipts : (resReceipts?.data || []);
 
     // 1. Core Metrics
     const totalRevenue = revData?.TongDoanhThu || 0;

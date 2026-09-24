@@ -1,4 +1,5 @@
 import axiosClient from '../../api/axiosClient';
+import { asCollection } from './pagination';
 
 const formatTime = (t) => {
   if (!t) return '00:00:00';
@@ -26,7 +27,7 @@ const mapShift = (s) => ({
 const shiftService = {
   getShifts: async () => {
     const data = await axiosClient.get('/admin/ca-lam-viec');
-    return data.map(mapShift);
+    return asCollection(data, 'ca làm việc').map(mapShift);
   },
 
   addShift: async (shift) => {
@@ -64,7 +65,7 @@ const shiftService = {
 
   getShiftDetails: async () => {
     const data = await axiosClient.get('/admin/ca-lam-viec/phan-ca/lich-truc');
-    return data.map(sd => {
+    return asCollection(data, 'lịch trực').map(sd => {
       const staffName = sd.NhanVien?.TaiKhoan?.HoTen || 'N/A';
       const staffRole = sd.NhanVien?.ChucVu || 'N/A';
       const shiftName = sd.CaLamViec?.TenCa || 'N/A';
