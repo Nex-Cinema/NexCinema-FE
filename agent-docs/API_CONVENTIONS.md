@@ -154,7 +154,7 @@ const fetchData = async () => {
 | `authApi.js` | Auth | `POST /auth/login`, `/auth/register`, `/auth/logout`, `/auth/refresh-token` |
 | `movieApi.js` | Movie | `GET /phim`, `GET /phim/:id` |
 | `bookingApi.js` | Booking | `GET /suat-chieu/:id/ghe`, `POST /dat-ve/giu-ghe`, `POST /dat-ve/huy-giu-ghe`, `POST /dat-ve/thanh-toan` |
-| `paymentApi.js` | Payment | `POST /payment/payos/create`, `GET /payment/payos/:id/status`, `POST /payment/vnpay/create`, `GET /payment/vnpay/:id/status` |
+| `paymentApi.js` | Payment | PayOS create/status và VNPay Sandbox create/status |
 | `refundApi.js` | Refund | Hoàn vé / hủy đặt vé |
 | `accountApi.js` | Account | `GET /tai-khoan/me`, `PUT /tai-khoan/me` |
 | `bookingHistoryApi.js` | History | `GET /dat-ve/lich-su` |
@@ -211,15 +211,6 @@ Backend sử dụng tiếng Việt không dấu:
 
 ## 8. Payment API Patterns
 
-### VNPay flow
-```
-POST /payment/vnpay/create { MaPhieuDat }
-  → { paymentUrl: "https://sandbox.vnpayment.vn/..." }
-  → Redirect user to paymentUrl
-  → User pays → VNPay calls backend callback
-  → User redirected to /payment/vnpay-return?vnp_ResponseCode=...
-```
-
 ### PayOS flow
 ```
 POST /payment/payos/create { MaPhieuDat }
@@ -227,6 +218,16 @@ POST /payment/payos/create { MaPhieuDat }
   → Show QR code để user quét
   → Poll: GET /payment/payos/:maGiaoDich/status
   → Status: PENDING → PAID / CANCELLED
+```
+
+### VNPay Sandbox flow
+```
+POST /payment/vnpay/create { MaPhieuDat }
+  → { paymentUrl, maGiaoDich, expiresAt }
+  → Redirect browser tới VNPay Sandbox
+  → VNPay gọi GET /payment/vnpay/ipn để backend xác thực chữ ký và cập nhật DB
+  → Browser quay lại /payment/vnpay-return?maGiaoDich=...
+  → Poll GET /payment/vnpay/:maGiaoDich/status
 ```
 
 ---

@@ -3,6 +3,8 @@
 > Tài liệu này dành cho **AI Coding Agent** làm việc trong repository `cinema-booking-system-frontend`.  
 > Đọc toàn bộ file này trước khi thực hiện bất kỳ task nào.
 
+> Trước khi code, đọc thêm [`agent-docs/CURRENT_PROJECT_CONTEXT.md`](agent-docs/CURRENT_PROJECT_CONTEXT.md). Tài liệu đó ghi nhận kiến trúc, màu đang dùng và các quyết định nghiệp vụ mới nhất. Nếu tài liệu UI cũ mâu thuẫn với user request hoặc CSS token hiện hành, ưu tiên user request và token hiện hành.
+
 ---
 
 ## 1. Business Context
@@ -60,9 +62,9 @@ Chọn ghế → Thanh toán → Xác nhận
 
 ## 3. Payment
 
-Chỉ hỗ trợ (prototype):
-- **VNPay** — redirect URL, callback `/payment/vnpay-return`
+Chỉ hỗ trợ:
 - **PayOS** — QR payment, polling status
+- **VNPay Sandbox** — redirect, IPN, return URL và polling trạng thái
 
 Payment flow:
 ```
@@ -106,7 +108,7 @@ Trạng thái thanh toán:
 
 1. Thêm nghiệp vụ **không có trong business context** (food, loyalty, shipping...).
 2. Tạo `BookingCartStore` hay bất kỳ cart-like state nào nếu không được yêu cầu.
-3. Thêm payment gateway mới ngoài VNPay và PayOS.
+3. Thêm payment gateway mới ngoài PayOS và VNPay Sandbox.
 4. Thêm authentication provider mới ngoài Email và Google.
 5. Thêm membership tier, loyalty points, quà tặng, promotion/coupon.
 6. Dùng `useEffect` để fetch data mà không có cleanup hoặc dependency array.

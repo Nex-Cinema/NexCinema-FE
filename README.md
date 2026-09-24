@@ -169,8 +169,7 @@ docs: update frontend README
 - Đây là repository **frontend only**, không phải monorepo/full-stack repository.
 - Backend phải chạy riêng để các API như đăng nhập, phim, suất chiếu, giữ ghế, thanh toán giả lập và lịch sử đặt vé hoạt động.
 - API prefix mặc định: `http://localhost:5000/api/v1`.
-- Tích hợp thanh toán thật MoMo/VNPay chưa hoàn thiện và đang được hoãn.
-- Checkout hiện tại sử dụng luồng thanh toán giả lập qua backend.
+- Thanh toán trực tuyến hỗ trợ PayOS và VNPay Sandbox dành cho demo/tích hợp.
 - QR code trong giao diện được tạo từ `MaChiTietDat` để phục vụ demo/check-in; không mô tả đây là secure token do backend sinh.
 - Frontend có thể dùng visual movie assets cục bộ làm fallback nếu URL poster/backdrop/trailer từ backend bị thiếu hoặc lỗi.
 - Dự án phục vụ mục đích học thuật/đồ án nhóm, không nên xem là hệ thống production-ready.

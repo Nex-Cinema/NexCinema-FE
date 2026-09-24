@@ -44,15 +44,16 @@ Dự án ưu tiên:
 ### 2.2 Payment Flow
 
 ```
-/checkout → chọn VNPay → redirect sang VNPay → callback /payment/vnpay-return
 /checkout → chọn PayOS → hiển thị QR → poll status → kết quả
+/checkout → chọn VNPay Sandbox → thanh toán bằng thẻ test → IPN → return → kết quả
 ```
 
 **Phải kiểm tra:**
 - [ ] Hiển thị đúng số tiền tổng = sum(GiaVeTinhToan) của các ghế đã chọn.
-- [ ] VNPay: redirect URL hợp lệ.
-- [ ] VNPay return: parse đúng `vnp_ResponseCode`, hiển thị kết quả đúng.
 - [ ] PayOS: QR hiển thị, polling dừng khi status = `PAID` hoặc `CANCELLED`.
+- [ ] VNPay Sandbox: URL có chữ ký hợp lệ và mở đúng gateway test.
+- [ ] VNPay Sandbox: IPN đúng chữ ký cập nhật booking; IPN sai chữ ký bị từ chối.
+- [ ] VNPay Sandbox: return page poll đến thành công, thất bại hoặc timeout.
 - [ ] Trạng thái PENDING / PROCESSING / SUCCESS / FAILED / CANCELLED hiển thị đúng badge.
 
 ### 2.3 Authentication

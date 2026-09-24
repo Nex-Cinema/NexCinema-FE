@@ -105,14 +105,15 @@ MovieDetails.jsx
 
 Checkout.jsx
   → nhận bookingPayload từ location.state
-  → render Checkout flow (chọn phương thức thanh toán, tóm tắt)
+  → render Checkout flow (tóm tắt và thanh toán)
   → gọi realCheckout API
-  → VNPay: redirect | PayOS: show QR
+  → PayOS: show QR và poll trạng thái
+  → VNPay Sandbox: redirect sang gateway
 
 VNPayReturn.jsx
-  → nhận query params từ VNPay redirect
-  → fetch payment status
-  → hiển thị kết quả
+  → nhận mã giao dịch từ backend return URL
+  → poll trạng thái đã được IPN cập nhật
+  → hiển thị vé hoặc trạng thái lỗi/timeout
 
 TicketConfirmation.jsx
   → hiển thị vé điện tử (QR code + thông tin đặt vé)
