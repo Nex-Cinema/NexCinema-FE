@@ -29,3 +29,6 @@ dist-ssr
 # CodeGraph
 .codegraph/
 
+# Local Git worktrees
+.worktrees/
+
