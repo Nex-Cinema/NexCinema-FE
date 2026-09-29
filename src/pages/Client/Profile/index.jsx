@@ -37,7 +37,9 @@ const parseDate = (dStr) => {
 const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('account');
+  const [activeTab, setActiveTab] = useState(
+    () => location.state?.activeTab || 'account'
+  );
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -139,13 +141,6 @@ const Profile = () => {
     };
     fetchData();
   }, [location.key]);
-
-  // Sync tab from navigation state (e.g. from TicketConfirmation)
-  useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
 
   // ─── Booking detail ─────────────────────────
   const handleOpenDetail = async (maPhieuDat) => {

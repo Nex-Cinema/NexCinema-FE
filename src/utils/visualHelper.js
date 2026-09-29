@@ -70,9 +70,9 @@ export const getMovieVisuals = (movie) => {
   }
 
   // Resolve matching/fallback index
-  let finalPoster = '';
-  let finalBackdrop = '';
-  let finalTrailer = '';
+  let finalPoster;
+  let finalBackdrop;
+  let finalTrailer;
 
   if (mockMovie) {
     finalPoster = mockMovie.poster_path;
