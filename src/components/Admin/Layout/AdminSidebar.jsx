@@ -3,9 +3,9 @@ import { NavLink } from 'react-router-dom';
 import axiosClient from '../../../api/axiosClient';
 import AdminConfirmDialog from '../Common/AdminConfirmDialog';
 import {
-  BarChart3, CalendarDays, ChevronRight, CircleUserRound, Clock3,
+  BarChart3, CalendarDays, ChevronRight, CircleUserRound,
   Film, Grid3X3, LogOut, ReceiptText, Theater,
-  UserRoundCog, WalletCards, X, CreditCard,
+  WalletCards, X, CreditCard, ScanLine,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -24,10 +24,14 @@ const navigationGroups = [
     ],
   },
   {
+    label: 'Vận hành & Soát vé',
+    items: [
+      { name: 'Soát vé', icon: ScanLine, path: '/admin/check-in' },
+    ],
+  },
+  {
     label: 'Hệ thống',
     items: [
-      { name: 'Nhân viên', icon: UserRoundCog, path: '/admin/personnel' },
-      { name: 'Ca làm việc', icon: Clock3, path: '/admin/shifts' },
       { name: 'Khách hàng', icon: CircleUserRound, path: '/admin/customers' },
       { name: 'Giao dịch', icon: ReceiptText, path: '/admin/transactions' },
       { name: 'Cổng thanh toán', icon: CreditCard, path: '/admin/payment-gateways' },

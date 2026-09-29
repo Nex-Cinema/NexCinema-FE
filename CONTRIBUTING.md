@@ -93,7 +93,6 @@ Format: `<type>(<scope>): <subject>`
 | `showtime` | Showtime display, selection |
 | `seat` | Seat map, seat types |
 | `admin` | Admin panel |
-| `staff` | Staff portal |
 | `api` | API layer changes |
 | `ui` | Shared components, design system |
 | `nav` | Navbar, footer, layout |

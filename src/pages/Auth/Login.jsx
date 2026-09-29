@@ -42,15 +42,12 @@ const Login = () => {
 
       if (role === "CUSTOMER") {
         navigate(from || "/", { replace: true });
-      } else if (role === "STAFF") {
-        // If from is a staff page, go there; otherwise staff dashboard
-        const staffTarget = from && from.startsWith("/staff") ? from : "/staff/dashboard";
-        navigate(staffTarget, { replace: true });
       } else if (role === "ADMIN") {
         const adminTarget = from && from.startsWith("/admin") ? from : "/admin";
         navigate(adminTarget, { replace: true });
       } else {
-        navigate("/", { replace: true });
+        // Any role outside the current CUSTOMER/ADMIN scope is forbidden.
+        navigate("/403", { replace: true });
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -22,23 +22,13 @@ import Movies from './pages/Admin/Movies';
 import MovieEditor from './pages/Admin/MovieEditor';
 import SeatMaps from './pages/Admin/SeatMaps';
 import Pricing from './pages/Admin/Pricing';
-import Personnel from './pages/Admin/Personnel';
 import Showtimes from './pages/Admin/Showtimes';
 import Stats from './pages/Admin/Stats';
 import SeatMapTemplates from './pages/Admin/SeatMapTemplates';
-import Shifts from './pages/Admin/Shifts';
 import Customers from './pages/Admin/Customers';
 import Transactions from './pages/Admin/Transactions';
 import PaymentGateways from './pages/Admin/PaymentGateways';
-
-// Staff Pages
-import SellTicketWizard from './pages/Staff/SellTicket/SellTicketWizard';
-import StaffLayout from './components/StaffLayout/StaffLayout';
-import CheckIn from './pages/Staff/CheckInPage/index';
-import Dashboard from './pages/Staff/Dashboard';
-import StaffProfile from './pages/Staff/Profile/index';
-import Schedule from './pages/Staff/Schedule/index';
-import TransactionHistory from './pages/Staff/TransactionHistory/index';
+import CheckIn from './pages/Admin/CheckIn';
 
 function App() {
   return (
@@ -87,22 +77,10 @@ function App() {
           </Route>
         </Route>
 
-        {/* === STAFF ROUTES (Role: STAFF) === */}
-        <Route element={<ProtectedRoute allowedRoles={["STAFF"]} />}>
-          <Route path="/staff" element={<StaffLayout />}>
-            <Route index element={<Navigate to="/staff/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="sell-ticket" element={<SellTicketWizard />} />
-            <Route path="check-in" element={<CheckIn />} />
-            <Route path="profile" element={<StaffProfile />} />
-            <Route path="schedule" element={<Schedule />} />
-            <Route path="transactions" element={<TransactionHistory />} />
-          </Route>
-        </Route>
-
         {/* === ADMIN ROUTES (Role: ADMIN) === */}
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
           <Route path="/admin" element={<Navigate to="/admin/stats" replace />} />
+          <Route path="/admin/check-in" element={<CheckIn />} />
           <Route path="/admin/rooms" element={<Rooms />} />
           <Route path="/admin/rooms/:roomId/seats" element={<SeatMaps />} />
           <Route path="/admin/movies" element={<Movies />} />
@@ -110,8 +88,6 @@ function App() {
           <Route path="/admin/movies/:id" element={<MovieEditor />} />
           <Route path="/admin/seat-templates" element={<SeatMapTemplates />} />
           <Route path="/admin/pricing" element={<Pricing />} />
-          <Route path="/admin/personnel" element={<Personnel />} />
-          <Route path="/admin/shifts" element={<Shifts />} />
           <Route path="/admin/showtimes" element={<Showtimes />} />
           <Route path="/admin/customers" element={<Customers />} />
           <Route path="/admin/transactions" element={<Transactions />} />
@@ -123,7 +99,6 @@ function App() {
         <Route path="/404" element={<SystemErrorPage code={404} />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
-
     </>
   );
 }

@@ -52,7 +52,7 @@ test('direct refund describes manual recording rather than a provider transfer',
 });
 
 test('direct refund cannot submit while sending or without a reason', () => {
-  assert.match(renderDirect({ isSubmitting: true }), /disabled=""[^>]*>Đang ghi nhận/);
-  assert.match(renderDirect({ refundReason: '  ' }), /disabled=""[^>]*>Xác nhận đã hoàn tiền/);
+  assert.match(renderDirect({ isSubmitting: true }), /disabled=""[^>]*><span>Đang ghi nhận/);
+  assert.match(renderDirect({ refundReason: '  ' }), /disabled=""[^>]*><span>Xác nhận đã hoàn tiền/);
   assert.doesNotMatch(renderDirect(), /disabled=""/);
 });

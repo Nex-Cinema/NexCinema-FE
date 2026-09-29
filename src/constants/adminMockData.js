@@ -89,31 +89,11 @@ export const ADMIN_MOVIES = [
 
 export const ACCOUNTS = [
   { MaTaiKhoan: 'TK01', HoTen: 'Nguyễn Huy Bình', Email: 'binh@cinema.com', SoDienThoai: '0987654321', MatKhau: 'CinemaPlus@2026', NgaySinh: '1995-04-12', GioiTinh: 1, Role: 'Admin', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaTaiKhoan: 'TK02', HoTen: 'Trần Thị Hoa', Email: 'hoa@cinema.com', SoDienThoai: '0123456789', MatKhau: 'CinemaPlus@2026', NgaySinh: '1998-08-25', GioiTinh: 0, Role: 'Staff', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaTaiKhoan: 'TK03', HoTen: 'Lê Văn Tùng', Email: 'tung@cinema.com', SoDienThoai: '0555666777', MatKhau: 'CinemaPlus@2026', NgaySinh: '1990-11-05', GioiTinh: 1, Role: 'Manager', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH001', HoTen: 'Phạm Minh Hoàng', Email: 'hoang.pham@gmail.com', SoDienThoai: '0912345678', MatKhau: 'Customer@123', NgaySinh: '1994-05-12', GioiTinh: 1, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH002', HoTen: 'Nguyễn Diệp Chi', Email: 'chi.nd@gmail.com', SoDienThoai: '0987654321', MatKhau: 'Customer@123', NgaySinh: '1997-03-20', GioiTinh: 0, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH003', HoTen: 'Lê Anh Đức', Email: 'duc.la@gmail.com', SoDienThoai: '0901234567', MatKhau: 'Customer@123', NgaySinh: '1999-11-15', GioiTinh: 1, Role: 'Customer', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH004', HoTen: 'Vũ Hoài Nam', Email: 'nam.vh@gmail.com', SoDienThoai: '0934567890', MatKhau: 'Customer@123', NgaySinh: '1996-07-08', GioiTinh: 1, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH005', HoTen: 'Đỗ Thùy Linh', Email: 'linh.dt@gmail.com', SoDienThoai: '0978901234', MatKhau: 'Customer@123', NgaySinh: '2000-01-25', GioiTinh: 0, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const STAFF = [
-  { MaNhanVien: 'NV01', MaTaiKhoan: 'TK01', ChucVu: 'Quản lý rạp', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaNhanVien: 'NV02', MaTaiKhoan: 'TK02', ChucVu: 'Nhân viên bán vé', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaNhanVien: 'NV03', MaTaiKhoan: 'TK03', ChucVu: 'Kỹ thuật viên', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const SHIFTS = [
-  { MaCaLamViec: 'C01', TenCa: 'Ca Sáng', GioBatDau: '08:00:00', GioKetThuc: '14:00:00', SoNguoiToiDa: 5, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaCaLamViec: 'C02', TenCa: 'Ca Chiều', GioBatDau: '14:00:00', GioKetThuc: '20:00:00', SoNguoiToiDa: 5, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaCaLamViec: 'C03', TenCa: 'Ca Tối', GioBatDau: '20:00:00', GioKetThuc: '02:00:00', SoNguoiToiDa: 3, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const SHIFT_DETAILS = [
-  { MaChiTietCa: 'CTC01', MaNhanVien: 'NV01', MaCaLamViec: 'C01', NgayLam: '2026-05-21', GhiChu: 'Trực quầy chính', KhaDung: 1, NgayLap: null, KieuLap: null, NgayTao: '2026-05-20 10:00:00', NgayCapNhat: null },
-  { MaChiTietCa: 'CTC02', MaNhanVien: 'NV02', MaCaLamViec: 'C02', NgayLam: '2026-05-21', GhiChu: 'Bán vé + bắp nước', KhaDung: 1, NgayLap: null, KieuLap: null, NgayTao: '2026-05-20 11:00:00', NgayCapNhat: null },
-  { MaChiTietCa: 'CTC03', MaNhanVien: 'NV02', MaCaLamViec: 'C03', NgayLam: '2026-05-22', GhiChu: 'Ca tối tăng cường', KhaDung: 0, NgayLap: null, KieuLap: null, NgayTao: '2026-05-21 08:30:00', NgayCapNhat: '2026-05-21 15:00:00' },
 ];
 
 export const SHOWTIMES = [

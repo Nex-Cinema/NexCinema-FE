@@ -18,8 +18,7 @@
 | Role | Mô tả |
 |---|---|
 | `CUSTOMER` | Người dùng xem phim, đặt vé online |
-| `STAFF` | Nhân viên rạp: bán vé tại quầy, check-in |
-| `ADMIN` | Quản trị viên: quản lý phim, suất chiếu, nhân sự, doanh thu |
+| `ADMIN` | Quản trị viên: quản lý phim, suất chiếu, phòng, soát vé, doanh thu |
 
 ### Domain model chính
 
@@ -130,7 +129,8 @@ Trạng thái thanh toán:
 | React Hot Toast | 2.x | Notifications |
 | React Player | 3.x | Trailer video |
 | Recharts | 3.x | Admin charts |
-| QRCode.react | 4.x | QR code PayOS |
+| QRCode.react | 4.x | QR code PayOS và vé đặt |
+| Html5-qrcode | 2.x | Quét QR camera / file soát vé Admin |
 
 ---
 
@@ -155,30 +155,20 @@ Trạng thái thanh toán:
 | `/profile` | `ClientProfile` |
 | `/payment/vnpay-return` | `VNPayReturn` |
 
-### Staff routes (STAFF protected)
-| Route | Component |
-|---|---|
-| `/staff/dashboard` | `Dashboard` |
-| `/staff/sell-ticket` | `SellTicketWizard` |
-| `/staff/check-in` | `CheckIn` |
-| `/staff/schedule` | `Schedule` |
-| `/staff/transactions` | `TransactionHistory` |
-| `/staff/profile` | `StaffProfile` |
-
 ### Admin routes (ADMIN protected)
 | Route | Component |
 |---|---|
 | `/admin/stats` | `Stats` |
+| `/admin/check-in` | `CheckIn` |
 | `/admin/movies` | `Movies` |
 | `/admin/showtimes` | `Showtimes` |
 | `/admin/rooms` | `Rooms` |
 | `/admin/rooms/:roomId/seats` | `SeatMaps` |
 | `/admin/seat-templates` | `SeatMapTemplates` |
 | `/admin/pricing` | `Pricing` |
-| `/admin/personnel` | `Personnel` |
-| `/admin/shifts` | `Shifts` |
 | `/admin/customers` | `Customers` |
 | `/admin/transactions` | `Transactions` |
+| `/admin/payment-gateways` | `PaymentGateways` |
 
 ---
 

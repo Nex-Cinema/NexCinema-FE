@@ -112,8 +112,8 @@ Chạy checklist này trước khi tạo PR:
 
 ### Auth
 - [ ] Các route protected chuyển hướng đúng nếu chưa đăng nhập.
-- [ ] Khách hàng không truy cập được `/staff` hoặc `/admin`.
-- [ ] Nhân viên không truy cập được `/admin`.
+- [ ] Khách hàng không truy cập được `/admin`.
+- [ ] Chỉ Admin truy cập được `/admin/check-in`.
 
 ---
 

@@ -10,7 +10,7 @@ Dự án có **hai** axios instance với mục đích khác nhau:
 
 | Instance | File | Dùng cho |
 |---|---|---|
-| `axiosClient` | `src/api/axiosClient.js` | Authenticated requests (CUSTOMER, STAFF, ADMIN) |
+| `axiosClient` | `src/api/axiosClient.js` | Authenticated requests (CUSTOMER, ADMIN) |
 | `axiosPublic` | `src/api/axiosPublic.js` | Public requests (không cần token — danh sách phim, suất chiếu) |
 
 ```js
@@ -84,9 +84,9 @@ Backend trả về một trong hai dạng:
 ```
 localStorage.accessToken   — JWT access token (short-lived)
 localStorage.refreshToken  — Refresh token (long-lived)
-localStorage.userRole      — 'CUSTOMER' | 'STAFF' | 'ADMIN'
+localStorage.userRole      — 'CUSTOMER' | 'ADMIN'
 localStorage.userName      — Display name
-localStorage.userCode      — Mã nhân viên / mã khách hàng
+localStorage.userCode      — Mã tài khoản / mã khách hàng
 ```
 
 ### Auto refresh flow
@@ -166,14 +166,13 @@ const fetchData = async () => {
 | File | Dùng cho |
 |---|---|
 | `clientService.js` | Client-side data fetching: phim, suất chiếu, sơ đồ ghế (dùng `axiosPublic`) |
-| `adminService.js` | Admin: CRUD phim, phòng chiếu, nhân sự, ... |
+| `adminService.js` | Admin: CRUD phim, phòng chiếu, khách hàng, ... |
 | `admin/movieService.js` | Admin CRUD phim |
 | `admin/showtimeService.js` | Admin quản lý suất chiếu |
 | `admin/roomService.js` | Admin quản lý phòng chiếu |
 | `admin/seatService.js` | Admin quản lý ghế |
 | `admin/pricingService.js` | Admin quản lý giá vé |
-| `admin/shiftService.js` | Admin quản lý ca làm việc |
-| `admin/personnelService.js` | Admin quản lý nhân sự |
+| `admin/admissionService.js` | Admin soát QR theo phiếu đặt vé |
 | `admin/customerService.js` | Admin quản lý khách hàng |
 | `admin/transactionService.js` | Admin xem giao dịch |
 | `admin/statsService.js` | Admin dashboard statistics |
