@@ -7,7 +7,7 @@
 - NexCinema là hệ thống đặt vé cho một cụm rạp. Vai trò chính: khách hàng (`CUSTOMER`) và quản trị viên (`ADMIN`).
 - Luồng khách hàng: chọn phim/suất chiếu → chọn ghế → thanh toán → nhận vé. Khách có thể đổi suất ở bước chọn ghế; khi đổi suất cần xóa lựa chọn cũ và tải sơ đồ mới.
 - Giữ ghế 10 phút. Dùng API/service hiện hữu và kiểm tra trạng thái ghế từ backend; không tự tạo cart hoặc trạng thái thanh toán giả.
-- Cổng đang có: VNPay Sandbox và PayOS. Không thêm gateway mới nếu chưa được yêu cầu.
+- Cổng đang có: VNPay Sandbox và PayOS. Admin có luồng bán vé tại quầy cho khách vãng lai: tiền mặt được xác nhận trực tiếp, chuyển khoản dùng QR PayOS. Không thêm gateway mới nếu chưa được yêu cầu.
 - Frontend: React 19, Vite 8, Tailwind CSS 4, React Router 7, Axios, Lucide, React Hot Toast. QR PayOS dùng `qrcode.react` đã cài sẵn. Quét QR camera / file dùng `html5-qrcode`.
 - Cấu trúc: màn hình trong `src/pages`, component dùng chung trong `src/components`, API trong `src/api`, adapter theo miền trong `src/services`, helper thuần trong `src/utils`, màu và style dùng chung trong `src/index.css` và `src/styles/admin.css`.
 
@@ -53,6 +53,7 @@ Quy tắc áp dụng:
 - Với loading, empty, error, pending, success và failed, ghi đúng trạng thái backend; lỗi phải có cách tiếp tục/hành động phù hợp.
 - Không dùng nhãn `00:00` làm giá trị thay thế khi giờ không hợp lệ. Giờ `TIME` từ backend phải qua `formatShowtimeTime` (`src/utils/showtimeHelper.js`) để tránh lệch timezone.
 - Soát vé vào rạp tại Admin (`/admin/check-in`) dùng mã QR của phiếu đặt vé (`QRPayload`, định dạng chuẩn `QR_<UUID>`) theo backend API `POST /admin/admission/check-in`. Khách hàng hiển thị một QR chung cho phiếu đặt trong chi tiết đặt vé khi backend trả về `QRPayload`.
+- Bán vé tại quầy nằm ở `/admin/counter-sales`, chỉ dành cho Admin. Phiếu tại quầy có thể không gắn tài khoản khách hàng và vẫn sinh một QR chung sau khi tiền mặt hoặc PayOS được xác nhận.
 - Modal phải dễ đọc, đóng được bằng nút và Escape, không làm mất focus bất ngờ, có vùng nội dung cuộn được và hoạt động ở màn hình hẹp.
 - Trước khi sửa UI đã tồn tại, đọc component, service/API, token CSS và domain flow liên quan. Không phỏng đoán từ screenshot đơn lẻ.
 

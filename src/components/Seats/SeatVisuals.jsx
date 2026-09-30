@@ -1,14 +1,14 @@
 const seatKinds = {
-  standard: { icon: 'text-slate-200', stroke: 'stroke-slate-400', text: 'text-slate-700' },
-  vip: { icon: 'text-amber-200', stroke: 'stroke-amber-500', text: 'text-amber-900' },
-  couple: { icon: 'text-pink-200', stroke: 'stroke-pink-500', text: 'text-pink-900' },
+  standard: { icon: 'text-[#E8F0FE]', stroke: 'stroke-[#5B7BB2]', text: 'text-[#233A62]' },
+  vip: { icon: 'text-[#FFF0B8]', stroke: 'stroke-[#D97706]', text: 'text-[#78350F]' },
+  couple: { icon: 'text-[#EDE9FE]', stroke: 'stroke-[#7C3AED]', text: 'text-[#4C1D95]' },
 };
 
 const seatStates = {
-  selected: { icon: 'text-[#d71920]', stroke: 'stroke-[#d71920]', text: 'text-white' },
-  sold: { icon: 'text-slate-300 opacity-60', stroke: 'stroke-slate-400 opacity-60', text: 'text-slate-500 opacity-60' },
-  held: { icon: 'text-orange-200 opacity-70', stroke: 'stroke-orange-400 opacity-70', text: 'text-orange-700 opacity-70' },
-  locked: { icon: 'text-slate-200 opacity-60', stroke: 'stroke-slate-400 opacity-60', text: 'text-slate-500 opacity-60' },
+  selected: { icon: 'text-[#DC2626]', stroke: 'stroke-[#991B1B]', text: 'text-white' },
+  sold: { icon: 'text-[#D1D5DB]', stroke: 'stroke-[#64748B]', text: 'text-[#334155]' },
+  held: { icon: 'text-[#CFFAFE]', stroke: 'stroke-[#0891B2]', text: 'text-[#155E75]' },
+  locked: { icon: 'text-[#E5E7EB]', stroke: 'stroke-[#9CA3AF]', text: 'text-[#4B5563]' },
 };
 
 const getSeatKind = (name = '') => {
@@ -37,7 +37,7 @@ export const CoupleSeatIcon = ({ className = '', strokeClassName = '' }) => (
   </svg>
 );
 
-export const CinemaSeat = ({ label, typeName, state = 'available', selected = false, onClick, disabled = false, compact = false, className = '', title }) => {
+export const CinemaSeat = ({ label, typeName, state = 'available', selected = false, onClick, disabled = false, compact = false, showLabel = true, className = '', title }) => {
   const kind = getSeatKind(typeName);
   const tone = selected ? seatStates.selected : seatStates[state] || seatKinds[kind];
   const Icon = kind === 'couple' ? CoupleSeatIcon : SeatIcon;
@@ -53,10 +53,10 @@ export const CinemaSeat = ({ label, typeName, state = 'available', selected = fa
       aria-label={`Ghế ${label}, ${typeName || 'Thường'}`}
       aria-pressed={selected}
       title={title}
-      className={`group relative flex shrink-0 select-none items-center justify-center bg-transparent ${dimensions} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] hover:-translate-y-1'} ${className}`}
+      className={`group relative flex shrink-0 select-none items-center justify-center rounded-xl bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DC2626] focus-visible:ring-offset-2 ${dimensions} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] hover:-translate-y-1'} ${className}`}
     >
       <Icon className={`absolute inset-0 size-full ${tone.icon}`} strokeClassName={tone.stroke} />
-      <span className={`relative z-10 font-mono text-[9px] font-black tracking-tighter ${tone.text}`}>{label}</span>
+      {showLabel && <span className={`relative z-10 font-mono text-[9px] font-black tracking-tighter ${tone.text}`}>{label}</span>}
     </button>
   );
 };

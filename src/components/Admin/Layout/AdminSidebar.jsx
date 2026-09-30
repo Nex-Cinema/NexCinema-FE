@@ -5,7 +5,7 @@ import AdminConfirmDialog from '../Common/AdminConfirmDialog';
 import {
   BarChart3, CalendarDays, ChevronRight, CircleUserRound,
   Film, Grid3X3, LogOut, ReceiptText, Theater,
-  WalletCards, X, CreditCard, ScanLine,
+  WalletCards, X, CreditCard, ScanLine, Banknote,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -26,6 +26,7 @@ const navigationGroups = [
   {
     label: 'Vận hành & Soát vé',
     items: [
+      { name: 'Bán vé tại quầy', icon: Banknote, path: '/admin/counter-sales' },
       { name: 'Soát vé', icon: ScanLine, path: '/admin/check-in' },
     ],
   },

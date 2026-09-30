@@ -107,6 +107,7 @@ const showtimeService = {
       TrangThai: gsc.TrangThai === 'DA_DAT' ? 1 : (gsc.TrangThai === 'DANG_GIU' ? 2 : 0),
       KhaDung: gsc.KhaDung ? 1 : 0,
       TenLoaiGhe: gsc.Ghe?.LoaiGhe?.TenLoaiGhe || 'Thường',
+      GiaVe: Number(gsc.GiaVe || 0),
     }));
   }
 };

@@ -84,8 +84,8 @@ const SeatMapTemplateModal = ({ isOpen, editingTemplate, formData, onChange, onS
         </FormField>
 
         <div className="admin-form-grid">
-          <FormField label="Số hàng" required><input type="number" name="TongHang" min="1" max="20" required value={formData.TongHang} onChange={onChange} /></FormField>
-          <FormField label="Số cột" required><input type="number" name="TongCot" min="1" max="20" required value={formData.TongCot} onChange={onChange} /></FormField>
+          <FormField label="Số hàng" required><input type="number" name="TongHang" min="1" max="15" required value={formData.TongHang} onChange={onChange} /></FormField>
+          <FormField label="Số cột" required><input type="number" name="TongCot" min="1" max="15" required value={formData.TongCot} onChange={onChange} /></FormField>
         </div>
 
         <div className="admin-form-grid">
@@ -112,7 +112,7 @@ const SeatMapTemplateModal = ({ isOpen, editingTemplate, formData, onChange, onS
         {geometryIsSafe && (
           <div className="rounded-xl border border-neutral-200 p-4">
             <div className="mb-3 flex items-center justify-between"><strong className="text-sm">Xem trước</strong><span className="text-xs text-neutral-500">{stats.units} đơn vị ghế · {stats.capacity} chỗ ngồi</span></div>
-            <div className="overflow-x-auto"><div className="mx-auto w-max min-w-full"><div className="mb-4 text-center text-xs text-neutral-500">Màn hình</div>{Array.from({ length: rows }, (_, row) => <div key={row} className="mb-1 flex items-center gap-2"><span className="w-5 text-xs text-neutral-500">{String.fromCharCode(65 + row)}</span><div className="flex gap-2">{Array.from({ length: cols }, (_, col) => { const pair = structure.couples.find((item) => item.row === row + 1 && item.startCol === col + 1); const covered = structure.couples.some((item) => item.row === row + 1 && item.startCol + 1 === col + 1); if (covered) return null; if (isAislePosition(structure, row, col)) return <span key={col} className="size-9 shrink-0" />; return <CinemaSeat key={col} compact disabled label={`${String.fromCharCode(65 + row)}${col + 1}${pair ? `–${String.fromCharCode(65 + row)}${col + 2}` : ''}`} typeName={pair ? 'Sweetbox' : 'Thường'} />; })}</div></div>)}</div></div>
+            <div className="overflow-x-auto"><div className="admin-seat-preview-grid"><div className="admin-seat-column-labels"><span />{Array.from({ length: cols }, (_, col) => <b key={col} aria-label={`Cột ${col + 1}`}>{col + 1}</b>)}</div>{Array.from({ length: rows }, (_, row) => <div key={row} className="admin-seat-grid-row"><b aria-label={`Hàng ${String.fromCharCode(65 + row)}`}>{String.fromCharCode(65 + row)}</b>{Array.from({ length: cols }, (_, col) => { const pair = structure.couples.find((item) => item.row === row + 1 && item.startCol === col + 1); const covered = structure.couples.some((item) => item.row === row + 1 && item.startCol + 1 === col + 1); if (covered) return null; if (isAislePosition(structure, row, col)) return <span key={col} className="size-9 shrink-0" />; const seatLabel = `${String.fromCharCode(65 + row)}${col + 1}${pair ? `–${String.fromCharCode(65 + row)}${col + 2}` : ''}`; return <CinemaSeat key={col} compact disabled showLabel={false} label={seatLabel} title={`Ghế ${seatLabel}`} typeName={pair ? 'Sweetbox' : 'Thường'} />; })}</div>)}</div></div>
           </div>
         )}
 

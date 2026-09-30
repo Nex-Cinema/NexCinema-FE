@@ -11,7 +11,7 @@ const transactionService = {
 
     const txList = [];
     items.forEach(p => {
-      const customerName = p.KhachHang?.TaiKhoan?.HoTen || 'Khách vãng lai';
+      const customerName = p.KhachHang?.TaiKhoan?.HoTen || p.TenKhachHangTaiQuay || 'Khách vãng lai';
       const firstDetail = p.ChiTietDatVes?.[0];
       const movieName = firstDetail?.GheSuatChieu?.SuatChieu?.Phim?.TenPhim || 'N/A';
       const seatsList = p.ChiTietDatVes?.map(ct => {

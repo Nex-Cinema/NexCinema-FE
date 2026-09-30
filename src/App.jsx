@@ -29,6 +29,7 @@ import Customers from './pages/Admin/Customers';
 import Transactions from './pages/Admin/Transactions';
 import PaymentGateways from './pages/Admin/PaymentGateways';
 import CheckIn from './pages/Admin/CheckIn';
+import CounterSales from './pages/Admin/CounterSales';
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
           <Route path="/admin" element={<Navigate to="/admin/stats" replace />} />
           <Route path="/admin/check-in" element={<CheckIn />} />
+          <Route path="/admin/counter-sales" element={<CounterSales />} />
           <Route path="/admin/rooms" element={<Rooms />} />
           <Route path="/admin/rooms/:roomId/seats" element={<SeatMaps />} />
           <Route path="/admin/movies" element={<Movies />} />

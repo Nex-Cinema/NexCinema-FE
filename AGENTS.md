@@ -160,6 +160,7 @@ Trạng thái thanh toán:
 |---|---|
 | `/admin/stats` | `Stats` |
 | `/admin/check-in` | `CheckIn` |
+| `/admin/counter-sales` | `CounterSales` |
 | `/admin/movies` | `Movies` |
 | `/admin/showtimes` | `Showtimes` |
 | `/admin/rooms` | `Rooms` |

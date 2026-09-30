@@ -39,8 +39,8 @@ export const isAislePosition = (structure, rowIndex, columnIndex) => {
 };
 
 export const validateSeatMap = ({ rows, cols, structure }) => {
-  if (!Number.isInteger(rows) || rows < 1 || rows > 20 || !Number.isInteger(cols) || cols < 1 || cols > 20) {
-    return 'Số hàng và số cột phải là số nguyên từ 1 đến 20.';
+  if (!Number.isInteger(rows) || rows < 1 || rows > 15 || !Number.isInteger(cols) || cols < 1 || cols > 15) {
+    return 'Số hàng và số cột phải là số nguyên từ 1 đến 15.';
   }
   if (!structure || typeof structure !== 'object' || !structure.aisles || !Array.isArray(structure.aisles.rows) || !Array.isArray(structure.aisles.cols) || !Array.isArray(structure.aisles.custom) || !Array.isArray(structure.couples)) return 'Các trường aisles và couples phải là danh sách.';
   if (structure.aisles.rows.some((row) => !Number.isInteger(row) || row < 1 || row > rows) || structure.aisles.cols.some((col) => !Number.isInteger(col) || col < 1 || col > cols)) return 'Vị trí lối đi phải là số nguyên nằm trong kích thước sơ đồ.';

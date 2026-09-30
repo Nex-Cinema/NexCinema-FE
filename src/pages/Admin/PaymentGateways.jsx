@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, Copy, CreditCard, RefreshCw, ShieldCheck, Webhook } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Copy, CreditCard, RefreshCw } from 'lucide-react';
 import AdminLayout from '../../components/Admin/Layout/AdminLayout';
 import AdminButton from '../../components/Admin/Common/AdminButton';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
@@ -48,7 +48,7 @@ const GatewayCard = ({ gateway, updating, onToggle }) => (
       </label>
     </header>
 
-    <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_230px]">
+    <div className="p-5">
       <div>
         <div className={`mb-3 flex items-start gap-3 rounded-lg p-3 ${gateway.configured ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>
           {gateway.configured ? <CheckCircle2 className="mt-0.5 shrink-0" size={17} /> : <AlertTriangle className="mt-0.5 shrink-0" size={17} />}
@@ -58,15 +58,6 @@ const GatewayCard = ({ gateway, updating, onToggle }) => (
           {Object.entries(gateway.endpoints).map(([key, value]) => <EndpointRow key={key} label={endpointLabels[key] || key} value={value} />)}
         </div>
       </div>
-
-      <aside className="rounded-lg bg-neutral-950 p-4 text-white">
-        <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-400"><Activity size={15} /> Giao dịch</div>
-        <dl className="space-y-3 text-sm">
-          <div className="flex justify-between"><dt className="text-neutral-400">Thành công</dt><dd className="font-bold text-emerald-400">{gateway.transactions.succeeded}</dd></div>
-          <div className="flex justify-between"><dt className="text-neutral-400">Đang chờ</dt><dd className="font-bold text-amber-300">{gateway.transactions.pending}</dd></div>
-          <div className="flex justify-between"><dt className="text-neutral-400">Thất bại</dt><dd className="font-bold text-red-400">{gateway.transactions.failed}</dd></div>
-        </dl>
-      </aside>
     </div>
   </article>
 );
@@ -108,11 +99,6 @@ const PaymentGateways = () => {
   return (
     <AdminLayout>
       <AdminPageHeader title="Cổng thanh toán" subtitle="Giám sát cấu hình vận hành. Credential luôn được giữ trong biến môi trường máy chủ." action={<AdminButton variant="outline" icon={RefreshCw} onClick={load} disabled={loading}>Làm mới</AdminButton>} />
-      <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg bg-white p-4 ring-1 ring-black/5"><ShieldCheck className="mb-3 text-emerald-600" size={20} /><strong className="block text-sm">Không lưu secret</strong><p className="mt-1 text-xs text-neutral-500">API key và checksum không bao giờ trả về trình duyệt.</p></div>
-        <div className="rounded-lg bg-white p-4 ring-1 ring-black/5"><Webhook className="mb-3 text-blue-600" size={20} /><strong className="block text-sm">Callback rõ ràng</strong><p className="mt-1 text-xs text-neutral-500">Tách callback backend và trang kết quả frontend.</p></div>
-        <div className="rounded-lg bg-white p-4 ring-1 ring-black/5"><Activity className="mb-3 text-(--admin-brand)" size={20} /><strong className="block text-sm">Chặn lỗi sớm</strong><p className="mt-1 text-xs text-neutral-500">Cổng tắt hoặc thiếu cấu hình sẽ không tạo giao dịch.</p></div>
-      </div>
       {loading ? <AdminLoadingSkeleton rows={4} /> : error ? <AdminErrorState onRetry={load} /> : <div className="space-y-5">{gateways.map((gateway) => <GatewayCard key={gateway.provider} gateway={gateway} updating={updating === gateway.provider} onToggle={toggle} />)}</div>}
     </AdminLayout>
   );

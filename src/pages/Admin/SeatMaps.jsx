@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import AdminLayout from '../../components/Admin/Layout/AdminLayout';
 import adminService from '../../services/adminService';
-import { Armchair, Lock, MousePointer2, Save, Unlock } from 'lucide-react';
+import { Lock, MousePointer2, Save, Unlock } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toastHelper';
 import AdminPageHeader from '../../components/Admin/Common/AdminPageHeader';
 import AdminButton from '../../components/Admin/Common/AdminButton';
@@ -230,11 +230,6 @@ const SeatMaps = () => {
             </div>
           </div>
 
-          {/* Selection Stats */}
-          <div className="flex items-center gap-3 rounded-2xl bg-neutral-950 p-5 text-white shadow-[0_16px_36px_rgba(23,23,23,.16)]">
-            <span className="grid size-10 place-items-center rounded-xl bg-white/10 text-red-400"><Armchair size={19} /></span>
-            <div><span className="text-[9px] font-bold uppercase tracking-[.18em] text-neutral-400">Vùng đang chọn</span><div className="mt-0.5 text-xl font-black">{selectedSeats.length} <span className="text-xs font-semibold text-neutral-400">ghế</span></div></div>
-          </div>
         </div>
 
         {/* Matrix Canvas */}
@@ -248,10 +243,10 @@ const SeatMaps = () => {
             </div>
 
             <div className="admin-seat-grid custom-scrollbar">
-              <div className="admin-seat-column-labels"><span />{Array.from({ length: template.TongCot }, (_, index) => <b key={index}>{index + 1}</b>)}<span /></div>
+              <div className="admin-seat-column-labels"><span />{Array.from({ length: template.TongCot }, (_, index) => <b key={index} aria-label={`Cột ${index + 1}`}>{index + 1}</b>)}</div>
               {matrix.map((row) => (
                 <div key={row[0]?.Hang} className="admin-seat-grid-row">
-                  <b>{row[0]?.Hang}</b>
+                  <b aria-label={`Hàng ${row[0]?.Hang}`}>{row[0]?.Hang}</b>
                   {row.map((seat) => {
                     if (seat.isCovered) return null;
                     if (seat.isAisle) return <span key={seat.MaChiTietSoDo} className="size-9 shrink-0" />;
@@ -260,16 +255,17 @@ const SeatMaps = () => {
                       <CinemaSeat
                         key={seat.MaChiTietSoDo}
                         label={seat.DoRongCot > 1 ? `${seat.Hang}${seat.Cot}–${seat.Hang}${seat.Cot + seat.DoRongCot - 1}` : `${seat.Hang}${seat.Cot}`}
+                        showLabel={false}
                         typeName={typeName}
                         state={seat.KhaDung === 0 ? 'locked' : 'available'}
                         selected={selectedSeats.includes(seat.MaChiTietSoDo)}
                         compact
                         className={seat.KhaDung === 0 ? 'admin-seat--locked' : getAdminSeatClassName(typeName)}
+                        title={`Ghế ${seat.DoRongCot > 1 ? `${seat.Hang}${seat.Cot}–${seat.Hang}${seat.Cot + seat.DoRongCot - 1}` : `${seat.Hang}${seat.Cot}`} · ${typeName}`}
                         onClick={(event) => handleSeatClick(seat.MaChiTietSoDo, event)}
                       />
                     );
                   })}
-                  <b>{row[0]?.Hang}</b>
                 </div>
               ))}
             </div>

@@ -109,7 +109,7 @@ test('Admin visual cleanup keeps actions consistent, seat visuals visible and pa
   assert.match(templates, /showDetailAction=\{false\}/);
   assert.match(seatMap, /admin-seat-map-canvas/);
   assert.match(seatMap, /admin-seat--standard/);
-  assert.match(seatVisuals, /standard:\s*\{\s*icon:\s*'text-slate-200'/);
+  assert.match(seatVisuals, /standard:\s*\{\s*icon:\s*'text-\[#E8F0FE\]'/);
   assert.match(styles, /\.admin-seat--standard,[^}]*background: transparent/);
   assert.match(styles, /\.admin-legacy-table th:last-child[^}]*background: var\(--admin-surface\)/);
   assert.doesNotMatch(transactions, /Tham Chiếu Đối Tác|MaThamChieuDoiTac/);
