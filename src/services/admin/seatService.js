@@ -38,15 +38,17 @@ const seatService = {
       MaGhe: s.MaGhe,
       ViTriDay: s.ViTriDay,
       ViTriCot: s.ViTriCot,
+      DoRongCot: s.DoRongCot || 1,
+      SucChua: s.SucChua || 1,
       MaLoaiGhe: s.MaLoaiGhe,
       KhaDung: s.KhaDung ? 1 : 0
     }));
   },
 
   saveSeatConfig: async (roomId, overrides) => {
-    const ghes = Object.entries(overrides)
-      .filter(([, value]) => value.MaGhe) // Must have MaGhe (UUID)
-      .map(([, value]) => ({
+    const ghes = Object.values(overrides)
+      .filter((value) => value.MaGhe) // Must have MaGhe (UUID)
+      .map((value) => ({
         maGhe: value.MaGhe,
         maLoaiGhe: value.MaLoaiGhe,
         khaDung: value.KhaDung === 1
@@ -83,7 +85,7 @@ const seatService = {
       SoHang: Number(data.TongHang),
       SoCot: Number(data.TongCot),
       CauTruc: data.CauTruc,
-      KhaDung: data.KhaDung === 1
+      KhaDung: data.KhaDung === true || data.KhaDung === 1 || data.KhaDung === '1'
     };
     const res = await axiosClient.put(`/admin/so-do-ghe/${id}`, payload);
     return {

@@ -32,7 +32,7 @@ Mô tả kiến trúc tổng thể của ứng dụng frontend.
                          │
 ┌────────────────────────▼────────────────────────────┐
 │              Pages / Components                      │
-│  Client pages │ Admin pages │ Staff pages            │
+│           Client pages │ Admin pages                 │
 │  Shared components (Navbar, Footer, Modal...)        │
 └──────┬──────────────────────────┬───────────────────┘
        │                          │
@@ -66,7 +66,7 @@ Mô tả kiến trúc tổng thể của ứng dụng frontend.
 
 ## 3. User Roles & Portal Separation
 
-Hệ thống có **3 portal** hoàn toàn tách biệt về layout và routes:
+Hệ thống có **2 portal** tách biệt về layout và routes:
 
 ### 🎬 Client Portal (`/`)
 
@@ -74,17 +74,11 @@ Hệ thống có **3 portal** hoàn toàn tách biệt về layout và routes:
 - Dành cho: `CUSTOMER` (chưa đăng nhập xem được phần lớn, cần đăng nhập để đặt vé)
 - Route prefix: `/`, `/movie/...`, `/booking/...`, `/profile`, `/payment/...`
 
-### 🎟 Staff Portal (`/staff`)
-
-- `StaffLayout` — sidebar riêng, không có Navbar chung
-- Dành cho: `STAFF` (nhân viên rạp)
-- Chức năng: Bán vé tại quầy, check-in khách, xem lịch làm việc
-
 ### ⚙️ Admin Portal (`/admin`)
 
 - Layout admin riêng — sidebar, không có Navbar chung
 - Dành cho: `ADMIN`
-- Chức năng: CRUD toàn bộ dữ liệu hệ thống
+- Chức năng: Quản lý dữ liệu hệ thống và soát vé tại `/admin/check-in`
 
 ---
 
@@ -105,14 +99,15 @@ MovieDetails.jsx
 
 Checkout.jsx
   → nhận bookingPayload từ location.state
-  → render Checkout flow (chọn phương thức thanh toán, tóm tắt)
+  → render Checkout flow (tóm tắt và thanh toán)
   → gọi realCheckout API
-  → VNPay: redirect | PayOS: show QR
+  → PayOS: show QR và poll trạng thái
+  → VNPay Sandbox: redirect sang gateway
 
 VNPayReturn.jsx
-  → nhận query params từ VNPay redirect
-  → fetch payment status
-  → hiển thị kết quả
+  → nhận mã giao dịch từ backend return URL
+  → poll trạng thái đã được IPN cập nhật
+  → hiển thị vé hoặc trạng thái lỗi/timeout
 
 TicketConfirmation.jsx
   → hiển thị vé điện tử (QR code + thông tin đặt vé)
@@ -145,11 +140,8 @@ src/components/
 │   ├── Layout/           — Admin sidebar, header
 │   ├── Movies/           — Movie management UI
 │   ├── Showtimes/        — Showtime management UI
-│   ├── Personnel/        — Staff management UI
 │   ├── Pricing/          — Pricing management UI
-│   ├── Shifts/           — Shift management UI
 │   └── Stats/            — Dashboard charts
-├── StaffLayout/          — Staff portal layout
 ├── payment/              — Payment-related shared components
 └── common/               — Truly shared: ConfirmDialog, Header, Footer
 ```
@@ -233,11 +225,9 @@ export const useMovieDetail = (movieId) => {
   <Route path="/profile" element={<ClientProfile />} />
 </Route>
 
-// Protected — chỉ STAFF
-<Route element={<ProtectedRoute allowedRoles={['STAFF']} />}>
-  <Route path="/staff" element={<StaffLayout />}>
-    <Route path="sell-ticket" element={<SellTicketWizard />} />
-  </Route>
+// Protected — chỉ ADMIN
+<Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+  <Route path="/admin/check-in" element={<CheckIn />} />
 </Route>
 ```
 

@@ -1,0 +1,108 @@
+import { Route, Routes, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
+import ClientLayout from './layouts/ClientLayout';
+import AuthLayout from './layouts/AuthLayout';
+
+// Client Pages
+import Home from './pages/Client/Home';
+import MovieDetails from './pages/Client/MovieDetails';
+import BookingEntry from './pages/Client/BookingEntry';
+import MoviesPage from './pages/Client/MoviesPage';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import ClientProfile from './pages/Client/Profile';
+import VNPayReturn from './pages/Client/VNPayReturn';
+import SystemErrorPage from './pages/SystemErrorPage';
+
+// Admin Pages
+import Rooms from './pages/Admin/Rooms';
+import Movies from './pages/Admin/Movies';
+import MovieEditor from './pages/Admin/MovieEditor';
+import SeatMaps from './pages/Admin/SeatMaps';
+import Pricing from './pages/Admin/Pricing';
+import Showtimes from './pages/Admin/Showtimes';
+import Stats from './pages/Admin/Stats';
+import SeatMapTemplates from './pages/Admin/SeatMapTemplates';
+import Customers from './pages/Admin/Customers';
+import Transactions from './pages/Admin/Transactions';
+import PaymentGateways from './pages/Admin/PaymentGateways';
+import CheckIn from './pages/Admin/CheckIn';
+import CounterSales from './pages/Admin/CounterSales';
+
+function App() {
+  return (
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#131A2A",
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "14px",
+          },
+          success: {
+            iconTheme: {
+              primary: "#10b981",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
+      <Routes>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
+
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/booking/:showtimeId" element={<BookingEntry />} />
+          <Route path="/movies/now-showing" element={<MoviesPage key="now" initialType="now" />} />
+          <Route path="/movies/coming-soon" element={<MoviesPage key="soon" initialType="soon" />} />
+
+          <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
+            <Route path="/profile" element={<ClientProfile />} />
+            <Route path="/payment/vnpay-return" element={<VNPayReturn />} />
+          </Route>
+        </Route>
+
+        {/* === ADMIN ROUTES (Role: ADMIN) === */}
+        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          <Route path="/admin" element={<Navigate to="/admin/stats" replace />} />
+          <Route path="/admin/check-in" element={<CheckIn />} />
+          <Route path="/admin/counter-sales" element={<CounterSales />} />
+          <Route path="/admin/rooms" element={<Rooms />} />
+          <Route path="/admin/rooms/:roomId/seats" element={<SeatMaps />} />
+          <Route path="/admin/movies" element={<Movies />} />
+          <Route path="/admin/movies/new" element={<MovieEditor />} />
+          <Route path="/admin/movies/:id" element={<MovieEditor />} />
+          <Route path="/admin/seat-templates" element={<SeatMapTemplates />} />
+          <Route path="/admin/pricing" element={<Pricing />} />
+          <Route path="/admin/showtimes" element={<Showtimes />} />
+          <Route path="/admin/customers" element={<Customers />} />
+          <Route path="/admin/transactions" element={<Transactions />} />
+          <Route path="/admin/payment-gateways" element={<PaymentGateways />} />
+          <Route path="/admin/stats" element={<Stats />} />
+        </Route>
+
+        <Route path="/403" element={<SystemErrorPage code={403} />} />
+        <Route path="/404" element={<SystemErrorPage code={404} />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
+    </>
+  );
+}
+
+export default App;

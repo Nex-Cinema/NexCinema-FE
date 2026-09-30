@@ -42,7 +42,7 @@ export const TRANSACTIONS = [
     type: "Bán vé",
     amount: 350000,
     status: "Thành công",
-    method: "VNPay",
+    method: "PayOS",
   },
   {
     id: "SV-9A8B7C6D",

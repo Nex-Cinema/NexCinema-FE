@@ -3,6 +3,8 @@
 > Tài liệu này dành cho **AI Coding Agent** làm việc trong repository `cinema-booking-system-frontend`.  
 > Đọc toàn bộ file này trước khi thực hiện bất kỳ task nào.
 
+> Trước khi code, đọc thêm [`agent-docs/CURRENT_PROJECT_CONTEXT.md`](agent-docs/CURRENT_PROJECT_CONTEXT.md). Tài liệu đó ghi nhận kiến trúc, màu đang dùng và các quyết định nghiệp vụ mới nhất. Nếu tài liệu UI cũ mâu thuẫn với user request hoặc CSS token hiện hành, ưu tiên user request và token hiện hành.
+
 ---
 
 ## 1. Business Context
@@ -16,8 +18,7 @@
 | Role | Mô tả |
 |---|---|
 | `CUSTOMER` | Người dùng xem phim, đặt vé online |
-| `STAFF` | Nhân viên rạp: bán vé tại quầy, check-in |
-| `ADMIN` | Quản trị viên: quản lý phim, suất chiếu, nhân sự, doanh thu |
+| `ADMIN` | Quản trị viên: quản lý phim, suất chiếu, phòng, soát vé, doanh thu |
 
 ### Domain model chính
 
@@ -60,9 +61,9 @@ Chọn ghế → Thanh toán → Xác nhận
 
 ## 3. Payment
 
-Chỉ hỗ trợ (prototype):
-- **VNPay** — redirect URL, callback `/payment/vnpay-return`
+Chỉ hỗ trợ:
 - **PayOS** — QR payment, polling status
+- **VNPay Sandbox** — redirect, IPN, return URL và polling trạng thái
 
 Payment flow:
 ```
@@ -106,7 +107,7 @@ Trạng thái thanh toán:
 
 1. Thêm nghiệp vụ **không có trong business context** (food, loyalty, shipping...).
 2. Tạo `BookingCartStore` hay bất kỳ cart-like state nào nếu không được yêu cầu.
-3. Thêm payment gateway mới ngoài VNPay và PayOS.
+3. Thêm payment gateway mới ngoài PayOS và VNPay Sandbox.
 4. Thêm authentication provider mới ngoài Email và Google.
 5. Thêm membership tier, loyalty points, quà tặng, promotion/coupon.
 6. Dùng `useEffect` để fetch data mà không có cleanup hoặc dependency array.
@@ -128,7 +129,8 @@ Trạng thái thanh toán:
 | React Hot Toast | 2.x | Notifications |
 | React Player | 3.x | Trailer video |
 | Recharts | 3.x | Admin charts |
-| QRCode.react | 4.x | QR code PayOS |
+| QRCode.react | 4.x | QR code PayOS và vé đặt |
+| Html5-qrcode | 2.x | Quét QR camera / file soát vé Admin |
 
 ---
 
@@ -153,30 +155,21 @@ Trạng thái thanh toán:
 | `/profile` | `ClientProfile` |
 | `/payment/vnpay-return` | `VNPayReturn` |
 
-### Staff routes (STAFF protected)
-| Route | Component |
-|---|---|
-| `/staff/dashboard` | `Dashboard` |
-| `/staff/sell-ticket` | `SellTicketWizard` |
-| `/staff/check-in` | `CheckIn` |
-| `/staff/schedule` | `Schedule` |
-| `/staff/transactions` | `TransactionHistory` |
-| `/staff/profile` | `StaffProfile` |
-
 ### Admin routes (ADMIN protected)
 | Route | Component |
 |---|---|
 | `/admin/stats` | `Stats` |
+| `/admin/check-in` | `CheckIn` |
+| `/admin/counter-sales` | `CounterSales` |
 | `/admin/movies` | `Movies` |
 | `/admin/showtimes` | `Showtimes` |
 | `/admin/rooms` | `Rooms` |
 | `/admin/rooms/:roomId/seats` | `SeatMaps` |
 | `/admin/seat-templates` | `SeatMapTemplates` |
 | `/admin/pricing` | `Pricing` |
-| `/admin/personnel` | `Personnel` |
-| `/admin/shifts` | `Shifts` |
 | `/admin/customers` | `Customers` |
 | `/admin/transactions` | `Transactions` |
+| `/admin/payment-gateways` | `PaymentGateways` |
 
 ---
 

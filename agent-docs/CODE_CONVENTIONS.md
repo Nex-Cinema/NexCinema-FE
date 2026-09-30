@@ -15,7 +15,7 @@ Agent và contributor phải tuân thủ các quy tắc này.
 | Utility / helper | `camelCase.js` — suffix mô tả | `formatHelper.js`, `statusHelper.js` |
 | API module | `camelCase.js` — suffix `Api` | `bookingApi.js`, `paymentApi.js` |
 | Service module | `camelCase.js` — suffix `Service` | `clientService.js`, `adminService.js` |
-| CSS module | `camelCase.css` hoặc `kebab-case.css` | `staff.css` |
+| CSS module | `camelCase.css` hoặc `kebab-case.css` | `admin.css` |
 | Directory | `PascalCase` (component dir) hoặc `camelCase` (logic) | `MovieDetails/`, `hooks/` |
 
 ### Variables & Functions
@@ -66,7 +66,6 @@ const PAYMENT_STATUS = {
 
 const USER_ROLE = {
   CUSTOMER: 'CUSTOMER',
-  STAFF:    'STAFF',
   ADMIN:    'ADMIN',
 };
 ```

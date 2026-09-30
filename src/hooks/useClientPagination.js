@@ -2,12 +2,11 @@ import { useState, useMemo } from 'react';
 import { normalizeText } from '../utils/normalize';
 
 export const useClientPagination = (initialItems = [], searchFields = [], filtersFn = null) => {
+  const items = initialItems;
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const items = useMemo(() => (Array.isArray(initialItems) ? initialItems : []), [initialItems]);
 
   // Reset page to 1 when search or filters change
   const setFilterVal = (key, value) => {

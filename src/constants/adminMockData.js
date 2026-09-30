@@ -89,31 +89,11 @@ export const ADMIN_MOVIES = [
 
 export const ACCOUNTS = [
   { MaTaiKhoan: 'TK01', HoTen: 'Nguyễn Huy Bình', Email: 'binh@cinema.com', SoDienThoai: '0987654321', MatKhau: 'CinemaPlus@2026', NgaySinh: '1995-04-12', GioiTinh: 1, Role: 'Admin', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaTaiKhoan: 'TK02', HoTen: 'Trần Thị Hoa', Email: 'hoa@cinema.com', SoDienThoai: '0123456789', MatKhau: 'CinemaPlus@2026', NgaySinh: '1998-08-25', GioiTinh: 0, Role: 'Staff', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaTaiKhoan: 'TK03', HoTen: 'Lê Văn Tùng', Email: 'tung@cinema.com', SoDienThoai: '0555666777', MatKhau: 'CinemaPlus@2026', NgaySinh: '1990-11-05', GioiTinh: 1, Role: 'Manager', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH001', HoTen: 'Phạm Minh Hoàng', Email: 'hoang.pham@gmail.com', SoDienThoai: '0912345678', MatKhau: 'Customer@123', NgaySinh: '1994-05-12', GioiTinh: 1, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH002', HoTen: 'Nguyễn Diệp Chi', Email: 'chi.nd@gmail.com', SoDienThoai: '0987654321', MatKhau: 'Customer@123', NgaySinh: '1997-03-20', GioiTinh: 0, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH003', HoTen: 'Lê Anh Đức', Email: 'duc.la@gmail.com', SoDienThoai: '0901234567', MatKhau: 'Customer@123', NgaySinh: '1999-11-15', GioiTinh: 1, Role: 'Customer', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH004', HoTen: 'Vũ Hoài Nam', Email: 'nam.vh@gmail.com', SoDienThoai: '0934567890', MatKhau: 'Customer@123', NgaySinh: '1996-07-08', GioiTinh: 1, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
   { MaTaiKhoan: 'TK_KH005', HoTen: 'Đỗ Thùy Linh', Email: 'linh.dt@gmail.com', SoDienThoai: '0978901234', MatKhau: 'Customer@123', NgaySinh: '2000-01-25', GioiTinh: 0, Role: 'Customer', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const STAFF = [
-  { MaNhanVien: 'NV01', MaTaiKhoan: 'TK01', ChucVu: 'Quản lý rạp', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaNhanVien: 'NV02', MaTaiKhoan: 'TK02', ChucVu: 'Nhân viên bán vé', KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaNhanVien: 'NV03', MaTaiKhoan: 'TK03', ChucVu: 'Kỹ thuật viên', KhaDung: 0, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const SHIFTS = [
-  { MaCaLamViec: 'C01', TenCa: 'Ca Sáng', GioBatDau: '08:00:00', GioKetThuc: '14:00:00', SoNguoiToiDa: 5, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaCaLamViec: 'C02', TenCa: 'Ca Chiều', GioBatDau: '14:00:00', GioKetThuc: '20:00:00', SoNguoiToiDa: 5, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-  { MaCaLamViec: 'C03', TenCa: 'Ca Tối', GioBatDau: '20:00:00', GioKetThuc: '02:00:00', SoNguoiToiDa: 3, KhaDung: 1, NgayTao: '2026-05-01 09:00:00', NgayCapNhat: null },
-];
-
-export const SHIFT_DETAILS = [
-  { MaChiTietCa: 'CTC01', MaNhanVien: 'NV01', MaCaLamViec: 'C01', NgayLam: '2026-05-21', GhiChu: 'Trực quầy chính', KhaDung: 1, NgayLap: null, KieuLap: null, NgayTao: '2026-05-20 10:00:00', NgayCapNhat: null },
-  { MaChiTietCa: 'CTC02', MaNhanVien: 'NV02', MaCaLamViec: 'C02', NgayLam: '2026-05-21', GhiChu: 'Bán vé + bắp nước', KhaDung: 1, NgayLap: null, KieuLap: null, NgayTao: '2026-05-20 11:00:00', NgayCapNhat: null },
-  { MaChiTietCa: 'CTC03', MaNhanVien: 'NV02', MaCaLamViec: 'C03', NgayLam: '2026-05-22', GhiChu: 'Ca tối tăng cường', KhaDung: 0, NgayLap: null, KieuLap: null, NgayTao: '2026-05-21 08:30:00', NgayCapNhat: '2026-05-21 15:00:00' },
 ];
 
 export const SHOWTIMES = [
@@ -178,8 +158,8 @@ export const TICKET_DETAILS = [
 export const TRANSACTIONS = [
   { MaGiaoDich: 'TX10091', MaPhieuDatVe: 'PDV06', MaThamChieuDoiTac: 'PAYOS_20260521_9910', SoTien: 170000, PhuongThucThanhToan: 'PAYOS', TrangThai: 'Success', NgayGiaoDich: '2026-05-21 09:30:00', GhiChu: 'Thanh toán trực tuyến thành công', KhaDung: 1, NgayTao: '2026-05-21 09:30:00', NgayCapNhat: null },
   { MaGiaoDich: 'TX10090', MaPhieuDatVe: 'PDV03', MaThamChieuDoiTac: 'CARD_7721839210', SoTien: 170000, PhuongThucThanhToan: 'Card', TrangThai: 'Success', NgayGiaoDich: '2026-05-20 20:15:00', GhiChu: 'Thanh toán quốc tế VISA', KhaDung: 1, NgayTao: '2026-05-20 20:15:00', NgayCapNhat: null },
-  { MaGiaoDich: 'TX10089', MaPhieuDatVe: 'PDV05', MaThamChieuDoiTac: 'VNP_20260519_8812', SoTien: 170000, PhuongThucThanhToan: 'VNPay', TrangThai: 'Success', NgayGiaoDich: '2026-05-19 17:30:00', GhiChu: 'Thanh toán qua ví VNPay', KhaDung: 1, NgayTao: '2026-05-19 17:30:00', NgayCapNhat: null },
-  { MaGiaoDich: 'TX10088', MaPhieuDatVe: 'PDV01', MaThamChieuDoiTac: 'VNP_20260518_7723', SoTien: 170000, PhuongThucThanhToan: 'VNPay', TrangThai: 'Success', NgayGiaoDich: '2026-05-18 19:30:00', GhiChu: 'Thanh toán vé xem phim Lật Mặt 7', KhaDung: 1, NgayTao: '2026-05-18 19:30:00', NgayCapNhat: null },
+  { MaGiaoDich: 'TX10089', MaPhieuDatVe: 'PDV05', MaThamChieuDoiTac: 'PAYOS_20260519_8812', SoTien: 170000, PhuongThucThanhToan: 'PayOS', TrangThai: 'Success', NgayGiaoDich: '2026-05-19 17:30:00', GhiChu: 'Thanh toán qua PayOS', KhaDung: 1, NgayTao: '2026-05-19 17:30:00', NgayCapNhat: null },
+  { MaGiaoDich: 'TX10088', MaPhieuDatVe: 'PDV01', MaThamChieuDoiTac: 'PAYOS_20260518_7723', SoTien: 170000, PhuongThucThanhToan: 'PayOS', TrangThai: 'Success', NgayGiaoDich: '2026-05-18 19:30:00', GhiChu: 'Thanh toán vé xem phim Lật Mặt 7', KhaDung: 1, NgayTao: '2026-05-18 19:30:00', NgayCapNhat: null },
   { MaGiaoDich: 'TX10086', MaPhieuDatVe: 'PDV04', MaThamChieuDoiTac: 'MOMO_20260505_4412', SoTien: 85000, PhuongThucThanhToan: 'MoMo', TrangThai: 'Refunded', NgayGiaoDich: '2026-05-05 18:00:00', GhiChu: 'Khách hàng hoàn vé sớm', KhaDung: 1, NgayTao: '2026-05-05 18:00:00', NgayCapNhat: '2026-05-05 18:15:00' },
   { MaGiaoDich: 'TX10085', MaPhieuDatVe: 'PDV07', MaThamChieuDoiTac: 'MOMO_20260501_1120', SoTien: 170000, PhuongThucThanhToan: 'MoMo', TrangThai: 'Failed', NgayGiaoDich: '2026-05-01 11:20:00', GhiChu: 'Lỗi giao dịch từ ví MoMo (Số dư không đủ)', KhaDung: 1, NgayTao: '2026-05-01 11:20:00', NgayCapNhat: null }
 ];

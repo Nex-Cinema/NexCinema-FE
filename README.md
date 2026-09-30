@@ -4,12 +4,10 @@
 
 Cinema Booking System / UIT Cinema là phần giao diện người dùng của đồ án nhóm về hệ thống đặt vé xem phim. Repository này chỉ chứa **frontend** được xây dựng bằng React và Vite; backend nằm ở repository riêng và cần được chạy độc lập để các chức năng gọi API hoạt động.
 
-Ứng dụng hiện tập trung vào hai nhóm người dùng chính:
+Ứng dụng có hai nhóm người dùng:
 
 - Khách hàng đặt vé và quản lý lịch sử đặt vé.
-- Nhân viên bán vé tại quầy, soát vé và quản lý lịch làm việc.
-
-Admin có thể xuất hiện trong luồng điều hướng/role fallback, nhưng không phải trọng tâm hoàn thiện của frontend hiện tại.
+- Quản trị viên quản lý rạp và soát vé.
 
 ## Liên kết repository
 
@@ -28,7 +26,7 @@ Admin có thể xuất hiện trong luồng điều hướng/role fallback, như
 | Routing | React Router DOM |
 | HTTP client | Axios |
 | Icon/UI hỗ trợ | Lucide React, React Hot Toast |
-| Media | React Player |
+| Media / QR | React Player, qrcode.react, html5-qrcode |
 | Lint | ESLint, eslint-plugin-react-hooks, eslint-plugin-react-refresh |
 
 ## Chức năng chính
@@ -43,30 +41,19 @@ Admin có thể xuất hiện trong luồng điều hướng/role fallback, như
 - Xem sơ đồ ghế, chọn ghế và giữ ghế.
 - Thanh toán giả lập qua backend.
 - Xác nhận vé sau khi đặt.
-- Hiển thị QR/check-in code dựa trên `MaChiTietDat` phục vụ demo/soát vé.
+- Hiển thị một QR do backend cấp cho mỗi phiếu đặt vé.
 - Xem lịch sử đặt vé và chi tiết đặt vé.
 - Hủy đặt vé.
 - Gửi yêu cầu hoàn tiền và theo dõi trạng thái hoàn tiền.
 - Cập nhật hồ sơ cá nhân.
 - Đổi mật khẩu.
 
-### Nhân viên
+### Quản trị viên
 
-- Đăng nhập tài khoản nhân viên.
-- Xem dashboard nghiệp vụ.
-- Bán vé tại quầy/POS.
-- Chọn suất chiếu và sơ đồ ghế khi bán vé tại quầy.
-- Thanh toán vé tại quầy.
-- Soát vé bằng `MaChiTietDat`.
-- Xem lịch sử soát vé/giao dịch.
-- Xem lịch làm việc.
-- Đăng ký và hủy ca làm.
-- Cập nhật hồ sơ nhân viên.
-- Đổi mật khẩu.
-
-### Ghi chú về Admin
-
-Frontend có xử lý điều hướng cho route bắt đầu bằng `/admin` trong một số luồng đăng nhập/role, nhưng module Admin không phải phần được tài liệu hóa như chức năng hoàn thiện trong repository này.
+- Quản lý phim, suất chiếu, phòng, sơ đồ ghế và bảng giá.
+- Quản lý khách hàng, giao dịch và cổng thanh toán.
+- Xem thống kê vận hành.
+- Soát một phiếu đặt vé bằng camera, ảnh QR hoặc mã được dán tại `/admin/check-in`.
 
 ## Cấu trúc thư mục
 
@@ -74,13 +61,13 @@ Frontend có xử lý điều hướng cho route bắt đầu bằng `/admin` tr
 src/
 ├── api/                 # Axios client và các hàm gọi API nghiệp vụ
 ├── assets/              # Logo, hình ảnh, SVG và dữ liệu visual fallback
-├── components/          # Component dùng chung, layout staff, bảo vệ route
+├── components/          # Component dùng chung, layout Admin, bảo vệ route
 ├── data/                # Dữ liệu mock cục bộ cho một số màn hình
 ├── hooks/               # Custom hooks, hiện có các hook cho luồng khách hàng
 ├── pages/
 │   ├── Auth/            # Đăng nhập, đăng ký, quên mật khẩu
 │   ├── Client/          # Trang khách hàng: phim, đặt vé, hồ sơ
-│   └── Staff/           # Trang nhân viên: dashboard, bán vé, soát vé, lịch làm
+│   └── Admin/           # Trang quản trị và soát vé
 ├── styles/              # CSS riêng cho một số khu vực giao diện
 ├── utils/               # Helper định dạng, ngày giờ, trạng thái, visual fallback
 ├── App.jsx              # Khai báo route chính
@@ -144,7 +131,7 @@ npm run lint
 
 ## Tài khoản test
 
-Tài khoản test phụ thuộc vào seed data của backend. Vui lòng xem README/backend seed script của repository backend để biết tài khoản khách hàng, nhân viên và dữ liệu mẫu tương ứng.
+Tài khoản test phụ thuộc vào seed data của backend. Xem README hoặc seed script của backend để biết tài khoản khách hàng, quản trị viên và dữ liệu mẫu.
 
 ## Quy trình phát triển nhóm
 
@@ -160,7 +147,7 @@ Ví dụ commit message:
 
 ```text
 feat(customer): add booking history view
-fix(staff): handle check-in validation error
+fix(admin): handle check-in validation error
 docs: update frontend README
 ```
 
@@ -169,9 +156,8 @@ docs: update frontend README
 - Đây là repository **frontend only**, không phải monorepo/full-stack repository.
 - Backend phải chạy riêng để các API như đăng nhập, phim, suất chiếu, giữ ghế, thanh toán giả lập và lịch sử đặt vé hoạt động.
 - API prefix mặc định: `http://localhost:5000/api/v1`.
-- Tích hợp thanh toán thật MoMo/VNPay chưa hoàn thiện và đang được hoãn.
-- Checkout hiện tại sử dụng luồng thanh toán giả lập qua backend.
-- QR code trong giao diện được tạo từ `MaChiTietDat` để phục vụ demo/check-in; không mô tả đây là secure token do backend sinh.
+- Thanh toán trực tuyến hỗ trợ PayOS và VNPay Sandbox dành cho demo/tích hợp.
+- QR vé dùng `QRPayload` của phiếu đặt do backend trả về; frontend không tự tạo mã thay thế khi field này thiếu.
 - Frontend có thể dùng visual movie assets cục bộ làm fallback nếu URL poster/backdrop/trailer từ backend bị thiếu hoặc lỗi.
 - Dự án phục vụ mục đích học thuật/đồ án nhóm, không nên xem là hệ thống production-ready.
 

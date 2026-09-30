@@ -29,13 +29,13 @@ const useAdminForm = (initialState, onSubmit) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, dataOverride) => {
     if (e) e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
 
     try {
-      await onSubmit(formData, { resetForm, setFormData, setErrors });
+      await onSubmit(dataOverride || formData, { resetForm, setFormData, setErrors });
     } catch (err) {
       setErrors({ submit: err.message });
     } finally {

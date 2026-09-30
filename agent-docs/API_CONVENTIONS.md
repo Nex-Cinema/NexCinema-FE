@@ -10,7 +10,7 @@ Dự án có **hai** axios instance với mục đích khác nhau:
 
 | Instance | File | Dùng cho |
 |---|---|---|
-| `axiosClient` | `src/api/axiosClient.js` | Authenticated requests (CUSTOMER, STAFF, ADMIN) |
+| `axiosClient` | `src/api/axiosClient.js` | Authenticated requests (CUSTOMER, ADMIN) |
 | `axiosPublic` | `src/api/axiosPublic.js` | Public requests (không cần token — danh sách phim, suất chiếu) |
 
 ```js
@@ -84,9 +84,9 @@ Backend trả về một trong hai dạng:
 ```
 localStorage.accessToken   — JWT access token (short-lived)
 localStorage.refreshToken  — Refresh token (long-lived)
-localStorage.userRole      — 'CUSTOMER' | 'STAFF' | 'ADMIN'
+localStorage.userRole      — 'CUSTOMER' | 'ADMIN'
 localStorage.userName      — Display name
-localStorage.userCode      — Mã nhân viên / mã khách hàng
+localStorage.userCode      — Mã tài khoản / mã khách hàng
 ```
 
 ### Auto refresh flow
@@ -154,7 +154,7 @@ const fetchData = async () => {
 | `authApi.js` | Auth | `POST /auth/login`, `/auth/register`, `/auth/logout`, `/auth/refresh-token` |
 | `movieApi.js` | Movie | `GET /phim`, `GET /phim/:id` |
 | `bookingApi.js` | Booking | `GET /suat-chieu/:id/ghe`, `POST /dat-ve/giu-ghe`, `POST /dat-ve/huy-giu-ghe`, `POST /dat-ve/thanh-toan` |
-| `paymentApi.js` | Payment | `POST /payment/payos/create`, `GET /payment/payos/:id/status`, `POST /payment/vnpay/create`, `GET /payment/vnpay/:id/status` |
+| `paymentApi.js` | Payment | PayOS create/status và VNPay Sandbox create/status |
 | `refundApi.js` | Refund | Hoàn vé / hủy đặt vé |
 | `accountApi.js` | Account | `GET /tai-khoan/me`, `PUT /tai-khoan/me` |
 | `bookingHistoryApi.js` | History | `GET /dat-ve/lich-su` |
@@ -166,14 +166,13 @@ const fetchData = async () => {
 | File | Dùng cho |
 |---|---|
 | `clientService.js` | Client-side data fetching: phim, suất chiếu, sơ đồ ghế (dùng `axiosPublic`) |
-| `adminService.js` | Admin: CRUD phim, phòng chiếu, nhân sự, ... |
+| `adminService.js` | Admin: CRUD phim, phòng chiếu, khách hàng, ... |
 | `admin/movieService.js` | Admin CRUD phim |
 | `admin/showtimeService.js` | Admin quản lý suất chiếu |
 | `admin/roomService.js` | Admin quản lý phòng chiếu |
 | `admin/seatService.js` | Admin quản lý ghế |
 | `admin/pricingService.js` | Admin quản lý giá vé |
-| `admin/shiftService.js` | Admin quản lý ca làm việc |
-| `admin/personnelService.js` | Admin quản lý nhân sự |
+| `admin/admissionService.js` | Admin soát QR theo phiếu đặt vé |
 | `admin/customerService.js` | Admin quản lý khách hàng |
 | `admin/transactionService.js` | Admin xem giao dịch |
 | `admin/statsService.js` | Admin dashboard statistics |
@@ -211,15 +210,6 @@ Backend sử dụng tiếng Việt không dấu:
 
 ## 8. Payment API Patterns
 
-### VNPay flow
-```
-POST /payment/vnpay/create { MaPhieuDat }
-  → { paymentUrl: "https://sandbox.vnpayment.vn/..." }
-  → Redirect user to paymentUrl
-  → User pays → VNPay calls backend callback
-  → User redirected to /payment/vnpay-return?vnp_ResponseCode=...
-```
-
 ### PayOS flow
 ```
 POST /payment/payos/create { MaPhieuDat }
@@ -227,6 +217,16 @@ POST /payment/payos/create { MaPhieuDat }
   → Show QR code để user quét
   → Poll: GET /payment/payos/:maGiaoDich/status
   → Status: PENDING → PAID / CANCELLED
+```
+
+### VNPay Sandbox flow
+```
+POST /payment/vnpay/create { MaPhieuDat }
+  → { paymentUrl, maGiaoDich, expiresAt }
+  → Redirect browser tới VNPay Sandbox
+  → VNPay gọi GET /payment/vnpay/ipn để backend xác thực chữ ký và cập nhật DB
+  → Browser quay lại /payment/vnpay-return?maGiaoDich=...
+  → Poll GET /payment/vnpay/:maGiaoDich/status
 ```
 
 ---

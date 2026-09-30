@@ -87,13 +87,12 @@ Format: `<type>(<scope>): <subject>`
 |---|---|
 | `movie` | Movie listing, detail, trailer |
 | `booking` | Booking flow, seat selection |
-| `payment` | Payment flow, VNPay, PayOS |
+| `payment` | Payment flow, PayOS, VNPay Sandbox |
 | `auth` | Login, register, OAuth |
 | `profile` | User profile, booking history |
 | `showtime` | Showtime display, selection |
 | `seat` | Seat map, seat types |
 | `admin` | Admin panel |
-| `staff` | Staff portal |
 | `api` | API layer changes |
 | `ui` | Shared components, design system |
 | `nav` | Navbar, footer, layout |
@@ -102,7 +101,7 @@ Format: `<type>(<scope>): <subject>`
 
 ```
 feat(booking): implement seat hold timer with auto-cancel
-fix(payment): handle VNPay callback edge case when user closes browser
+fix(payment): handle PayOS callback edge case when user closes browser
 style(movie): update MovieCard to use new badge design tokens
 refactor(seat): extract SeatGrid into reusable component
 docs(api): document bookingApi endpoints

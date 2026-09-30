@@ -184,8 +184,11 @@ Suất chiếu  Chọn ghế  Thanh toán  Xác nhận
 
 ```
 ┌──────────────────────────────────┐
-│  [Logo]  VNPay                   │  ← font-bold
-│          Thanh toán qua VNPay    │  ← text-muted, text-sm
+│  [Logo]  PayOS                   │  ← font-bold
+│          Thanh toán qua PayOS    │  ← text-muted, text-sm
+├──────────────────────────────────┤
+│  [Logo]  VNPay Sandbox           │  ← font-bold
+│          Thẻ và OTP thử nghiệm   │  ← text-muted, text-sm
 └──────────────────────────────────┘
 ```
 
